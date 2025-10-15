@@ -22,7 +22,7 @@
  */
 
 export const API_BASES = {
-  auth: "http://localhost:5000",
+  auth: "http://localhost:8080",
   events: "http://localhost:5001",
   notifications: "http://localhost:5002",
   ai: "http://localhost:5003"
