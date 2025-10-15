@@ -1,55 +1,30 @@
 """
-Simple DB connection helper using SQLAlchemy.
-
-- Defaults to SQLite for easy local development.
-- Switch to PostgreSQL by setting the DATABASE_URL env var,
-  e.g. postgres://user:pass@host:5432/dbname
-
-SQLAlchemy gives us a standard way to define models (tables) and talk to the database in Python.
-SQLite is the default because it requires zero setup: just a file eventecho.db. That keeps onboarding easy for our team members and professor.
-If later we want PostgreSQL for hosting or grading, we only change one environment variable: DATABASE_URL. The rest of the code (models, queries) stays the same.
+Simple SQLite connection helper and schema initialization.
+Provides get_db() for use by services.
 """
 
+import sqlite3
+from pathlib import Path
+from dotenv import load_dotenv
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
 
-# Use environment variable if provided (useful when deploying)
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///eventecho.db")
+load_dotenv()  # loads .env from project root
 
-# Create SQLAlchemy engine
-# For SQLite: sqlite:///eventecho.db  (a file in the project root)
-# For PostgreSQL: postgres://user:pass@host:5432/dbname
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {})
+DB_PATH = os.getenv("DATABASE_URL", "./eventecho.db")
+DB_PATH = str(Path(DB_PATH).resolve())
 
-# Create a configured "Session" class
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base class for models to inherit from
-Base = declarative_base()
-
-
-def init_db():
-    """
-    Create tables for all models that inherit from Base.
-    Call this once at startup (or from a small setup script).
-    """
-    Base.metadata.create_all(bind=engine)
-
-
-# Simple helper to get a DB session (we should use this in the route handlers)
 def get_db():
     """
-    Yields a new DB session. Caller should close the session when done.
-    Example:
-        db = get_db()
-        try:
-            # use db (db is a Session instance)
-        finally:
-            db.close()
+    Return a new sqlite3.Connection with row access by name.
+    Caller is responsible for closing the connection.
     """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+    conn = sqlite3.connect(DB_PATH, detect_types=sqlite3.PARSE_DECLTYPES)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db(schema_path: str):
+    """
+    Initialize or migrate database using provided SQL schema file path.
+    """
+    with get_db() as conn, open(schema_path, "r", encoding="utf-8") as f:
+        conn.executescript(f.read())

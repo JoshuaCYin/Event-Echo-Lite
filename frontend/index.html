@@ -1,0 +1,31 @@
+<!-- frontend/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Event Echo Lite</title>
+</head>
+<body>
+  <h2>Register</h2>
+  <input id="regEmail" placeholder="Email"><br>
+  <input id="regPass" type="password" placeholder="Password"><br>
+  <input id="regName" placeholder="Display Name"><br>
+  <button onclick="registerUser()">Register</button>
+
+  <h2>Login</h2>
+  <input id="logEmail" placeholder="Email"><br>
+  <input id="logPass" type="password" placeholder="Password"><br>
+  <button onclick="loginUser()">Login</button>
+
+  <h2>Create Event</h2>
+  <input id="evTitle" placeholder="Title"><br>
+  <input id="evStart" placeholder="Start (YYYY-MM-DD HH:MM:SS)"><br>
+  <input id="evEnd" placeholder="End (YYYY-MM-DD HH:MM:SS)"><br>
+  <input id="evLocation" placeholder="Location"><br>
+  <button onclick="createEvent()">Create</button>
+
+  <pre id="output"></pre>
+
+  <script type="module" src="./js/app.js"></script>
+</body>
+</html>
