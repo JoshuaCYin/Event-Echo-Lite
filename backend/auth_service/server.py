@@ -18,7 +18,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sqlalchemy.orm import Session
 from database.db_connection import SessionLocal, init_db
-from .models import User
+from backend.auth_service.models import User
 import hashlib
 
 app = Flask(__name__)
@@ -113,5 +113,5 @@ def internal_error(error):
 
 
 if __name__ == "__main__":
-    # Run the auth service on port 5000
+    # Run the auth service on port 8080
     app.run(port=8080)

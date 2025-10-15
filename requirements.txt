@@ -1,0 +1,7 @@
+# Shared backend dependencies
+flask
+flask_cors
+sqlalchemy
+# bcrypt
+requests
+python-dotenv
