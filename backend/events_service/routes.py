@@ -1,26 +1,17 @@
 """
 Events service routes: create, read, update, delete events, and RSVP.
-Assumes token auth (same JWT secret) and user id is the subject.
 """
 
 from flask import Blueprint, request, jsonify
 from backend.database.db_connection import get_db
+from backend.auth_service.utils import verify_token_from_request # This is the shared utility file
 import os
-import jwt
 from datetime import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
-JWT_SECRET = os.getenv("JWT_SECRET", "change_me")
 
 events_bp = Blueprint("events", __name__)
-
-def verify_token(token: str):
-    try:
-        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
-        return payload.get("sub")
-    except Exception:
-        return None
 
 def parse_dt(val):
     # expects ISO-8601 or "YYYY-MM-DD HH:MM:SS"
@@ -47,16 +38,12 @@ def list_events():
 def create_event():
     """
     Create an event.
-    Header: Authorization: Bearer <token>
     Body JSON: title, description, start_time, end_time, location
     start_time/end_time should be ISO strings.
     """
-    auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
-        return jsonify({"error": "missing token"}), 401
-    user_id = verify_token(auth.split(" ",1)[1])
-    if not user_id:
-        return jsonify({"error": "invalid token"}), 401
+    user_id, role, err, code = verify_token_from_request(required_roles=["organizer", "admin"]) # Only organizers and admins can create events
+    if err:
+        return err, code
 
     data = request.get_json() or {}
     title = data.get("title") or ""
@@ -99,14 +86,11 @@ def create_event():
 @events_bp.route("/<int:event_id>", methods=["PUT"])
 def update_event(event_id):
     """
-    Update an event if the caller is the organizer.
+    Update an event if the caller is the organizer or admin.
     """
-    auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
-        return jsonify({"error": "missing token"}), 401
-    user_id = verify_token(auth.split(" ",1)[1])
-    if not user_id:
-        return jsonify({"error": "invalid token"}), 401
+    user_id, role, err, code = verify_token_from_request(required_roles=["organizer", "admin"]) # Only organizers and admins can create events
+    if err:
+        return err, code
 
     data = request.get_json() or {}
     conn = get_db()
@@ -116,10 +100,11 @@ def update_event(event_id):
         ev = cur.fetchone()
         if not ev:
             return jsonify({"error": "not found"}), 404
-        if ev["organizer_id"] != user_id:
+
+        if ev["organizer_id"] != user_id and role != "admin":
             return jsonify({"error": "forbidden"}), 403
 
-        # allow partial updates
+        # Allow partial updates
         fields = []
         values = []
         for key in ("title", "description", "start_time", "end_time", "location"):
@@ -140,12 +125,10 @@ def delete_event(event_id):
     """
     Delete an event if the caller is the organizer.
     """
-    auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
-        return jsonify({"error": "missing token"}), 401
-    user_id = verify_token(auth.split(" ",1)[1])
-    if not user_id:
-        return jsonify({"error": "invalid token"}), 401
+    user_id, role, err, code = verify_token_from_request(required_roles=["organizer", "admin"])
+    if err:
+        return err, code
+
 
     conn = get_db()
     try:
@@ -154,7 +137,8 @@ def delete_event(event_id):
         ev = cur.fetchone()
         if not ev:
             return jsonify({"error": "not found"}), 404
-        if ev["organizer_id"] != user_id:
+
+        if ev["organizer_id"] != user_id and role != "admin":
             return jsonify({"error": "forbidden"}), 403
 
         cur.execute("DELETE FROM events WHERE id = ?", (event_id,))
@@ -170,13 +154,17 @@ def rsvp(event_id):
     RSVP to an event.
     Header: Authorization: Bearer <token>
     Body: { "status": "going"|"canceled"|"maybe" }  (optional; default 'going')
+    Reminder: rsvp statuses are going, canceled, and maybe, with going as the default
     """
-    auth = request.headers.get("Authorization", "")
-    if not auth.startswith("Bearer "):
-        return jsonify({"error": "missing token"}), 401
-    user_id = verify_token(auth.split(" ",1)[1])
-    if not user_id:
-        return jsonify({"error": "invalid token"}), 401
+    user_id, _, err, code = verify_token_from_request()
+    if err:
+        return err, code
+    # auth = request.headers.get("Authorization", "")
+    # if not auth.startswith("Bearer "):
+    #     return jsonify({"error": "missing token"}), 401
+    # user_id = verify_token(auth.split(" ",1)[1])
+    # if not user_id:
+    #     return jsonify({"error": "invalid token"}), 401
 
     status = (request.get_json() or {}).get("status", "going")
     conn = get_db()

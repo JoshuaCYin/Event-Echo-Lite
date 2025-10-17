@@ -6,9 +6,14 @@ This is the local entrypoint for development.
 from flask import Flask, jsonify
 from flask_cors import CORS
 import os
+import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# basic console logging during API requests
+logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(asctime)s - %(message)s")
+
 
 def create_app():
     app = Flask(__name__)
@@ -25,6 +30,10 @@ def create_app():
     def ping():
         return jsonify({"status": "ok"}), 200
 
+    @app.route("/health")
+    def health():
+        return jsonify({"status": "ok"}), 200
+    
     return app
 
 if __name__ == "__main__":
