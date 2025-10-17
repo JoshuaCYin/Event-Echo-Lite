@@ -1,0 +1,22 @@
+<!-- This page is simple and an example. Added 10-17-2025, ensure it is updated later. -->
+
+<div style="text-align:center;">
+  <h2>Register</h2>
+  <input id="regEmail" placeholder="Email"><br>
+  <input id="regPass" type="password" placeholder="Password"><br>
+  <input id="regName" placeholder="Display Name"><br>
+  <button id="registerBtn">Register</button>
+  <pre id="output"></pre>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+
+document.querySelector("#registerBtn").onclick = async () => {
+  const email = document.querySelector("#regEmail").value;
+  const pass = document.querySelector("#regPass").value;
+  const name = document.querySelector("#regName").value;
+  const res = await api("/auth/register", "POST", { email, password: pass, display_name: name });
+  document.querySelector("#output").textContent = JSON.stringify(res, null, 2);
+};
+</script>

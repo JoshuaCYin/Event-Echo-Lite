@@ -1,0 +1,28 @@
+<!-- This page is simple and an example. Added 10-17-2025, ensure it is updated later. -->
+
+<div style="text-align:center;">
+  <h2>Login</h2>
+  <input id="logEmail" placeholder="Email"><br>
+  <input id="logPass" type="password" placeholder="Password"><br>
+  <button id="loginBtn">Login</button>
+  <pre id="output"></pre>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+import { API_BASE } from "../js/config.js";
+
+document.querySelector("#loginBtn").onclick = async () => {
+  const email = document.querySelector("#logEmail").value;
+  const pass = document.querySelector("#logPass").value;
+
+  // Check if the email and password are not empty
+  if (!email || !pass) {
+    alert("Please enter both email and password.");
+    return;
+  }
+
+  const res = await api("/auth/login", "POST", { email, password: pass });
+  document.querySelector("#output").textContent = JSON.stringify(res, null, 2);
+};
+</script>
