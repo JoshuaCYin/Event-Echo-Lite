@@ -41,3 +41,18 @@ window.createEvent = async () => {
   const res = await api("/events/", "POST", { title, start_time: start, end_time: end, location });
   document.querySelector("#output").textContent = JSON.stringify(res, null, 2);
 };
+
+// Centralized auth/redirect logic
+export function checkAuthAndRedirect() {
+  const token = localStorage.getItem("token");
+  if (!token) return; // not logged in, stay on login/register
+
+  // Decode JWT (simple way to read role)
+  const payload = JSON.parse(atob(token.split(".")[1]));
+  const role = payload.role || "attendee";
+
+  // Redirect by role
+  if (["attendee", "organizer", "admin"].includes(role)) {
+    window.location.hash = "#/home";
+  }
+}

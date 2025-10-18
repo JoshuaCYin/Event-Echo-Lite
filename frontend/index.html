@@ -9,19 +9,33 @@
 </head>
 <body>
   <header>
-    <h1>Event Echo Lite</h1>
+    <img src="./assets/logo.png" alt="Logo" class="logo"> <!-- placeholder for logo -->
+    <h1>Event Echo</h1>
+    <div class="menu-toggle">☰</div>
     <nav>
-      <a href="#/login">Login</a>
-      <a href="#/register">Register</a>
-      <a href="#/events">Events</a>
       <a href="#/home">Home</a>
+      <a href="#/events">Events</a>
+      <a class="nav-btn" href="#/login">Log In</a>
+      <a class="nav-btn" href="#/register">Sign Up</a>
     </nav>
   </header>
 
   <main id="app"></main>
 
-  <footer style="text-align:center;color:var(--gray);padding:1em;">© Event Echo Lite</footer> <!-- change to Event Echo later-->
+  <footer style="text-align:center; padding:1em; color:var(--offwhite);">
+    © Event Echo Lite |
+    <!-- Github link --> <a href="https://github.com/JoshuaCYin/Event-Echo-Lite/tree/main" target="_blank" style="color:white;text-decoration:none;">GitHub</a>
+  </footer>
 
   <script type="module" src="./js/router.js"></script>
+
+  <!-- Navbar Animation -->
+  <script>
+    document.querySelector('.menu-toggle').onclick = () => {
+      const nav = document.querySelector('nav');
+      nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+    };
+  </script>
+
 </body>
 </html>

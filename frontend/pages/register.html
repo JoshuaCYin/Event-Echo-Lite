@@ -1,17 +1,17 @@
 <!-- This page is simple and an example. Added 10-17-2025, ensure it is updated later. -->
 
-<div style="text-align:center;">
-  <h2>Register</h2>
+<div class="glass-card">
+  <h2>Sign Up</h2>
   <input id="regEmail" placeholder="Email"><br>
   <input id="regPass" type="password" placeholder="Password"><br>
   <input id="regName" placeholder="Display Name"><br>
   <button id="registerBtn">Register</button>
+  <p class="text-small">Already have an account? <a href="#/login">Log in</a></p>
   <pre id="output"></pre>
 </div>
 
 <script type="module">
 import { api } from "../js/api.js";
-
 document.querySelector("#registerBtn").onclick = async () => {
   const email = document.querySelector("#regEmail").value;
   const pass = document.querySelector("#regPass").value;
