@@ -26,7 +26,7 @@ footer { /* included footer styles mainly to ensure it is fixed to the bottom */
 /* ---------- NAVBAR ---------- */
 .logo {
   height: 40px;
-  margin-right: 0em;
+  margin-right: 1em;
 }
 
 header {
@@ -86,6 +86,8 @@ nav a:hover, .nav-btn:hover{
   width: 320px;
   margin: 10vh auto;
   text-align: center;
+  max-height: unset;
+  overflow: visible;
 }
 
 .glass-card h2 {
@@ -110,7 +112,7 @@ button {
   margin-top: 0.8em;    /* change this for the margin around the buttons */
   cursor: pointer;
   transition: transform 0.1s ease;
-  width: 95%;
+  /* width: 95%; */
 }
 
 button:hover {
@@ -121,8 +123,35 @@ button:hover {
 /* alleged responsive card scaling (doesn't seem to work) */
 @media (max-width: 400px) {
   .glass-card {
-    width: 10%;
+    width: 90%;
   }
+}
+
+/* ---------- CALENDAR ----------- */
+
+#calendar {
+  max-width: 900px;
+  margin: 20px auto;
+  min-height: 600px;
+  background: white;
+  border-radius: 10px;
+  padding: 1em;
+}
+
+#listViewBtn, #calendarViewBtn {
+  margin-left: 0.5em;
+  padding: 0.7em 1.2em;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: var(--red);
+  color: white;
+  font-weight: 600;
+  transition: background 0.3s ease;
+}
+
+#listViewBtn:hover, #calendarViewBtn:hover {
+  background: #a00c34;
 }
 
 /* ---------- UTILITIES ---------- */

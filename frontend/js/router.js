@@ -1,17 +1,23 @@
+// Loads pages and checks login state each time.
+
 import { loadPage } from "./utils.js";
+import { checkAuthAndRedirect } from "./app.js";
 
 const routes = {
-  "/login": "pages/login.html",
-  "/register": "pages/register.html",
-  "/events": "pages/events.html",
-  "/home": "pages/home.html",
+  "#/login": "pages/login.html",
+  "#/register": "pages/register.html",
+  "#/home": "pages/home.html",
+  "#/events": "pages/events.html",
 };
 
-function router() {
-  const rawHash = window.location.hash || "#/login";
-  const path = rawHash.replace(/^#/, "");
-  const page = routes[path] || routes["/login"];
-  loadPage(page);
+async function router() {
+  const path = window.location.hash || "#/login";
+  if (["#/login", "#/register"].includes(path)) {
+    await loadPage(routes[path]);
+  } else {
+    checkAuthAndRedirect();
+    await loadPage(routes[path]);
+  }
 }
 
 window.addEventListener("hashchange", router);

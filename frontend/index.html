@@ -1,16 +1,17 @@
-<!-- This is a small "app shell."" This is what stays on screen; real pages will load inside #app. -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Event Echo Lite</title>
   <link rel="stylesheet" href="./css/main.css">
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet" />
 </head>
 <body>
   <header>
-    <img src="./assets/logo.png" alt="Logo" class="logo"> <!-- placeholder for logo -->
-    <h1>Event Echo</h1>
+    <div style="display:flex;align-items:center;">
+      <img src="./assets/logo.png" alt="Logo" class="logo"> <!-- Added placeholder image for logo 10-17-25 -->
+      <h1>Event Echo</h1>
+    </div>
     <div class="menu-toggle">☰</div>
     <nav>
       <a href="#/home">Home</a>
@@ -23,18 +24,23 @@
   <main id="app"></main>
 
   <footer style="text-align:center; padding:1em; color:var(--offwhite);">
-    © Event Echo Lite |
-    <!-- Github link --> <a href="https://github.com/JoshuaCYin/Event-Echo-Lite/tree/main" target="_blank" style="color:white;text-decoration:none;">GitHub</a>
+    © Event Echo Lite | 
+    <!-- Github link -->
+    <a href="https://github.com/JoshuaCYin/Event-Echo-Lite/tree/main" target="_blank" style="color:white;text-decoration:none;">GitHub</a>
   </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
   <script type="module" src="./js/router.js"></script>
 
-  <!-- Navbar Animation -->
   <script>
+    // Hamburger menu toggle
     document.querySelector('.menu-toggle').onclick = () => {
       const nav = document.querySelector('nav');
       nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
     };
+    console.log(window.FullCalendar);
+
   </script>
 
 </body>
