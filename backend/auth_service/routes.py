@@ -17,7 +17,7 @@ load_dotenv()
 auth_bp = Blueprint("auth", __name__)
 ph = PasswordHasher()
 JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("JWT_SECRET") or os.getenv("JWT_SECRET", os.getenv("JWT_SECRET", os.getenv("JWT_SECRET", os.getenv("JWT_SECRET", ""))))  # ensure defined
-JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("JWT_SECRET", "change_me")
+# JWT_SECRET = os.getenv("JWT_SECRET") or os.getenv("JWT_SECRET", "change_me")
 
 # helper: create JWT token
 def create_token(user_id: int, role: str, expires_minutes: int = 60*24):

@@ -1,5 +1,6 @@
 """
 API gateway: combines auth and events blueprints and runs a single Flask app.
+Defines the app, registers routes/blueprints, and calls app.run() to listen for HTTP requests on a port.
 This is the local entrypoint for development.
 """
 

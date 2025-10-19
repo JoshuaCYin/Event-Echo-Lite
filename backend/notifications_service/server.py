@@ -1,9 +1,3 @@
-# from flask import Flask, jsonify
-# app = Flask(__name__)
-
-# @app.route("/notify", methods=["GET"])
-# def notify():
-#     return jsonify({"message": "Notification sent!"})
-
-# if __name__ == "__main__":
-#     app.run(port=5002)
+# This service does not run standalone.
+# Routes are registered with the main gateway (backend/gateway/server.py).
+# If this service is split into a microservice later, add Flask app setup and app.run() here.
