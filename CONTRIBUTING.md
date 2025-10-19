@@ -8,6 +8,7 @@ This guide will help you understand how to get started and what to expect when c
 
 - [Getting Started](#getting-started)
 - [Ways to Contribute](#ways-to-contribute)
+- [Branching and Commit Guidelines](#branching-and-commit-guidelines)
 - [Reporting Bugs](#reporting-bugs)
 - [Suggesting Enhancements](#suggesting-enhancements)
 - [Submitting Changes](#submitting-changes)
@@ -45,6 +46,7 @@ You can contribute in several ways:
 - Create a new branch for each feature or bug fix. Name it clearly, for example:
   - `feature/add-login`
   - `bugfix/fix-typo`
+
 These are the main categories, as this is a basic project. The feature category includes changes/enhancements in addition to new features.
 
 - Keep your commits small and focused on a single change.
