@@ -18,29 +18,46 @@ async function api(path, method = "GET", data = null) {
 
 // Register
 window.registerUser = async () => {
+  // Info fields
   const email = document.querySelector("#regEmail").value;
   const pass = document.querySelector("#regPass").value;
   const name = document.querySelector("#regName").value;
+
+  // Send
   const res = await api("/auth/register", "POST", { email, password: pass, display_name: name });
   document.querySelector("#output").textContent = JSON.stringify(res, null, 2);
 };
 
 // Login
 window.loginUser = async () => {
+  // Info fields
   const email = document.querySelector("#logEmail").value;
   const pass = document.querySelector("#logPass").value;
-  const res = await api("/auth/login", "POST", { email, password: pass });
+
+  // Send
+  const res = await api("/auth/login", "POST", {
+    email,
+    password: pass
+  });
   token = res.token;
   document.querySelector("#output").textContent = JSON.stringify(res, null, 2);
 };
 
 // Create Event
 window.createEvent = async () => {
+  // Info fields
   const title = document.querySelector("#evTitle").value;
   const start = document.querySelector("#evStart").value;
   const end = document.querySelector("#evEnd").value;
   const location = document.querySelector("#evLocation").value;
-  const res = await api("/events/", "POST", { title, start_time: start, end_time: end, location });
+
+  // Send
+  const res = await api("/events/", "POST", {
+    title,
+    start_time: start,
+    end_time: end,
+    location
+  });
   document.querySelector("#output").textContent = JSON.stringify(res, null, 2);
 };
 
