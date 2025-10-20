@@ -1,47 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Event Echo Lite</title>
-  <link rel="stylesheet" href="./css/main.css">
+  <link rel="stylesheet" href="./css/main.css" />
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 </head>
 <body>
+  <!-- NAVBAR -->
   <header>
-    <div style="display:flex;align-items:center;">
-      <img src="./assets/logo.png" alt="Logo" class="logo"> <!-- Added placeholder image for logo 10-17-25 -->
-      <h1>Event Echo</h1>
+    <div style="display: flex; align-items: center; cursor: pointer;" id="logoWrap">
+      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">☰</button>
+      <img src="./assets/logo.png" alt="Logo" class="logo" />
+      <h1 id="brandTitle">Event Echo</h1>
     </div>
-    <div class="menu-toggle">☰</div>
-    <nav>
-      <a href="#/home">Home</a>
-      <a href="#/events">Events</a>
-      <a class="nav-btn" href="#/login">Log In</a>
-      <a class="nav-btn" href="#/register">Sign Up</a>
-    </nav>
+    <div class="nav-right" id="navButtons">
+      <button onclick="location.hash='#/login'">Log In</button>
+      <button onclick="location.hash='#/register'">Sign Up</button>
+    </div>
   </header>
 
+  <!-- SIDEBAR (sidebar nav) -->
+  <aside id="sidebar" aria-label="Sidebar Navigation">
+    <a href="#/home">🏠 Home</a>
+    <a href="#/calendar">📅 Calendar</a>
+    <a href="#/events">📝 Event List</a>
+    <a href="#/ai-chat">💬 AI Chat</a>
+    <div id="roleLinks"> <!-- add class="hidden" hidden for unauthorized roles -->
+      <a href="#/create-event">➕ Create Event</a>
+      <a href="#/planning">📊 Planning</a>
+    </div>
+    <a href="#/profile" class="bottom">👤  Profile</a>
+  </aside>
+
+  <!-- MAIN CONTENT -->
   <main id="app"></main>
 
-  <footer style="text-align:center; padding:1em; color:var(--offwhite);">
-    © Event Echo Lite | 
-    <!-- Github link -->
-    <a href="https://github.com/JoshuaCYin/Event-Echo-Lite/tree/main" target="_blank" style="color:white;text-decoration:none;">GitHub</a>
+  <!-- FOOTER -->
+  <footer>
+    © Event Echo Lite |
+    <a href="https://github.com/JoshuaCYin/Event-Echo-Lite/tree/main" target="_blank" rel="noopener noreferrer">GitHub</a>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-
   <script type="module" src="./js/router.js"></script>
 
+  <!-- MENUS -->
   <script>
-    // Hamburger menu toggle
-    document.querySelector('.menu-toggle').onclick = () => {
-      const nav = document.querySelector('nav');
-      nav.style.display = nav.style.display === 'flex' ? 'none' : 'flex';
+    const menuToggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const navButtons = document.getElementById('navButtons');
+
+    // Toggle sidebar visibility on hamburger click
+    menuToggle.onclick = () => {
+      sidebar.classList.toggle('open');
+      // Also toggle body scroll lock on mobile when sidebar open
+      if (sidebar.classList.contains('open')) {
+        document.body.style.overflow = 'hidden';
+      } else {
+        document.body.style.overflow = '';
+      }
     };
-    console.log(window.FullCalendar);
 
+    // Close sidebar when clicking outside (on overlay)
+    document.body.addEventListener('click', (e) => {
+      if (
+        sidebar.classList.contains('open') &&
+        !sidebar.contains(e.target) &&
+        !menuToggle.contains(e.target)
+      ) {
+        sidebar.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    });
+
+    // Logo click to go home
+    document.getElementById('logoWrap').onclick = () => {
+      location.hash = '#/home';
+    };
+
+    // Responsive behavior: Hide nav buttons on small screens, shown only on wider
+    function handleResize() {
+      if (window.innerWidth <= 700) {
+        navButtons.style.display = 'none';
+      } else {
+        navButtons.style.display = 'flex';
+        // Ensure sidebar is closed if resizing to desktop view
+        sidebar.classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
+    window.addEventListener('resize', handleResize);
+    window.addEventListener('load', handleResize);
   </script>
-
 </body>
 </html>

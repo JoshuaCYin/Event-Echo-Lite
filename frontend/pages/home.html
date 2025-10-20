@@ -1,54 +1,6 @@
-<!-- This (Home) is the main events view (list/calendar page) -->
-<div class="glass-card" style="width:90%;max-width:900px;">
-    <h2>Events</h2>
-        <div style="text-align:right; display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 10px;">
-            <button id="listViewBtn">List</button>
-            <button id="calendarViewBtn">Calendar</button>
-        </div>
-    <div id="viewContainer"></div>
+<div class="glass-card" style="width:85%;max-width:600px;">
+  <h2>Welcome to Event Echo</h2>
+  <p>Your one-stop event manager for campus activities!</p>
+  <button onclick="location.hash='#/login'">Log In</button>
+  <button onclick="location.hash='#/register'">Sign Up</button>
 </div>
-
-<script type="module">
-import { api } from "../js/api.js";
-
-const container = document.querySelector("#viewContainer");
-
-// --- CALENDAR VIEW ---
-async function loadCalendarView() {
-    container.innerHTML = "<div id='calendar'></div>";
-    const events = await api("/events/", "GET");
-
-    const calendarEl = document.getElementById("calendar");
-    const calendar = new window.FullCalendar.Calendar(calendarEl, {
-        initialView: "dayGridMonth",
-        height: "auto",
-        events: events.map(e => ({
-            title: e.title,
-            start: e.start_time.replace(" ", "T"),  // Convert ' ' to 'T' because FullCalendar requires it
-            end: e.end_time.replace(" ", "T"),
-        })),
-    });
-
-    calendar.render();
-
-}
-
-// --- LIST VIEW ---
-async function loadListView() {
-    const events = await api("/events/", "GET");
-    if (!events.length) { // If not events exist, display a message instead
-        container.innerHTML = "<p>No events found.</p>";
-        return;
-    }
-    container.innerHTML = events
-        .map(e => `<p><strong>${e.title}</strong> — ${e.start_time}</p>`)
-        .join("");
-}
-
-// --- Buttons ---
-document.querySelector("#listViewBtn").onclick = loadListView;
-document.querySelector("#calendarViewBtn").onclick = loadCalendarView;
-
-// Default view
-loadCalendarView();
-</script>

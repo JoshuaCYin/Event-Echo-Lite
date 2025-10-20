@@ -1,0 +1,64 @@
+<!-- This is the main events view (list/calendar page) -->
+<div>
+    <div id="viewContainer"></div>
+</div>
+
+<div id="viewContainer"></div>
+
+<script type="module">
+import { api } from "../js/api.js";
+
+const container = document.querySelector("#viewContainer");
+
+// --- CALENDAR VIEW ---
+async function loadCalendarView() {
+    container.innerHTML = "<div id='calendar'></div>";
+    const events = await api("/events/", "GET");
+
+    const calendarEl = document.getElementById("calendar");
+    const calendar = new window.FullCalendar.Calendar(calendarEl, {
+        initialView: "dayGridMonth",
+        height: "auto",
+        events: events.map(e => ({
+            title: e.title,
+            start: e.start_time.replace(" ", "T"),  // Convert ' ' to 'T' because FullCalendar requires it
+            end: e.end_time.replace(" ", "T"),
+        })),            
+        headerToolbar: {
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        buttonText: {
+            today: 'Today',
+            month: 'Month',
+            week: 'Week',
+            day: 'Day'
+        },
+        height: 'auto',
+        aspectRatio: 1.8,
+    });
+
+    calendar.render();
+
+}
+
+// // --- LIST VIEW ---
+// async function loadListView() {
+//     const events = await api("/events/", "GET");
+//     if (!events.length) { // If not events exist, display a message instead
+//         container.innerHTML = "<p>No events found.</p>";
+//         return;
+//     }
+//     container.innerHTML = events
+//         .map(e => `<p><strong>${e.title}</strong> — ${e.start_time}</p>`)
+//         .join("");
+// }
+
+// --- Buttons ---
+// document.querySelector("#listViewBtn").onclick = loadListView;
+// document.querySelector("#calendarViewBtn").onclick = loadCalendarView;
+
+// Default view
+loadCalendarView();
+</script>

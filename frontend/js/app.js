@@ -1,3 +1,5 @@
+// CODE IS FLAWED, NEEDS TO BE REWRITTEN, especially at checkAuthAndRedirect()
+
 // Handles register, login, and create event actions.
 
 import { API_BASE } from "./config.js";
@@ -52,7 +54,7 @@ export function checkAuthAndRedirect() {
   const role = payload.role || "attendee";
 
   // Redirect by role
-  if (["attendee", "organizer", "admin"].includes(role)) {
-    window.location.hash = "#/home";
-  }
+  // if (["attendee", "organizer", "admin"].includes(role)) {
+  //   window.location.hash = "#/home";
+  // }
 }

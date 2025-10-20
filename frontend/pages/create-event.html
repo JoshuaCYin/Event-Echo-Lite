@@ -1,0 +1,25 @@
+<!-- This page is simple and an example. Added 10-19-2025, ensure it is updated later. -->
+
+<div class="glass-card">
+    <h2>Create Event</h2>
+    <input id="evTitle" placeholder="Title"><br>
+    <input id="evStart" placeholder="Start (YYYY-MM-DD HH:MM:SS)"><br>
+    <input id="evEnd" placeholder="End (YYYY-MM-DD HH:MM:SS)"><br>
+    <input id="evLocation" placeholder="Location"><br>
+    <button id="createBtn">Create</button>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+
+let token = localStorage.getItem("token");
+
+document.querySelector("#createBtn").onclick = async () => {
+  const title = document.querySelector("#evTitle").value;
+  const start = document.querySelector("#evStart").value;
+  const end = document.querySelector("#evEnd").value;
+  const location = document.querySelector("#evLocation").value;
+  const res = await api("/events/", "POST", { title, start_time: start, end_time: end, location }, token);
+  alert(JSON.stringify(res, null, 2));
+};
+</script>
