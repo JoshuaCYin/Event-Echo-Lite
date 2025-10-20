@@ -8,6 +8,10 @@ const routes = {
   "#/register": "pages/register.html",
   "#/home": "pages/home.html",
   "#/events": "pages/events.html",
+  "#/calendar": "pages/calendar.html",
+  "#/create-event": "pages/create-event.html",
+  "#/planning": "pages/planning.html",
+  "#/ai-chat": "pages/ai-chat.html"
 };
 
 async function router() {

@@ -9,38 +9,52 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   color: var(--gray);
-  background: url("../assets/chapel_auditorium.jpeg") center/cover no-repeat fixed; /* background photo */
+  background: url("../assets/chapel_auditorium.jpeg") center/cover no-repeat fixed;
   height: 100vh;
 }
 
-footer { /* included footer styles mainly to ensure it is fixed to the bottom */
-  position: fixed;
-  bottom: 0;
-  width: 100%;
+/* ======= FOOTER ======= */
+footer {
+  position: relative; /* no fixed */
+  margin-top: 2em;
   text-align: center;
   padding: 0.5em;
   color: var(--offwhite);
   background: rgba(0,0,0,0.6);
 }
 
-/* ---------- NAVBAR ---------- */
+/* ======= HEADER ======= */
 .logo {
   height: 40px;
-  margin-right: 1em;
+  user-select: none;
 }
 
 header {
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0 0 0 / 0.6);
   color: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1em 2em;
+  padding: 0 1.5em;
+  z-index: 1000; /* anything above 1000 is above the navbar, anything below 1000 is below the navbar */
+  user-select: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); /* for Safari */
 }
 
 header h1 {
   margin: 0;
   font-size: 1.5em;
+}
+
+.nav-right {
+  display: flex;
+  gap: 0.8em; /* or 1em for more space */
 }
 
 nav {
@@ -51,32 +65,45 @@ nav {
 nav a, .nav-btn {
   color: white;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 700;
+  font-size: 1em;
   background: rgba(255,255,255,0.1);
-  padding: 0.4em 0.8em;
+  padding: 0.6em 1.2em;
   cursor: pointer;
   transition: 0.2s;
   border-radius: 6px;
 }
 
-nav a:hover, .nav-btn:hover{
+/* override to make login/sign-up text larger */
+header .nav-btn {
+  font-size: 1.2em;
+}
+
+nav a:hover, .nav-btn:hover {
   background: var(--red);
   color: white;
 }
 
-/* Hamburger */
+/* ======= HAMBURGER MENU BUTTON ======= */
 .menu-toggle {
   display: none;
-  font-size: 1.5em;
+  padding: 0;
+  margin: 0;
+  font-size: 1.8em;
+  background: none;
+  border: none;
+  color: white;
   cursor: pointer;
+  user-select: none;
 }
 
+/* Show hamburger on small screens */
 @media (max-width: 700px) {
   nav { display: none; }
   .menu-toggle { display: block; }
 }
 
-/* ---------- GLASSY FORM ---------- */
+/* ======= GLASSY CARD (forms, containers) ======= */
 .glass-card {
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
@@ -108,11 +135,10 @@ button {
   color: white;
   border: none;
   border-radius: 6px;
-  padding: 0.9em 1.5em; /* change these for the padding/margin around the buttons */
-  margin-top: 0.8em;    /* change this for the margin around the buttons */
+  padding: 0.9em 1.5em;
+  margin-top: 0.8em;
   cursor: pointer;
   transition: transform 0.1s ease;
-  /* width: 95%; */
 }
 
 button:hover {
@@ -120,22 +146,22 @@ button:hover {
   background: #a00c34;
 }
 
-/* alleged responsive card scaling (doesn't seem to work) */
+/* Responsive card width on very small screens */
 @media (max-width: 400px) {
   .glass-card {
     width: 90%;
   }
 }
 
-/* ---------- CALENDAR ----------- */
-
+/* ======= CALENDAR ======= */
 #calendar {
-  max-width: 900px;
-  margin: 20px auto;
+  max-width: 1000px;
+  margin: 30px auto;
   min-height: 600px;
   background: white;
-  border-radius: 10px;
-  padding: 1em;
+  border-radius: 16px;
+  padding: 2em;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
 }
 
 #listViewBtn, #calendarViewBtn {
@@ -154,9 +180,116 @@ button:hover {
   background: #a00c34;
 }
 
-/* ---------- UTILITIES ---------- */
+/* ======= UTILITIES ======= */
 .text-small {
   font-size: 0.9em;
 }
 
 .hidden { display: none; }
+
+/* ======= SIDEBAR ======= */
+#sidebar {
+  position: fixed;
+  top: 70px; /* below header */
+  left: 0;
+  width: 200px;
+  height: calc(100% - 70px);
+  background: rgba(255 255 255 / 0.65); /* semi-transparent glass */
+  backdrop-filter: blur(15px);
+  border-right: 1px solid rgba(255 255 255 / 0.3);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* push bottom item down */
+  padding: 1em 0.8em;
+  box-sizing: border-box;
+  z-index: 1200; /* sidebar should be higher than header */
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+/* Sidebar links */
+#sidebar > a,
+#sidebar #roleLinks > a {
+  display: block;
+  padding: 0.5em 1em;
+  margin: 0.2em 0;
+  font-weight: 500;
+  color: var(--gray);
+  border-radius: 6px;
+  text-decoration: none;
+  user-select: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Hover & focus */
+#sidebar > a:hover,
+#sidebar #roleLinks > a:hover,
+#sidebar > a:focus,
+#sidebar #roleLinks > a:focus {
+  background-color: var(--red);
+  color: white;
+  outline: none;
+}
+
+/* Active link */
+#sidebar > a.active,
+#sidebar #roleLinks > a.active {
+  background-color: var(--red);
+  color: white;
+  font-weight: 600;
+}
+
+/* Bottom profile link */
+#sidebar a.bottom {
+  margin-top: auto;
+  padding-bottom: 1em;
+}
+
+/* ======= MAIN CONTENT ======= */
+main#app {
+  margin-top: 70px;   /* below header */
+  margin-left: 200px; /* width of sidebar */
+  padding: 1em;
+  min-height: calc(100vh - 70px);
+  box-sizing: border-box;
+  transition: margin-left 0.3s ease;
+}
+
+/* ======= MOBILE RESPONSIVE ======= */
+
+/* Sidebar overlay + slide on mobile */
+@media (max-width: 800px) {
+  #sidebar {
+    transform: translateX(-100%);
+    width: 75vw;
+    max-width: 300px;
+    height: 100vh;
+    top: 0;
+    border-right: none;
+    box-shadow: 3px 0 15px rgba(0,0,0,0.3);
+    padding-top: 3em; /* space for fixed header */
+  }
+  #sidebar.open {
+    transform: translateX(0);
+  }
+
+  main#app {
+    margin-left: 0;
+    margin-top: 70px;
+  }
+}
+
+/* Overlay to dim background when sidebar is open on mobile */
+#overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 900;
+  display: none;
+}
+
+#overlay.show {
+  display: block;
+}
