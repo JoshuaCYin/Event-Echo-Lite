@@ -1,0 +1,354 @@
+2025-10-22T09:50:18: Traceback (most recent call last):
+2025-10-22T09:50:18:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:18:     app = create_app()
+2025-10-22T09:50:18:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:18:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:18: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:20: Traceback (most recent call last):
+2025-10-22T09:50:20:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:20:     app = create_app()
+2025-10-22T09:50:20:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:20:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:20: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:28: Traceback (most recent call last):
+2025-10-22T09:50:28:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:28:     app = create_app()
+2025-10-22T09:50:28:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:28:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:28: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:30: Traceback (most recent call last):
+2025-10-22T09:50:30:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:30:     app = create_app()
+2025-10-22T09:50:30:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:30:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:30: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:32: Traceback (most recent call last):
+2025-10-22T09:50:32:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:32:     app = create_app()
+2025-10-22T09:50:32:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:32:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:32: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:33: Traceback (most recent call last):
+2025-10-22T09:50:33:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:33:     app = create_app()
+2025-10-22T09:50:33:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:33:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:33: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:35: Traceback (most recent call last):
+2025-10-22T09:50:35:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:35:     app = create_app()
+2025-10-22T09:50:35:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:35:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:35: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:36: Traceback (most recent call last):
+2025-10-22T09:50:36:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:36:     app = create_app()
+2025-10-22T09:50:36:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:36:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:36: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:37: Traceback (most recent call last):
+2025-10-22T09:50:37:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:37:     app = create_app()
+2025-10-22T09:50:37:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:37:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:37: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:39: Traceback (most recent call last):
+2025-10-22T09:50:39:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:39:     app = create_app()
+2025-10-22T09:50:39:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:39:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:39: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:42: Traceback (most recent call last):
+2025-10-22T09:50:42:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:42:     app = create_app()
+2025-10-22T09:50:42:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:42:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:42: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:44: Traceback (most recent call last):
+2025-10-22T09:50:44:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:44:     app = create_app()
+2025-10-22T09:50:44:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:44:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:44: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:45: Traceback (most recent call last):
+2025-10-22T09:50:45:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:45:     app = create_app()
+2025-10-22T09:50:45:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:45:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:45: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:47: Traceback (most recent call last):
+2025-10-22T09:50:47:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:47:     app = create_app()
+2025-10-22T09:50:47:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:47:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:47: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:48: Traceback (most recent call last):
+2025-10-22T09:50:48:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:48:     app = create_app()
+2025-10-22T09:50:48:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:48:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:48: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:50: Traceback (most recent call last):
+2025-10-22T09:50:50:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:50:     app = create_app()
+2025-10-22T09:50:50:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:50:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:50: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:52: Traceback (most recent call last):
+2025-10-22T09:50:52:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:52:     app = create_app()
+2025-10-22T09:50:52:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:52:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:52: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:53: Traceback (most recent call last):
+2025-10-22T09:50:53:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:53:     app = create_app()
+2025-10-22T09:50:53:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:53:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:53: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:54: Traceback (most recent call last):
+2025-10-22T09:50:54:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:54:     app = create_app()
+2025-10-22T09:50:54:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:54:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:54: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:56: Traceback (most recent call last):
+2025-10-22T09:50:56:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:56:     app = create_app()
+2025-10-22T09:50:56:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:56:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:56: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:57: Traceback (most recent call last):
+2025-10-22T09:50:57:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:57:     app = create_app()
+2025-10-22T09:50:57:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:57:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:57: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:50:58: Traceback (most recent call last):
+2025-10-22T09:50:58:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:50:58:     app = create_app()
+2025-10-22T09:50:58:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:50:58:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:50:58: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:00: Traceback (most recent call last):
+2025-10-22T09:51:00:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:00:     app = create_app()
+2025-10-22T09:51:00:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:00:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:00: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:01: Traceback (most recent call last):
+2025-10-22T09:51:01:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:01:     app = create_app()
+2025-10-22T09:51:01:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:01:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:01: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:02: Traceback (most recent call last):
+2025-10-22T09:51:02:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:02:     app = create_app()
+2025-10-22T09:51:02:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:02:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:02: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:03: Traceback (most recent call last):
+2025-10-22T09:51:03:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:03:     app = create_app()
+2025-10-22T09:51:03:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:03:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:03: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:05: Traceback (most recent call last):
+2025-10-22T09:51:05:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:05:     app = create_app()
+2025-10-22T09:51:05:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:05:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:05: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:06: Traceback (most recent call last):
+2025-10-22T09:51:06:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:06:     app = create_app()
+2025-10-22T09:51:06:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:06:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:06: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:07: Traceback (most recent call last):
+2025-10-22T09:51:07:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:07:     app = create_app()
+2025-10-22T09:51:07:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:07:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:07: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:08: Traceback (most recent call last):
+2025-10-22T09:51:08:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:08:     app = create_app()
+2025-10-22T09:51:08:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:08:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:08: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:10: Traceback (most recent call last):
+2025-10-22T09:51:10:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:10:     app = create_app()
+2025-10-22T09:51:10:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:10:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:10: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:11: Traceback (most recent call last):
+2025-10-22T09:51:11:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:11:     app = create_app()
+2025-10-22T09:51:11:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:11:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:11: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:13: Traceback (most recent call last):
+2025-10-22T09:51:13:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:13:     app = create_app()
+2025-10-22T09:51:13:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:13:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:13: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:15: Traceback (most recent call last):
+2025-10-22T09:51:15:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:15:     app = create_app()
+2025-10-22T09:51:15:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:15:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:15: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:16: Traceback (most recent call last):
+2025-10-22T09:51:16:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:16:     app = create_app()
+2025-10-22T09:51:16:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:16:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:16: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:18: Traceback (most recent call last):
+2025-10-22T09:51:18:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:18:     app = create_app()
+2025-10-22T09:51:18:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:18:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:18: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:19: Traceback (most recent call last):
+2025-10-22T09:51:19:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:19:     app = create_app()
+2025-10-22T09:51:19:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:19:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:19: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:21: Traceback (most recent call last):
+2025-10-22T09:51:21:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:21:     app = create_app()
+2025-10-22T09:51:21:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:21:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:21: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:23: Traceback (most recent call last):
+2025-10-22T09:51:23:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:23:     app = create_app()
+2025-10-22T09:51:23:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:23:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:23: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:26: Traceback (most recent call last):
+2025-10-22T09:51:26:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:26:     app = create_app()
+2025-10-22T09:51:26:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:26:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:26: ModuleNotFoundError: No module named 'backend'
+2025-10-22T09:51:29: Traceback (most recent call last):
+2025-10-22T09:51:29:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T09:51:29:     app = create_app()
+2025-10-22T09:51:29:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T09:51:29:     from backend.auth_service.routes import auth_bp
+2025-10-22T09:51:29: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:36: Traceback (most recent call last):
+2025-10-22T11:46:36:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:36:     app = create_app()
+2025-10-22T11:46:36:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:36:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:36: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:37: Traceback (most recent call last):
+2025-10-22T11:46:37:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:37:     app = create_app()
+2025-10-22T11:46:37:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:37:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:37: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:38: Traceback (most recent call last):
+2025-10-22T11:46:38:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:38:     app = create_app()
+2025-10-22T11:46:38:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:38:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:38: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:39: Traceback (most recent call last):
+2025-10-22T11:46:39:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:39:     app = create_app()
+2025-10-22T11:46:39:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:39:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:39: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:40: Traceback (most recent call last):
+2025-10-22T11:46:40:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:40:     app = create_app()
+2025-10-22T11:46:40:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:40:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:40: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:40: Traceback (most recent call last):
+2025-10-22T11:46:40:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:40:     app = create_app()
+2025-10-22T11:46:40:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:40:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:40: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:41: Traceback (most recent call last):
+2025-10-22T11:46:41:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:41:     app = create_app()
+2025-10-22T11:46:41:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:41:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:41: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:42: Traceback (most recent call last):
+2025-10-22T11:46:42:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:42:     app = create_app()
+2025-10-22T11:46:42:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:42:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:42: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:43: Traceback (most recent call last):
+2025-10-22T11:46:43:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:43:     app = create_app()
+2025-10-22T11:46:43:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:43:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:43: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:44: Traceback (most recent call last):
+2025-10-22T11:46:44:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:44:     app = create_app()
+2025-10-22T11:46:44:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:44:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:44: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:44: Traceback (most recent call last):
+2025-10-22T11:46:44:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:44:     app = create_app()
+2025-10-22T11:46:44:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:44:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:44: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:45: Traceback (most recent call last):
+2025-10-22T11:46:45:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:45:     app = create_app()
+2025-10-22T11:46:45:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:45:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:45: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:46: Traceback (most recent call last):
+2025-10-22T11:46:46:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:46:     app = create_app()
+2025-10-22T11:46:46:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:46:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:46: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:46: Traceback (most recent call last):
+2025-10-22T11:46:46:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:46:     app = create_app()
+2025-10-22T11:46:46:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:46:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:46: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:47: Traceback (most recent call last):
+2025-10-22T11:46:47:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:47:     app = create_app()
+2025-10-22T11:46:47:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:47:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:47: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:48: Traceback (most recent call last):
+2025-10-22T11:46:48:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:48:     app = create_app()
+2025-10-22T11:46:48:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:48:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:48: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:49: Traceback (most recent call last):
+2025-10-22T11:46:49:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:49:     app = create_app()
+2025-10-22T11:46:49:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:49:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:49: ModuleNotFoundError: No module named 'backend'
+2025-10-22T11:46:49: Traceback (most recent call last):
+2025-10-22T11:46:49:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 41, in <module>
+2025-10-22T11:46:49:     app = create_app()
+2025-10-22T11:46:49:   File "C:\Event-Echo-Lite\backend\gateway\server.py", line 24, in create_app
+2025-10-22T11:46:49:     from backend.auth_service.routes import auth_bp
+2025-10-22T11:46:49: ModuleNotFoundError: No module named 'backend'

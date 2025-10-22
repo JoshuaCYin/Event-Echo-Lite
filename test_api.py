@@ -5,7 +5,7 @@ Tests: register, login, create event, list events.
 
 import requests
 
-BASE = "http://localhost:5050"
+BASE = "http://localhost:5002"
 
 # 1) Register a user
 r = requests.post(f"{BASE}/auth/register", json={
