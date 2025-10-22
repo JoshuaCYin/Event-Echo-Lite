@@ -9,13 +9,14 @@
   <pre id="output"></pre>
 </div>
 
+<!-- Login frontend handling -->
 <script type="module">
-import { api } from "../js/api.js";
+import { handleLogin } from "../js/app.js";
+
 document.querySelector("#loginBtn").onclick = async () => {
   const email = document.querySelector("#logEmail").value;
   const pass = document.querySelector("#logPass").value;
-  const res = await api("/auth/login", "POST", { email, password: pass });
+  const res = await handleLogin(email, pass);
   document.querySelector("#output").textContent = JSON.stringify(res, null, 2);
-  if (res.token) localStorage.setItem("token", res.token);
 };
 </script>
