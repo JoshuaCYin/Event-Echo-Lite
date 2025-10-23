@@ -16,22 +16,41 @@
       <h1 id="brandTitle">Event Echo</h1>
     </div>
     <div class="nav-right" id="navButtons">
-      <button onclick="location.hash='#/login'">Log In</button>
-      <button onclick="location.hash='#/register'">Sign Up</button>
+      <!-- filled dynamically, see scrip below -->
     </div>
+    <script type="module">
+    import { handleLogout } from "./js/app.js";
+
+    const navButtons = document.getElementById("navButtons");
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      navButtons.innerHTML = '<button id="logoutBtn">Log Out</button>';
+      document.getElementById("logoutBtn").onclick = handleLogout;
+
+    } else {
+      navButtons.innerHTML = `
+        <button onclick="location.hash='#/login'">Log In</button>
+        <button onclick="location.hash='#/register'">Sign Up</button>
+      `;
+    }
+    </script>
+
   </header>
 
   <!-- SIDEBAR (sidebar nav) -->
-  <aside id="sidebar" aria-label="Sidebar Navigation">
-    <a href="#/home">🏠 Home</a>
-    <a href="#/calendar">📅 Calendar</a>
-    <a href="#/events">📝 Event List</a>
-    <a href="#/ai-chat">💬 AI Chat</a>
-    <div id="roleLinks"> <!-- add class="hidden" hidden for unauthorized roles -->
-      <a href="#/create-event">➕ Create Event</a>
-      <a href="#/planning">📊 Planning</a>
+  <aside id="sidebarContainer">
+    <div id="sidebar" aria-label="Sidebar Navigation">
+      <a href="#/home">🏠 Home</a>
+      <a href="#/calendar">📅 Calendar</a>
+      <a href="#/events">📝 Event List</a>
+      <a href="#/ai-chat">💬 AI Chat</a>
+      <div id="roleLinks">
+        <a href="#/create-event">➕ Create Event</a>
+        <a href="#/planning">📊 Planning</a>
+      </div>
+      <a href="#/profile" class="bottom">👤 Profile</a>
     </div>
-    <a href="#/profile" class="bottom">👤  Profile</a>
   </aside>
 
   <!-- MAIN CONTENT -->
@@ -50,8 +69,8 @@
   <script>
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
-    const navButtons = document.getElementById('navButtons');
-
+    //navButtons.innerHTML = '<button id="logoutBtn">Log Out</button>'; // No redeclaration, navButtons already exists
+    
     // Toggle sidebar visibility on hamburger click
     menuToggle.onclick = () => {
       sidebar.classList.toggle('open');
@@ -93,6 +112,20 @@
     }
     window.addEventListener('resize', handleResize);
     window.addEventListener('load', handleResize);
+
+    // Hide sidebar entirely if logged out
+    function updateSidebarVisibility() {
+      const token = localStorage.getItem("token");
+      const sidebarContainer = document.getElementById("sidebarContainer");
+      if (!token) {
+        sidebarContainer.style.display = "none";
+      } else {
+        sidebarContainer.style.display = "block";
+      }
+    }
+
+    // Run this on load
+    updateSidebarVisibility();
   </script>
 </body>
 </html>
