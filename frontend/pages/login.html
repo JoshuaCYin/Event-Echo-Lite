@@ -1,22 +1,83 @@
-<!-- This page is simple and an example. Added 10-17-2025, ensure it is updated later. -->
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  
+  <style>
+    /* Override any global background */
+    body {
+      background-image: url('../assets/chapel_auditorium.jpeg'), linear-gradient(to bottom, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)); /* Example of combining gradient and image */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
 <div class="glass-card">
-  <h2>Log In</h2>
-  <input id="logEmail" placeholder="Email"><br>
-  <input id="logPass" type="password" placeholder="Password"><br>
-  <button id="loginBtn">Login</button>
-  <p class="text-small">No account? <a href="#/register">Create one</a></p>
-  <pre id="output"></pre>
+  <h2>Welcome Back</h2>
+  <p style="color: var(--text-secondary); margin-bottom: 2rem;">Log in to manage your events</p>
+  
+  <form id="loginForm">
+    <input 
+      id="logEmail" 
+      type="email" 
+      placeholder="Email" 
+      required
+      autocomplete="email"
+    >
+    <input 
+      id="logPass" 
+      type="password" 
+      placeholder="Password" 
+      required
+      autocomplete="current-password"
+    >
+    <button type="submit" id="loginBtn">Log In</button>
+  </form>
+  
+  <p class="text-auth-account-question">No account? <a href="#/register" class="text-auth-account-answer">Create one</a></p>
+  
+  <div id="loginError" style="display: none; margin-top: 1rem;"></div>
 </div>
 
-<!-- Login frontend handling -->
 <script type="module">
 import { handleLogin } from "../js/app.js";
 
-document.querySelector("#loginBtn").onclick = async () => {
-  const email = document.querySelector("#logEmail").value;
-  const pass = document.querySelector("#logPass").value;
+const form = document.getElementById("loginForm");
+const errorDiv = document.getElementById("loginError");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById("logEmail").value;
+  const pass = document.getElementById("logPass").value;
+  const loginBtn = document.getElementById("loginBtn");
+  
+  // Disable button and show loading
+  loginBtn.disabled = true;
+  loginBtn.textContent = "Logging in...";
+  errorDiv.style.display = "none";
+  
   const res = await handleLogin(email, pass);
-  document.querySelector("#output").textContent = JSON.stringify(res, null, 2);
-};
+  
+  if (!res.success) {
+    // Show error
+    errorDiv.className = "error-message";
+    errorDiv.textContent = res.error || "Login failed. Please try again.";
+    errorDiv.style.display = "block";
+    
+    // Re-enable button
+    loginBtn.disabled = false;
+    loginBtn.textContent = "Log In";
+  }
+  // If success, handleLogin will redirect automatically
+});
 </script>
+</body>
+</html>

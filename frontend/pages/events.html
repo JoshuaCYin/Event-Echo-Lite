@@ -1,19 +1,109 @@
-<!-- This page is simple and an example. Added 10-17-2025, ensure it is updated later. -->
-
-<div class="glass-card">
-  <h2>Events</h2>
-  <button id="loadEvents">Load Events</button>
-  <div id="eventList"></div>
+<div class="events-list-container glass-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2>All Events</h2>
+        <!-- unnecessary create event button (keeping in case this shortcut is needed
+         <a href="#/create-event" class="action-btn primary" style="text-decoration: none; display: inline-flex;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            New Event
+        </a> -->
+    </div>
+    
+    <button id="loadEvents">Refresh Events</button>
+    <div id="eventList"></div>
 </div>
 
 <script type="module">
 import { api } from "../js/api.js";
 
-let token = localStorage.getItem("token");
+const eventList = document.getElementById("eventList");
+const loadBtn = document.getElementById("loadEvents");
 
-document.querySelector("#loadEvents").onclick = async () => {
-  const res = await api("/events/", "GET");
-  const list = document.querySelector("#eventList");
-  list.innerHTML = res.map(e => `<p><strong>${e.title}</strong> @ ${e.location}</p>`).join("");
-};
+async function loadEvents() {
+    try {
+        loadBtn.disabled = true;
+        loadBtn.textContent = "Loading...";
+        eventList.innerHTML = '<div class="loading">Loading events</div>';
+        
+        const token = localStorage.getItem("token");
+        const events = await api("/events/", "GET", null, token);
+        
+        if (!events || events.length === 0) {
+            eventList.innerHTML = `
+                <div class="empty-state">
+                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+                    <h3>No Events Yet</h3>
+                    <p>Create your first event to get started!</p>
+                </div>
+            `;
+            loadBtn.disabled = false;
+            loadBtn.textContent = "Refresh Events";
+            return;
+        }
+        
+        // Sort events by start time
+        events.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+        
+        eventList.innerHTML = events.map(e => {
+            const startDate = new Date(e.start_time);
+            const formattedDate = startDate.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric', 
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+            
+            return `
+                <article class="event-card" style="margin-bottom: 1rem;">
+                    <div class="event-content">
+                        <div class="event-date">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                <line x1="16" y1="2" x2="16" y2="6"></line>
+                                <line x1="8" y1="2" x2="8" y2="6"></line>
+                                <line x1="3" y1="10" x2="21" y2="10"></line>
+                            </svg>
+                            ${formattedDate}
+                        </div>
+                        <h3>${e.title}</h3>
+                        ${e.description ? `<p class="event-description">${e.description}</p>` : ''}
+                        <div class="event-meta">
+                            <span class="location">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                    <circle cx="12" cy="10" r="3"></circle>
+                                </svg>
+                                ${e.location}
+                            </span>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }).join("");
+        
+        loadBtn.disabled = false;
+        loadBtn.textContent = "Refresh Events";
+        
+    } catch (error) {
+        console.error("Failed to load events:", error);
+        eventList.innerHTML = '<div class="error-message">Failed to load events. Please try again.</div>';
+        loadBtn.disabled = false;
+        loadBtn.textContent = "Refresh Events";
+    }
+}
+
+// Load events on button click
+loadBtn.addEventListener("click", loadEvents);
+
+// Auto-load on page load
+loadEvents();
 </script>

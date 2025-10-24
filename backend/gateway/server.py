@@ -39,5 +39,5 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    port = int(os.getenv("GATEWAY_PORT", 5000))
+    port = int(os.getenv("GATEWAY_PORT", 5000)) # 5000 is a fallback port
     app.run(host="0.0.0.0", port=port, debug=True)
