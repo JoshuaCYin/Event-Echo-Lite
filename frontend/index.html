@@ -1,131 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Event Echo Lite</title>
-  <link rel="stylesheet" href="./css/main.css" />
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EventEcho - Manage Your Events</title>
+    <link rel="stylesheet" href="css/main.css">
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 </head>
 <body>
-  <!-- NAVBAR -->
-  <header>
-    <div style="display: flex; align-items: center; cursor: pointer;" id="logoWrap">
-      <button class="menu-toggle" id="menuToggle" aria-label="Toggle Menu">☰</button>
-      <img src="./assets/logo.png" alt="Logo" class="logo" />
-      <h1 id="brandTitle">Event Echo</h1>
-    </div>
-    <div class="nav-right" id="navButtons">
-      <!-- filled dynamically, see scrip below -->
-    </div>
+    <!-- Mobile Header -->
+    <header class="mobile-header" id="mobileHeader" style="display: none;">
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="logo">
+            <img src="assets/logo.png" alt="EventEcho Logo" onerror="this.style.display='none'">
+            <span>EventEcho</span>
+        </div>
+        <button class="profile-btn" aria-label="Profile">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+        </button>
+    </header>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar" style="display: none;">
+        <div class="sidebar-header">
+            <div class="logo">
+                <img src="assets/logo.png" alt="EventEcho Logo" onerror="this.style.display='none'">
+                <span>EventEcho</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#/home" class="nav-item" data-page="home">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="#/events" class="nav-item" data-page="events">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>Events</span>
+            </a>
+            <a href="#/calendar" class="nav-item" data-page="calendar">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span>Calendar</span>
+            </a>
+            <a href="#/ai-chat" class="nav-item" data-page="ai-chat">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                </svg>
+                <span>AI Assistant</span>
+            </a>
+            <a href="#/create-event" class="nav-item" data-page="create-event">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                <span>Create Event</span>
+            </a>
+            <a href="#/planning" class="nav-item" data-page="planning">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                <span>Planning</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="#/profile" class="user-profile">
+                <div class="avatar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </div>
+                <div class="user-info">
+                    <div class="user-name" id="userName">User</div>
+                    <div class="user-role" id="userRole">Attendee</div>
+                </div>
+            </a>
+            <button class="logout-btn" id="logoutBtn" aria-label="Logout">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Container -->
+    <main class="main-content" id="app">
+        <!-- Pages load here dynamically -->
+    </main>
+
+    <!-- Core Scripts -->
     <script type="module">
-    import { handleLogout } from "./js/app.js";
+        import { handleLogout } from './js/app.js';
+        
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                menuToggle.classList.toggle('active');
+            });
+        }
 
-    const navButtons = document.getElementById("navButtons");
-    const token = localStorage.getItem("token");
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 768) {
+                if (sidebar && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                    sidebar.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+            }
+        });
 
-    if (token) {
-      navButtons.innerHTML = '<button id="logoutBtn">Log Out</button>';
-      document.getElementById("logoutBtn").onclick = handleLogout;
+        // Active nav item
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                
+                // Close mobile menu after navigation
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+            });
+        });
 
-    } else {
-      navButtons.innerHTML = `
-        <button onclick="location.hash='#/login'">Log In</button>
-        <button onclick="location.hash='#/register'">Sign Up</button>
-      `;
-    }
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
     </script>
-
-  </header>
-
-  <!-- SIDEBAR (sidebar nav) -->
-  <aside id="sidebarContainer">
-    <div id="sidebar" aria-label="Sidebar Navigation">
-      <a href="#/home">🏠 Home</a>
-      <a href="#/calendar">📅 Calendar</a>
-      <a href="#/events">📝 Event List</a>
-      <a href="#/ai-chat">💬 AI Chat</a>
-      <div id="roleLinks">
-        <a href="#/create-event">➕ Create Event</a>
-        <a href="#/planning">📊 Planning</a>
-      </div>
-      <a href="#/profile" class="bottom">👤 Profile</a>
-    </div>
-  </aside>
-
-  <!-- MAIN CONTENT -->
-  <main id="app"></main>
-
-  <!-- FOOTER -->
-  <footer>
-    © Event Echo Lite |
-    <a href="https://github.com/JoshuaCYin/Event-Echo-Lite/tree/main" target="_blank" rel="noopener noreferrer">GitHub</a>
-  </footer>
-
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
-  <script type="module" src="./js/router.js"></script>
-
-  <!-- MENUS -->
-  <script>
-    const menuToggle = document.getElementById('menuToggle');
-    const sidebar = document.getElementById('sidebar');
-    //navButtons.innerHTML = '<button id="logoutBtn">Log Out</button>'; // No redeclaration, navButtons already exists
-    
-    // Toggle sidebar visibility on hamburger click
-    menuToggle.onclick = () => {
-      sidebar.classList.toggle('open');
-      // Also toggle body scroll lock on mobile when sidebar open
-      if (sidebar.classList.contains('open')) {
-        document.body.style.overflow = 'hidden';
-      } else {
-        document.body.style.overflow = '';
-      }
-    };
-
-    // Close sidebar when clicking outside (on overlay)
-    document.body.addEventListener('click', (e) => {
-      if (
-        sidebar.classList.contains('open') &&
-        !sidebar.contains(e.target) &&
-        !menuToggle.contains(e.target)
-      ) {
-        sidebar.classList.remove('open');
-        document.body.style.overflow = '';
-      }
-    });
-
-    // Logo click to go home
-    document.getElementById('logoWrap').onclick = () => {
-      location.hash = '#/home';
-    };
-
-    // Responsive behavior: Hide nav buttons on small screens, shown only on wider
-    function handleResize() {
-      if (window.innerWidth <= 700) {
-        navButtons.style.display = 'none';
-      } else {
-        navButtons.style.display = 'flex';
-        // Ensure sidebar is closed if resizing to desktop view
-        sidebar.classList.remove('open');
-        document.body.style.overflow = '';
-      }
-    }
-    window.addEventListener('resize', handleResize);
-    window.addEventListener('load', handleResize);
-
-    // Hide sidebar entirely if logged out
-    function updateSidebarVisibility() {
-      const token = localStorage.getItem("token");
-      const sidebarContainer = document.getElementById("sidebarContainer");
-      if (!token) {
-        sidebarContainer.style.display = "none";
-      } else {
-        sidebarContainer.style.display = "block";
-      }
-    }
-
-    // Run this on load
-    updateSidebarVisibility();
-  </script>
+    <script type="module" src="js/router.js"></script>
 </body>
 </html>

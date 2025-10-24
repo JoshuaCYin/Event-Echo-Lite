@@ -1,22 +1,104 @@
-<!-- This page is simple and an example. Added 10-17-2025, ensure it is updated later. -->
-
 <div class="glass-card">
-  <h2>Sign Up</h2>
-  <input id="regEmail" placeholder="Email"><br>
-  <input id="regPass" type="password" placeholder="Password"><br>
-  <input id="regName" placeholder="Display Name"><br>
-  <button id="registerBtn">Register</button>
-  <p class="text-small">Already have an account? <a href="#/login">Log in</a></p>
-  <pre id="output"></pre>
+  <h2>Create Account</h2>
+  <p style="color: var(--text-secondary); margin-bottom: 2rem;">Sign up to join the community!</p>
+  
+  <form id="registerForm">
+    <input 
+      id="regName" 
+      type="text" 
+      placeholder="Display Name" 
+      required
+      autocomplete="name"
+    >
+    <input 
+      id="regEmail" 
+      type="email" 
+      placeholder="Email" 
+      required
+      autocomplete="email"
+    >
+    <input 
+      id="regPass" 
+      type="password" 
+      placeholder="Password" 
+      required
+      autocomplete="new-password"
+      minlength="8"
+    >
+    <input 
+      id="regConfirmPass" 
+      type="password" 
+      placeholder="Confirm Password" 
+      required
+    >
+    <button type="submit" id="registerBtn">Create Account</button>
+  </form>
+  
+  <p class="text-auth-account-question">Already have an account? <a href="#/login" class="text-auth-account-answer">Log in</a></p>
+  
+  <div id="registerMessage" style="display: none; margin-top: 1rem;"></div>
 </div>
 
 <script type="module">
 import { api } from "../js/api.js";
-document.querySelector("#registerBtn").onclick = async () => {
-  const email = document.querySelector("#regEmail").value;
-  const pass = document.querySelector("#regPass").value;
-  const name = document.querySelector("#regName").value;
-  const res = await api("/auth/register", "POST", { email, password: pass, display_name: name });
-  document.querySelector("#output").textContent = JSON.stringify(res, null, 2);
-};
+
+const form = document.getElementById("registerForm");
+const messageDiv = document.getElementById("registerMessage");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById("regEmail").value;
+  const pass = document.getElementById("regPass").value;
+  const confirmPass = document.getElementById("regConfirmPass").value;
+  const name = document.getElementById("regName").value;
+  const registerBtn = document.getElementById("registerBtn");
+
+  // Check if password and confirm password match
+  if (pass !== confirmPass) {
+    messageDiv.className = "error-message";
+    messageDiv.textContent = "Passwords do not match. Please try again.";
+    messageDiv.style.display = "block";
+    return;
+  }
+  
+  // Disable button and show loading
+  registerBtn.disabled = true;
+  registerBtn.textContent = "Creating account...";
+  messageDiv.style.display = "none";
+  
+  try {
+    const res = await api("/auth/register", "POST", { 
+      email, 
+      password: pass, 
+      display_name: name 
+    });
+    
+    if (res.error) {
+      // Show error
+      messageDiv.className = "error-message";
+      messageDiv.textContent = res.error || "Registration failed. Please try again.";
+      messageDiv.style.display = "block";
+      
+      registerBtn.disabled = false;
+      registerBtn.textContent = "Create Account";
+    } else {
+      // Show success and redirect
+      messageDiv.className = "success-message";
+      messageDiv.textContent = "Account created! Redirecting to login...";
+      messageDiv.style.display = "block";
+      
+      setTimeout(() => {
+        window.location.hash = "#/login";
+      }, 1500);
+    }
+  } catch (error) {
+    messageDiv.className = "error-message";
+    messageDiv.textContent = "Network error. Please try again.";
+    messageDiv.style.display = "block";
+    
+    registerBtn.disabled = false;
+    registerBtn.textContent = "Create Account";
+  }
+});
 </script>

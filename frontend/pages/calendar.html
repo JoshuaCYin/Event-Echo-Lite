@@ -1,64 +1,67 @@
-<!-- This is the main events view (list/calendar page) -->
-<div>
-    <div id="viewContainer"></div>
+<div id="calendarContainer">
+    <div id="calendar"></div>
 </div>
-
-<div id="viewContainer"></div>
 
 <script type="module">
 import { api } from "../js/api.js";
 
-const container = document.querySelector("#viewContainer");
+const container = document.querySelector("#calendarContainer");
 
-// --- CALENDAR VIEW ---
+// Load calendar view
 async function loadCalendarView() {
-    container.innerHTML = "<div id='calendar'></div>";
-    const events = await api("/events/", "GET");
-
-    const calendarEl = document.getElementById("calendar");
-    const calendar = new window.FullCalendar.Calendar(calendarEl, {
-        initialView: "dayGridMonth",
-        height: "auto",
-        events: events.map(e => ({
-            title: e.title,
-            start: e.start_time.replace(" ", "T"),  // Convert ' ' to 'T' because FullCalendar requires it
-            end: e.end_time.replace(" ", "T"),
-        })),            
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        buttonText: {
-            today: 'Today',
-            month: 'Month',
-            week: 'Week',
-            day: 'Day'
-        },
-        height: 'auto',
-        aspectRatio: 1.8,
-    });
-
-    calendar.render();
-
+    try {
+        const token = localStorage.getItem("token");
+        const events = await api("/events/", "GET", null, token);
+        
+        const calendarEl = document.getElementById("calendar");
+        
+        const calendar = new window.FullCalendar.Calendar(calendarEl, {
+            initialView: "dayGridMonth",
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            buttonText: {
+                today: 'Today',
+                month: 'Month',
+                week: 'Week',
+                day: 'Day'
+            },
+            height: 'auto',
+            aspectRatio: 1.8,
+            events: events.map(e => ({
+                title: e.title,
+                start: e.start_time.replace(" ", "T"),
+                end: e.end_time.replace(" ", "T"),
+                extendedProps: {
+                    location: e.location,
+                    description: e.description
+                }
+            })),
+            eventClick: function(info) {
+                alert(
+                    'Event: ' + info.event.title + '\n' +
+                    'Location: ' + (info.event.extendedProps.location || 'N/A') + '\n' +
+                    'Start: ' + info.event.start.toLocaleString()
+                );
+            },
+            eventMouseEnter: function(info) {
+                info.el.style.opacity = '0.8';
+            },
+            eventMouseLeave: function(info) {
+                info.el.style.opacity = '1';
+            }
+        });
+        
+        calendar.render();
+        
+    } catch (error) {
+        console.error("Failed to load calendar:", error);
+        container.innerHTML = '<div class="error-message">Failed to load calendar. Please try again.</div>';
+    }
 }
 
-// // --- LIST VIEW ---
-// async function loadListView() {
-//     const events = await api("/events/", "GET");
-//     if (!events.length) { // If not events exist, display a message instead
-//         container.innerHTML = "<p>No events found.</p>";
-//         return;
-//     }
-//     container.innerHTML = events
-//         .map(e => `<p><strong>${e.title}</strong> — ${e.start_time}</p>`)
-//         .join("");
-// }
-
-// --- Buttons ---
-// document.querySelector("#listViewBtn").onclick = loadListView;
-// document.querySelector("#calendarViewBtn").onclick = loadCalendarView;
-
-// Default view
+// Load calendar on page load
 loadCalendarView();
 </script>

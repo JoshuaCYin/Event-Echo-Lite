@@ -1,0 +1,219 @@
+<div class="profile-container" style="max-width: 800px; margin: 0 auto;">
+    <div class="profile-header" style="background: var(--bg-primary); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 2rem;">
+            <div class="avatar" style="width: 80px; height: 80px; font-size: 2rem;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </div>
+            <div style="flex: 1;">
+                <h1 style="margin-bottom: 0.5rem;" id="profileDisplayName">Loading...</h1>
+                <p style="color: var(--text-secondary); margin-bottom: 0.25rem;" id="profileEmail">email@example.com</p>
+                <span class="status-badge" id="profileRole" style="margin-top: 0.5rem; display: inline-block;">Attendee</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-section" style="background: var(--bg-primary); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 1.5rem;">Edit Profile</h2>
+        
+        <form id="profileForm">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;">
+                Display Name
+            </label>
+            <input 
+                id="editDisplayName" 
+                type="text" 
+                placeholder="Your name"
+                style="width: 100%; padding: 0.875rem 1rem; margin-bottom: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem;"
+            >
+            
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;">
+                Email
+            </label>
+            <input 
+                id="editEmail" 
+                type="email" 
+                placeholder="your@email.com"
+                disabled
+                style="width: 100%; padding: 0.875rem 1rem; margin-bottom: 1.5rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem; background: var(--bg-tertiary); color: var(--text-light);"
+            >
+            
+            <button type="submit" id="saveProfileBtn" style="width: 100%; padding: 1rem; background: var(--gradient-primary); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer;">
+                Save Changes
+            </button>
+        </form>
+        
+        <div id="profileMessage" style="display: none; margin-top: 1rem;"></div>
+    </div>
+
+    <div class="profile-section" style="background: var(--bg-primary); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
+        <h2 style="margin-bottom: 1.5rem;">Change Password</h2>
+        
+        <form id="passwordForm">
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;">
+                Current Password
+            </label>
+            <input 
+                id="currentPassword" 
+                type="password" 
+                placeholder="Enter current password"
+                style="width: 100%; padding: 0.875rem 1rem; margin-bottom: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem;"
+            >
+            
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;">
+                New Password
+            </label>
+            <input 
+                id="newPassword" 
+                type="password" 
+                placeholder="Enter new password"
+                style="width: 100%; padding: 0.875rem 1rem; margin-bottom: 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem;"
+            >
+            
+            <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;">
+                Confirm New Password
+            </label>
+            <input 
+                id="confirmPassword" 
+                type="password" 
+                placeholder="Confirm new password"
+                style="width: 100%; padding: 0.875rem 1rem; margin-bottom: 1.5rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem;"
+            >
+            
+            <button type="submit" id="changePasswordBtn" style="width: 100%; padding: 1rem; background: var(--gradient-primary); color: white; border: none; border-radius: var(--radius-md); font-size: 1rem; font-weight: 600; cursor: pointer;">
+                Change Password
+            </button>
+        </form>
+        
+        <div id="passwordMessage" style="display: none; margin-top: 1rem;"></div>
+    </div>
+
+    <div class="profile-section" style="background: #fee; border: 1px solid #fcc; border-radius: var(--radius-lg); padding: 2rem;">
+        <h2 style="margin-bottom: 1rem; color: #c33;">Danger Zone</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">Once you delete your account, there is no going back. Please be certain.</p>
+        <button id="deleteAccountBtn" style="padding: 0.875rem 1.5rem; background: #f56565; color: white; border: none; border-radius: var(--radius-md); font-weight: 600; cursor: pointer;">
+            Delete Account
+        </button>
+    </div>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+
+const token = localStorage.getItem("token");
+
+// Load user profile
+async function loadProfile() {
+    try {
+        const userData = await api("/auth/me", "GET", null, token);
+        
+        document.getElementById("profileDisplayName").textContent = userData.display_name || userData.email.split('@')[0];
+        document.getElementById("profileEmail").textContent = userData.email;
+        document.getElementById("editDisplayName").value = userData.display_name || "";
+        document.getElementById("editEmail").value = userData.email;
+        
+        const roleText = {
+            'admin': 'Administrator',
+            'organizer': 'Event Organizer',
+            'attendee': 'Attendee'
+        };
+        const roleBadge = document.getElementById("profileRole");
+        roleBadge.textContent = roleText[userData.role] || 'Attendee';
+        roleBadge.className = 'status-badge ' + (userData.role === 'admin' ? 'active' : 'upcoming');
+        
+    } catch (error) {
+        console.error("Failed to load profile:", error);
+    }
+}
+
+// Save profile changes
+document.getElementById("profileForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    const displayName = document.getElementById("editDisplayName").value;
+    const messageDiv = document.getElementById("profileMessage");
+    const saveBtn = document.getElementById("saveProfileBtn");
+    
+    saveBtn.disabled = true;
+    saveBtn.textContent = "Saving...";
+    
+    // Note: You'll need to add an update endpoint to your backend
+    // For now, this is a placeholder
+    messageDiv.className = "success-message";
+    messageDiv.textContent = "Profile updated successfully! (Backend endpoint needed)";
+    messageDiv.style.display = "block";
+    
+    saveBtn.disabled = false;
+    saveBtn.textContent = "Save Changes";
+    
+    setTimeout(() => {
+        messageDiv.style.display = "none";
+    }, 3000);
+});
+
+// Change password
+document.getElementById("passwordForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    const currentPassword = document.getElementById("currentPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmPassword = document.getElementById("confirmPassword").value;
+    const messageDiv = document.getElementById("passwordMessage");
+    const changeBtn = document.getElementById("changePasswordBtn");
+    
+    if (newPassword !== confirmPassword) {
+        messageDiv.className = "error-message";
+        messageDiv.textContent = "Passwords do not match";
+        messageDiv.style.display = "block";
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        messageDiv.className = "error-message";
+        messageDiv.textContent = "Password must be at least 6 characters";
+        messageDiv.style.display = "block";
+        return;
+    }
+    
+    changeBtn.disabled = true;
+    changeBtn.textContent = "Changing...";
+    
+    // Note: You'll need to add a change password endpoint to your backend
+    messageDiv.className = "success-message";
+    messageDiv.textContent = "Password changed successfully! (Backend endpoint needed)";
+    messageDiv.style.display = "block";
+    
+    document.getElementById("passwordForm").reset();
+    changeBtn.disabled = false;
+    changeBtn.textContent = "Change Password";
+    
+    setTimeout(() => {
+        messageDiv.style.display = "none";
+    }, 3000);
+});
+
+// Delete account
+document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
+    if (!confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
+        return;
+    }
+    
+    if (!confirm("This will permanently delete all your data. Are you absolutely sure?")) {
+        return;
+    }
+    
+    try {
+        await api("/auth/delete", "POST", null, token);
+        alert("Account deleted successfully");
+        localStorage.removeItem("token");
+        window.location.hash = "#/login";
+    } catch (error) {
+        alert("Failed to delete account: " + error.message);
+    }
+});
+
+// Load profile on page load
+loadProfile();
+</script>

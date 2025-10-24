@@ -1,3 +1,4 @@
 # Event Echo Lite
 
-...
+## Project Vision Statement
+For university students, faculty, and staff who want to easily plan, discover, organize, and attend campus events without scheduling conflicts, EventEcho is a digital event management software application that enables easy event discovery, streamlines event planning, and uses generative artificial intelligence (AI) to increase engagement via conversational assistance. Unlike scattered emails or bulletin board flyers, our software offers a more interactive platform that simplifies logistics, improves communication, and unites the people of the Indiana Wesleyan University (IWU) community.

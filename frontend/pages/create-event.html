@@ -1,25 +1,118 @@
-<!-- This page is simple and an example. Added 10-19-2025, ensure it is updated later. -->
-
-<div class="glass-card">
-    <h2>Create Event</h2>
-    <input id="evTitle" placeholder="Title"><br>
-    <input id="evStart" placeholder="Start (YYYY-MM-DD HH:MM:SS)"><br>
-    <input id="evEnd" placeholder="End (YYYY-MM-DD HH:MM:SS)"><br>
-    <input id="evLocation" placeholder="Location"><br>
-    <button id="createBtn">Create</button>
+<div class="create-event-form" style="max-width: 600px; margin: 0 auto;">
+    <h2>Create New Event</h2>
+    
+    <form id="createEventForm">
+        <input 
+            id="evTitle" 
+            type="text" 
+            placeholder="Event Title" 
+            required
+        >
+        
+        <textarea 
+            id="evDescription" 
+            placeholder="Event Description (optional)"
+        ></textarea>
+        
+        <input 
+            id="evLocation" 
+            type="text" 
+            placeholder="Location" 
+            required
+        >
+        
+        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+            Start Date & Time
+        </label>
+        <input 
+            id="evStart" 
+            type="datetime-local" 
+            required
+        >
+        
+        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
+            End Date & Time
+        </label>
+        <input 
+            id="evEnd" 
+            type="datetime-local" 
+            required
+        >
+        
+        <button type="submit" id="createBtn">Create Event</button>
+    </form>
+    
+    <div id="createMessage" style="display: none; margin-top: 1rem;"></div>
 </div>
 
 <script type="module">
 import { api } from "../js/api.js";
 
-let token = localStorage.getItem("token");
+const form = document.getElementById("createEventForm");
+const messageDiv = document.getElementById("createMessage");
 
-document.querySelector("#createBtn").onclick = async () => {
-  const title = document.querySelector("#evTitle").value;
-  const start = document.querySelector("#evStart").value;
-  const end = document.querySelector("#evEnd").value;
-  const location = document.querySelector("#evLocation").value;
-  const res = await api("/events/", "POST", { title, start_time: start, end_time: end, location }, token);
-  alert(JSON.stringify(res, null, 2));
-};
+// Format datetime-local to "YYYY-MM-DD HH:MM:SS" format
+function formatDateTime(datetimeLocal) {
+    return datetimeLocal.replace('T', ' ') + ':00';
+}
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    const token = localStorage.getItem("token");
+    const createBtn = document.getElementById("createBtn");
+    
+    const title = document.getElementById("evTitle").value;
+    const description = document.getElementById("evDescription").value;
+    const start = formatDateTime(document.getElementById("evStart").value);
+    const end = formatDateTime(document.getElementById("evEnd").value);
+    const location = document.getElementById("evLocation").value;
+    
+    // Validate dates
+    if (new Date(start) >= new Date(end)) {
+        messageDiv.className = "error-message";
+        messageDiv.textContent = "End time must be after start time";
+        messageDiv.style.display = "block";
+        return;
+    }
+    
+    // Disable button
+    createBtn.disabled = true;
+    createBtn.textContent = "Creating...";
+    messageDiv.style.display = "none";
+    
+    try {
+        const res = await api("/events/", "POST", { 
+            title, 
+            description,
+            start_time: start, 
+            end_time: end, 
+            location 
+        }, token);
+        
+        if (res.error) {
+            messageDiv.className = "error-message";
+            messageDiv.textContent = res.error || "Failed to create event";
+            messageDiv.style.display = "block";
+            
+            createBtn.disabled = false;
+            createBtn.textContent = "Create Event";
+        } else {
+            messageDiv.className = "success-message";
+            messageDiv.textContent = "Event created successfully! Redirecting...";
+            messageDiv.style.display = "block";
+            
+            setTimeout(() => {
+                window.location.hash = "#/events";
+            }, 1500);
+        }
+    } catch (error) {
+        messageDiv.className = "error-message";
+        messageDiv.textContent = "Network error. Please try again.";
+        messageDiv.style.display = "block";
+        
+        createBtn.disabled = false;
+        createBtn.textContent = "Create Event";
+    }
+});
 </script>

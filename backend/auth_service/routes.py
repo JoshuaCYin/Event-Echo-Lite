@@ -50,7 +50,7 @@ def register():
     display_name = data.get("display_name") or None
 
     if not email or not password:   # missing field check
-        return jsonify({"error": "email and password required"}), 400
+        return jsonify({"error": "Email and password required"}), 400
 
     pw_hash = ph.hash(password)
 
@@ -67,8 +67,8 @@ def register():
     except Exception as e:
         conn.rollback()
         if "UNIQUE" in str(e).upper():
-            return jsonify({"error": "email already exists"}), 400
-        return jsonify({"error": "registration failed"}), 500
+            return jsonify({"error": "Email already exists"}), 400 # Error message shown to user
+        return jsonify({"error": "Registration failed"}), 500 # Error message shown to user
     finally:
         conn.close()
 
@@ -86,7 +86,7 @@ def login():
     password = data.get("password", "")
 
     if not email or not password:
-        return jsonify({"error": "email and password required"}), 400
+        return jsonify({"error": "Email and password required"}), 400 # Error message shown to user
 
     conn = get_db()
     try:
@@ -94,7 +94,7 @@ def login():
         cur.execute("SELECT id, password_hash, role FROM users WHERE email = ?", (email,))
         row = cur.fetchone()
         if not row:
-            return jsonify({"error": "invalid credentials"}), 401
+            return jsonify({"error": "Invalid credentials"}), 401 # Error message shown to user
 
         user_id = row["id"]
         pw_hash = row["password_hash"]
@@ -103,7 +103,7 @@ def login():
         try:
             ph.verify(pw_hash, password)
         except Exception:
-            return jsonify({"error": "invalid credentials"}), 401
+            return jsonify({"error": "Invalid credentials"}), 401 # Error message shown to user
 
     finally:
         conn.close()
@@ -119,11 +119,11 @@ def delete_account():
     """
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
-        return jsonify({"error": "missing token"}), 401
+        return jsonify({"error": "Missing token"}), 401
     token = auth.split(" ", 1)[1]
     user_id = verify_token(token)
     if not user_id:
-        return jsonify({"error": "invalid token"}), 401
+        return jsonify({"error": "Invalid token"}), 401
 
     conn = get_db()
     try:
@@ -143,12 +143,12 @@ def current_user():
     """
     auth = request.headers.get("Authorization", "")
     if not auth.startswith("Bearer "):
-        return jsonify({"error": "missing token"}), 401
+        return jsonify({"error": "Missing token"}), 401
     token = auth.split(" ", 1)[1]
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
     except Exception:
-        return jsonify({"error": "invalid token"}), 401
+        return jsonify({"error": "Invalid token"}), 401
 
     user_id = payload.get("sub")
     role = payload.get("role")
@@ -162,7 +162,7 @@ def current_user():
         conn.close()
 
     if not user:
-        return jsonify({"error": "not found"}), 404
+        return jsonify({"error": "Not found"}), 404
 
     return jsonify({
         "id": user_id,
@@ -186,7 +186,7 @@ def set_role():
     new_role = data.get("role")
 
     if not target_id or new_role not in ["attendee", "organizer", "admin"]:
-        return jsonify({"error": "invalid input"}), 400
+        return jsonify({"error": "Invalid input"}), 400
 
     conn = get_db()
     try:
