@@ -45,7 +45,7 @@ You can contribute in several ways:
 
 - Create a new branch for each feature or bug fix. Name it clearly, for example:
   - `feature/add-login`
-  - `bugfix/fix-typo`
+  - `fix/fix-typo`
 
 These are the main categories, as this is a basic project. The feature category includes changes/enhancements in addition to new features.
 
