@@ -1,4 +1,6 @@
-# Shared backend dependencies
+# Event Echo requirements
+# Usage: pip install -r requirements.txt
+
 Flask==2.3.3
 Flask-Cors==4.0.1
 python-dotenv==1.0.0
