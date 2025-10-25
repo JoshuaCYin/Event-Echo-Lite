@@ -123,7 +123,7 @@ def update_event(event_id):
 @events_bp.route("/<int:event_id>", methods=["DELETE"])
 def delete_event(event_id):
     """
-    Delete an event if the caller is the organizer.
+    Delete an event if the caller is the organizer or admin.
     """
     user_id, role, err, code = verify_token_from_request(required_roles=["organizer", "admin"])
     if err:
