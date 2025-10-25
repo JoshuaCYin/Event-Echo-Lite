@@ -1,6 +1,6 @@
-// Updated router with proper sidebar visibility and role-based access
+// Updated router with proper sidebar visibility
 import { loadPage } from "./utils.js";
-import { checkAuthAndRedirect, updateUserInfo, getRoleFromToken } from "./app.js";
+import { checkAuthAndRedirect, updateUserInfo } from "./app.js";
 
 const routes = {
   "#/login": "pages/login.html",
@@ -16,30 +16,6 @@ const routes = {
 
 const publicPages = ["#/login", "#/register"];
 
-// Pages that require organizer or admin role
-const restrictedPages = ["#/create-event", "#/home", "#/planning"];
-
-function updateSidebarForRole(role) {
-  console.log("Updating sidebar for role:", role); // Debug log
-  
-  const restrictedNavItems = document.querySelectorAll('[data-page="home"], [data-page="create-event"], [data-page="planning"]');
-  
-  console.log("Found restricted items:", restrictedNavItems.length); // Debug log
-  
-  if (role === "attendee") {
-    // Hide restricted items for attendees
-    restrictedNavItems.forEach(item => {
-      console.log("Hiding item:", item.getAttribute('data-page')); // Debug log
-      item.style.display = "none";
-    });
-  } else {
-    // Show all items for organizers and admins
-    restrictedNavItems.forEach(item => {
-      item.style.display = "flex";
-    });
-  }
-}
-
 async function router() {
   const path = window.location.hash || "#/login";
   const isPublicPage = publicPages.includes(path);
@@ -48,6 +24,7 @@ async function router() {
   const sidebar = document.getElementById("sidebar");
   const mobileHeader = document.getElementById("mobileHeader");
   const mainContent = document.querySelector(".main-content");
+  const app = document.getElementById("app");
   
   if (isPublicPage) {
     // Hide sidebar for login/register
@@ -63,26 +40,8 @@ async function router() {
     const isAuthenticated = checkAuthAndRedirect();
     
     if (isAuthenticated) {
-      // Check role-based access
-      const role = getRoleFromToken();
-      console.log("User role:", role); // Debug log
-      
-      if (restrictedPages.includes(path) && role === "attendee") {
-        // Redirect attendees away from restricted pages
-        window.location.hash = "#/calendar";
-        return;
-      }
-      
       // Show sidebar for authenticated pages
-      if (sidebar) {
-        sidebar.style.display = "flex";
-        
-        // Wait a tiny bit to ensure DOM is ready, then hide restricted items
-        setTimeout(() => {
-          updateSidebarForRole(role);
-        }, 10);
-      }
-      
+      if (sidebar) sidebar.style.display = "flex";
       if (mobileHeader) {
         // Only show mobile header on small screens
         if (window.innerWidth <= 768) {
@@ -107,16 +66,6 @@ async function router() {
   }
 }
 
-function updateActiveNav(path) {
-  const navItems = document.querySelectorAll('.nav-item');
-  navItems.forEach(item => {
-    item.classList.remove('active');
-    if (item.getAttribute('href') === path) {
-      item.classList.add('active');
-    }
-  });
-}
-
 // Handle window resize to show/hide mobile header
 window.addEventListener('resize', () => {
   const mobileHeader = document.getElementById("mobileHeader");
@@ -131,6 +80,16 @@ window.addEventListener('resize', () => {
     }
   }
 });
+
+function updateActiveNav(path) {
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('href') === path) {
+      item.classList.add('active');
+    }
+  });
+}
 
 window.addEventListener("hashchange", router);
 window.addEventListener("DOMContentLoaded", router);

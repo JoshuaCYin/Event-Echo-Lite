@@ -26,10 +26,13 @@ export function checkAuthAndRedirect() {
   token = localStorage.getItem("token");
   const path = window.location.hash;
   
+  // List of public pages that don't require auth
+  const publicPages = ["#/", "#/landing", "#/about", "#/events", "#/login", "#/register"];
+  
   if (!token) {
-    // Not logged in - redirect to login if trying to access protected page
-    if (path !== "#/login" && path !== "#/register") {
-      window.location.hash = "#/login";
+    // Not logged in - only redirect if trying to access protected page
+    if (!publicPages.includes(path) && path !== "") {
+      window.location.hash = "#/";
       return false;
     }
     return false;
@@ -40,13 +43,13 @@ export function checkAuthAndRedirect() {
   if (!payload) {
     // Invalid token
     localStorage.removeItem("token");
-    window.location.hash = "#/login";
+    window.location.hash = "#/";
     return false;
   }
   
-  // If visiting login/register but already logged in, redirect to home
+  // If visiting login/register but already logged in, redirect to calendar
   if (["#/login", "#/register"].includes(path)) {
-    window.location.hash = "#/home";
+    window.location.hash = "#/calendar";
     return true;
   }
   

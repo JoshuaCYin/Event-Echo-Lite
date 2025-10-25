@@ -11,6 +11,27 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 </head>
 <body>
+    <!-- Public Navigation (for landing/about/events) -->
+    <nav class="public-nav" id="publicNav" style="display: none;">
+        <div class="public-nav-container">
+            <a href="#/" class="logo">
+                <img src="assets/logo.png" alt="EventEcho Logo" onerror="this.style.display='none'">
+                <span>EventEcho</span>
+            </a>
+            <div class="public-nav-links">
+                <a href="#/events" class="public-nav-link">Browse Events</a>
+                <a href="#/about" class="public-nav-link">About</a>
+                <a href="#/login" class="public-nav-link-btn secondary">Log In</a>
+                <a href="#/register" class="public-nav-link-btn primary">Sign Up</a>
+            </div>
+            <button class="public-menu-toggle" id="publicMenuToggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
     <!-- Mobile Header -->
     <header class="mobile-header" id="mobileHeader" style="display: none;">
         <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
@@ -54,7 +75,14 @@
                     <line x1="8" y1="2" x2="8" y2="6"></line>
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
-                <span>Events</span>
+                <span>Browse Events</span>
+            </a>
+            <a href="#/my-events" class="nav-item" data-page="my-events">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                </svg>
+                <span>My Events</span>
             </a>
             <a href="#/calendar" class="nav-item" data-page="calendar">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
