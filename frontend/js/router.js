@@ -14,6 +14,7 @@ const routes = {
   "#/profile": "pages/profile.html"
 };
 
+// Pages that do not require authentication/login
 const publicPages = ["#/login", "#/register"];
 
 // Pages that require organizer or admin role
