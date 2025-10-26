@@ -21,6 +21,11 @@ def create_app():
     CORS(app)
 
     # register blueprints
+    import sys
+    import os
+    # Add the project root to Python path
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    
     from backend.auth_service.routes import auth_bp
     from backend.events_service.routes import events_bp
 
