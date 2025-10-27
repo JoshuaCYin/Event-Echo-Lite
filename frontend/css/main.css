@@ -1224,3 +1224,115 @@ a:focus-visible {
         padding: 1rem;
     }
 }
+
+/* ===== Landing Content Padding ===== */
+.main-content.landing-content {
+    padding-top: 70px;
+    margin-left: 0;
+    background: var(--bg-secondary);
+}
+
+/* ===== Landing Page Overrides ===== */
+.landing-content .landing-container,
+.landing-content .landing-events-container,
+.landing-content .landing-calendar-container,
+.landing-content .landing-about-container {
+    min-height: calc(100vh - 70px);
+}
+
+/* ===== Mobile Responsiveness for Landing Navbar ===== */
+@media (max-width: 768px) {
+    .main-content.landing-content {
+        padding-top: 70px;
+        padding-left: 0;
+        padding-right: 0;
+    }
+    
+    .landing-events-container,
+    .landing-calendar-container,
+    .landing-about-container {
+        padding: 1rem;
+        overflow-x: hidden;
+    }
+    
+    .landing-hero {
+        padding: 1.5rem 1rem;
+    }
+    
+    .hero-content {
+        padding: 0 0.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content.landing-content {
+        padding-top: 70px;
+    }
+    
+    .landing-events-container,
+    .landing-calendar-container,
+    .landing-about-container {
+        padding: 0.75rem;
+    }
+}
+
+/* ===== Loading state for landing pages ===== */
+.landing-content .loading {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+}
+
+/* ===== Fix event cards grid on landing ===== */
+.landing-events-container .events-grid {
+    margin-bottom: 2rem;
+}
+
+/* ===== Calendar responsive adjustments ===== */
+@media (max-width: 768px) {
+    .landing-calendar-container .calendar-wrapper {
+        padding: 1rem;
+    }
+    
+    .fc .fc-toolbar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .fc .fc-toolbar-chunk {
+        display: flex;
+        justify-content: center;
+    }
+}
+
+/* ===== Accessibility improvements ===== */
+.navbar-hamburger:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.navbar-links a:focus-visible,
+.navbar-btn:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* ===== Ensure navbar stays on top ===== */
+#landingNavbarContainer {
+    position: relative;
+    z-index: 1000;
+}
+
+/* ===== Print styles for landing pages ===== */
+@media print {
+    #landingNavbarContainer,
+    .navbar-mobile-menu {
+        display: none;
+    }
+    
+    .landing-content {
+        padding-top: 0;
+    }
+}

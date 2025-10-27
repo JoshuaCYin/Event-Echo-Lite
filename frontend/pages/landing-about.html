@@ -1,0 +1,242 @@
+<!-- Landing About Page -->
+<style>
+  .landing-about-container {
+    padding: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .about-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .about-header h1 {
+    font-size: 2.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+
+  .about-header p {
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    max-width: 700px;
+    margin: 0 auto;
+    line-height: 1.8;
+  }
+
+  .about-section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-lg);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .about-section h2 {
+    font-size: 1.75rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  .about-section p {
+    color: var(--text-secondary);
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+
+  .about-section ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .about-section li {
+    color: var(--text-secondary);
+    font-size: 1.0625rem;
+    line-height: 1.8;
+    margin-bottom: 0.75rem;
+    padding-left: 2rem;
+    position: relative;
+  }
+
+  .about-section li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--primary-color);
+    font-weight: bold;
+    font-size: 1.25rem;
+  }
+
+  .team-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .team-member {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+  }
+
+  .team-member:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .team-avatar {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .team-name {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+  }
+
+  .team-role {
+    font-size: 0.875rem;
+    color: var(--text-light);
+  }
+
+  .cta-section {
+    background: var(--gradient-primary);
+    border-radius: var(--radius-lg);
+    padding: 3rem 2rem;
+    text-align: center;
+    color: white;
+  }
+
+  .cta-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .cta-section p {
+    font-size: 1.125rem;
+    margin-bottom: 2rem;
+    opacity: 0.95;
+  }
+
+  .cta-button {
+    display: inline-block;
+    padding: 1rem 2.5rem;
+    background: white;
+    color: var(--primary-color);
+    text-decoration: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 1.125rem;
+    transition: all 0.3s ease;
+  }
+
+  .cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (max-width: 768px) {
+    .landing-about-container {
+      padding: 1rem;
+    }
+
+    .about-header h1 {
+      font-size: 2rem;
+    }
+
+    .about-section {
+      padding: 1.5rem;
+    }
+
+    .team-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    .cta-section {
+      padding: 2rem 1.5rem;
+    }
+  }
+</style>
+
+<div class="landing-about-container">
+  <div class="about-header">
+    <h1>About EventEcho</h1>
+    <p>Your comprehensive platform for discovering, organizing, and managing campus events</p>
+  </div>
+
+  <div class="about-section">
+    <h2>Our Mission</h2>
+    <p>
+      EventEcho was created to simplify event management for campus communities. We believe that 
+      staying connected and engaged shouldn't be complicated. Our platform brings together event 
+      organizers and attendees in one seamless experience.
+    </p>
+  </div>
+
+  <div class="about-section">
+    <h2>What We Offer</h2>
+    <ul>
+      <li>Centralized event calendar for all campus activities</li>
+      <li>Easy RSVP and attendance tracking</li>
+      <li>AI-powered event recommendations tailored to your interests</li>
+      <li>Powerful planning tools for event organizers</li>
+      <li>Real-time notifications and updates</li>
+      <li>Mobile-friendly design for on-the-go access</li>
+    </ul>
+  </div>
+
+  <div class="about-section">
+    <h2>For Students</h2>
+    <p>
+      Never miss an event that matters to you. Browse upcoming activities, RSVP with one click, 
+      and receive personalized recommendations based on your interests. Stay connected with your 
+      campus community and make the most of your college experience.
+    </p>
+  </div>
+
+  <div class="about-section">
+    <h2>For Organizers</h2>
+    <p>
+      Streamline your event planning process with our intuitive tools. Create and manage events, 
+      track attendance, send notifications, and analyze engagement—all from one dashboard. Our 
+      AI assistant can even help you plan better events based on past data.
+    </p>
+  </div>
+
+  <div class="about-section">
+    <h2>Our Team</h2>
+    <div class="team-grid">
+      <div class="team-member">
+        <div class="team-avatar">EE</div>
+        <div class="team-name">EventEcho Team</div>
+        <div class="team-role">Developers</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-section">
+    <h2>Ready to Get Started?</h2>
+    <p>Join our community and start discovering amazing events today</p>
+    <a href="#/register" class="cta-button">Create Your Account</a>
+  </div>
+</div>

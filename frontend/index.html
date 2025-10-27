@@ -11,28 +11,10 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 </head>
 <body>
-    <!-- Public Navigation (for landing/about/events) -->
-    <nav class="public-nav" id="publicNav" style="display: none;">
-        <div class="public-nav-container">
-            <a href="#/" class="logo">
-                <img src="assets/logo.png" alt="EventEcho Logo" onerror="this.style.display='none'">
-                <span>EventEcho</span>
-            </a>
-            <div class="public-nav-links">
-                <a href="#/events" class="public-nav-link">Browse Events</a>
-                <a href="#/about" class="public-nav-link">About</a>
-                <a href="#/login" class="public-nav-link-btn secondary">Log In</a>
-                <a href="#/register" class="public-nav-link-btn primary">Sign Up</a>
-            </div>
-            <button class="public-menu-toggle" id="publicMenuToggle" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
-        </div>
-    </nav>
+    <!-- Landing Navigation (for public pages) -->
+    <div id="landingNavbarContainer" style="display: none;"></div>
 
-    <!-- Mobile Header -->
+    <!-- Mobile Header (for authenticated pages) -->
     <header class="mobile-header" id="mobileHeader" style="display: none;">
         <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
             <span></span>
@@ -51,7 +33,7 @@
         </button>
     </header>
 
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar Navigation (for authenticated pages) -->
     <aside class="sidebar" id="sidebar" style="display: none;">
         <div class="sidebar-header">
             <div class="logo">
@@ -68,6 +50,7 @@
                 </svg>
                 <span>Dashboard</span>
             </a>
+
             <a href="#/events" class="nav-item" data-page="events">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -75,15 +58,9 @@
                     <line x1="8" y1="2" x2="8" y2="6"></line>
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
-                <span>Browse Events</span>
+                <span>Events</span>
             </a>
-            <a href="#/my-events" class="nav-item" data-page="my-events">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                    <circle cx="9" cy="7" r="4"></circle>
-                </svg>
-                <span>My Events</span>
-            </a>
+
             <a href="#/calendar" class="nav-item" data-page="calendar">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -91,13 +68,15 @@
                 </svg>
                 <span>Calendar</span>
             </a>
+
             <a href="#/ai-chat" class="nav-item" data-page="ai-chat">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
                 <span>AI Assistant</span>
             </a>
-            <a href="#/create-event" class="nav-item" data-page="create-event">
+
+            <a href="#/create-event" class="nav-item" data-page="create-event" id="createEventNav">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"></circle>
                     <line x1="12" y1="8" x2="12" y2="16"></line>
@@ -105,7 +84,8 @@
                 </svg>
                 <span>Create Event</span>
             </a>
-            <a href="#/planning" class="nav-item" data-page="planning">
+
+            <a href="#/planning" class="nav-item" data-page="planning" id="planningNav">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                     <polyline points="14 2 14 8 20 8"></polyline>
@@ -145,7 +125,26 @@
 
     <!-- Core Scripts -->
     <script type="module">
-        import { handleLogout } from './js/app.js';
+        import { handleLogout, getRoleFromToken } from './js/app.js';
+        
+        // Hide admin/organizer nav items for regular users
+        function updateNavVisibility() {
+            const role = getRoleFromToken();
+            const createEventNav = document.getElementById('createEventNav');
+            const planningNav = document.getElementById('planningNav');
+            
+            if (role !== 'admin' && role !== 'organizer') {
+                if (createEventNav) createEventNav.style.display = 'none';
+                if (planningNav) planningNav.style.display = 'none';
+            } else {
+                if (createEventNav) createEventNav.style.display = 'flex';
+                if (planningNav) planningNav.style.display = 'flex';
+            }
+        }
+        
+        // Update nav visibility on load
+        window.addEventListener('hashchange', updateNavVisibility);
+        updateNavVisibility();
         
         // Mobile menu toggle
         const menuToggle = document.getElementById('menuToggle');

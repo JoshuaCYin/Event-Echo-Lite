@@ -1,0 +1,302 @@
+<!-- Landing Navigation Bar -->
+<style>
+  .landing-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1000;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .navbar-container {
+    max-width: 1400px;
+    height: 100%;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.5rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .navbar-brand img {
+    width: 40px;
+    height: 40px;
+    filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.3));
+  }
+
+  .navbar-links {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .navbar-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: color 0.3s ease;
+  }
+
+  .navbar-links a:hover {
+    color: var(--primary-color);
+  }
+
+  .navbar-links a.active {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+
+  .navbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .navbar-btn {
+    padding: 0.625rem 1.5rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .navbar-btn-secondary {
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+  }
+
+  .navbar-btn-secondary:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+
+  .navbar-btn-primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .navbar-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+  }
+
+  /* Mobile Menu */
+  .navbar-hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    padding: 8px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    background: none;
+    border: none;
+  }
+
+  .navbar-hamburger span {
+    width: 24px;
+    height: 2px;
+    background: var(--text-primary);
+    transition: all 0.3s ease;
+    border-radius: 2px;
+  }
+
+  .navbar-hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(7px, 7px);
+  }
+
+  .navbar-hamburger.active span:nth-child(2) {
+    opacity: 0;
+  }
+
+  .navbar-hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+  }
+
+  .navbar-mobile-menu {
+    display: none;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-primary);
+    padding: 2rem;
+    flex-direction: column;
+    gap: 1.5rem;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .navbar-mobile-menu.active {
+    transform: translateX(0);
+  }
+
+  .navbar-mobile-menu a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1.125rem;
+    padding: 1rem;
+    border-radius: var(--radius-md);
+    transition: all 0.3s ease;
+  }
+
+  .navbar-mobile-menu a:hover,
+  .navbar-mobile-menu a.active {
+    background: var(--bg-tertiary);
+    color: var(--primary-color);
+  }
+
+  .navbar-mobile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .navbar-mobile-actions .navbar-btn {
+    width: 100%;
+    text-align: center;
+    display: block;
+    padding: 1rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .navbar-container {
+      padding: 0 1rem;
+    }
+
+    .navbar-links,
+    .navbar-actions {
+      display: none;
+    }
+
+    .navbar-hamburger,
+    .navbar-mobile-menu {
+      display: flex;
+    }
+  }
+
+  /* Content padding for fixed navbar */
+  .landing-content {
+    padding-top: 70px;
+  }
+</style>
+
+<nav class="landing-navbar" id="landingNavbar">
+  <div class="navbar-container">
+    <a href="#/landing" class="navbar-brand">
+      <img src="assets/logo.png" alt="EventEcho Logo" onerror="this.style.display='none'">
+      <span>EventEcho</span>
+    </a>
+
+    <div class="navbar-links">
+      <a href="#/landing" data-nav="landing">Home</a>
+      <a href="#/landing-events" data-nav="events">Events</a>
+      <a href="#/landing-calendar" data-nav="calendar">Calendar</a>
+      <a href="#/landing-about" data-nav="about">About</a>
+    </div>
+
+    <div class="navbar-actions">
+      <a href="#/login" class="navbar-btn navbar-btn-secondary">Login</a>
+      <a href="#/register" class="navbar-btn navbar-btn-primary">Sign Up</a>
+    </div>
+
+    <button class="navbar-hamburger" id="navbarHamburger" aria-label="Toggle menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </div>
+
+  <div class="navbar-mobile-menu" id="navbarMobileMenu">
+    <a href="#/landing" data-nav="landing">Home</a>
+    <a href="#/landing-events" data-nav="events">Events</a>
+    <a href="#/landing-calendar" data-nav="calendar">Calendar</a>
+    <a href="#/landing-about" data-nav="about">About</a>
+    
+    <div class="navbar-mobile-actions">
+      <a href="#/login" class="navbar-btn navbar-btn-secondary">Login</a>
+      <a href="#/register" class="navbar-btn navbar-btn-primary">Sign Up</a>
+    </div>
+  </div>
+</nav>
+
+<script type="module">
+// Mobile menu toggle
+const hamburger = document.getElementById('navbarHamburger');
+const mobileMenu = document.getElementById('navbarMobileMenu');
+
+if (hamburger && mobileMenu) {
+  hamburger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    hamburger.classList.toggle('active');
+    mobileMenu.classList.toggle('active');
+  });
+
+  // Close menu when clicking a link
+  mobileMenu.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      hamburger.classList.remove('active');
+      mobileMenu.classList.remove('active');
+    });
+  });
+
+  // Close menu when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+      hamburger.classList.remove('active');
+      mobileMenu.classList.remove('active');
+    }
+  });
+}
+
+// Update active nav link
+function updateActiveNavLink() {
+  const path = window.location.hash;
+  const navLinks = document.querySelectorAll('[data-nav]');
+  
+  navLinks.forEach(link => {
+    link.classList.remove('active');
+  });
+  
+  if (path === '#/landing' || path === '#/' || path === '') {
+    document.querySelector('[data-nav="landing"]')?.classList.add('active');
+  } else if (path === '#/landing-events') {
+    document.querySelectorAll('[data-nav="events"]').forEach(el => el.classList.add('active'));
+  } else if (path === '#/landing-calendar') {
+    document.querySelectorAll('[data-nav="calendar"]').forEach(el => el.classList.add('active'));
+  } else if (path === '#/landing-about') {
+    document.querySelectorAll('[data-nav="about"]').forEach(el => el.classList.add('active'));
+  }
+}
+
+// Update on load and hash change
+updateActiveNavLink();
+window.addEventListener('hashchange', updateActiveNavLink);
+</script>

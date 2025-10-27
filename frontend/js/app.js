@@ -1,5 +1,5 @@
 // Cleaned up authentication and user management
-import { api } from "./api.js";  // Use the api.js function instead
+import { api } from "./api.js";
 
 export let token = localStorage.getItem("token") || null;
 
@@ -27,12 +27,20 @@ export function checkAuthAndRedirect() {
   const path = window.location.hash;
   
   // List of public pages that don't require auth
-  const publicPages = ["#/", "#/landing", "#/about", "#/events", "#/login", "#/register"];
+  const publicPages = [
+    "#/", 
+    "#/landing", 
+    "#/landing-events", 
+    "#/landing-calendar", 
+    "#/landing-about",
+    "#/login", 
+    "#/register"
+  ];
   
   if (!token) {
     // Not logged in - only redirect if trying to access protected page
     if (!publicPages.includes(path) && path !== "") {
-      window.location.hash = "#/";
+      window.location.hash = "#/landing";
       return false;
     }
     return false;
@@ -43,13 +51,13 @@ export function checkAuthAndRedirect() {
   if (!payload) {
     // Invalid token
     localStorage.removeItem("token");
-    window.location.hash = "#/";
+    window.location.hash = "#/landing";
     return false;
   }
   
-  // If visiting login/register but already logged in, redirect to calendar
+  // If visiting login/register but already logged in, redirect to home
   if (["#/login", "#/register"].includes(path)) {
-    window.location.hash = "#/calendar";
+    window.location.hash = "#/home";
     return true;
   }
   
@@ -67,9 +75,9 @@ export function updateUserInfo() {
   const userName = document.getElementById("userName");
   const userRole = document.getElementById("userRole");
   
-  // Need to fetch user info from /auth/me since JWT only has id and role
+  // Fetch user info from /auth/me since JWT only has id and role
   if (userName) {
-    // For now, just show user ID until we fetch from /auth/me
+    // Show user ID temporarily
     userName.textContent = `User #${payload.sub}`;
     
     // Fetch full user info
@@ -123,5 +131,5 @@ export async function handleLogin(email, password) {
 export function handleLogout() {
   localStorage.removeItem("token");
   token = null;
-  window.location.hash = "#/login";
+  window.location.hash = "#/landing";
 }
