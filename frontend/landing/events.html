@@ -1,9 +1,12 @@
 <!-- Landing Events Page -->
 <style>
-  .landing-events-container {
-    padding: 2rem;
+  .landing-events-container { /* or .landing-calendar-container, etc. */
     max-width: 1400px;
     margin: 0 auto;
+    /* Set padding for Top, Right, Bottom, Left.
+      90px top-padding for desktop navbar.
+    */
+    padding: 90px 2rem 2rem 2rem;
   }
 
   .events-header {
@@ -89,9 +92,7 @@
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding-bottom: 1rem;
     margin-bottom: 1rem;
-    border-bottom: 1px solid var(--border-color);
   }
 
   .event-location {
@@ -122,7 +123,10 @@
 
   @media (max-width: 768px) {
     .landing-events-container {
-      padding: 1rem;
+      /* Use 80px top-padding (70px nav + 10px space) 
+        and 1rem side-padding on mobile.
+      */
+      padding: 80px 1rem 1rem 1rem;
     }
 
     .events-grid {
@@ -211,7 +215,6 @@ async function loadEvents() {
                 ${event.location}
               </span>
             </div>
-            <a href="#/login" class="event-action">Login to RSVP</a>
           </div>
         </article>
       `;

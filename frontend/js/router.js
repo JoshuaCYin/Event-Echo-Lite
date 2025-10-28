@@ -1,21 +1,20 @@
-// Updated router with landing pages and proper sidebar visibility
+// Updated router with proper sidebar/navbar visibility
 import { loadPage } from "./utils.js";
-import { checkAuthAndRedirect, updateUserInfo, getRoleFromToken } from "./app.js";
+import { checkAuthAndRedirect, updateUserInfo, updateNavbarForAuth } from "./app.js";
 
 const routes = {
-  // Landing pages (public)
-  "": "pages/landing.html",
-  "#/": "pages/landing.html",
-  "#/landing": "pages/landing.html",
-  "#/landing-events": "pages/landing-events.html",
-  "#/landing-calendar": "pages/landing-calendar.html",
-  "#/landing-about": "pages/landing-about.html",
-  
-  // Auth pages
+  // Landing/Public Routes
+  "#/": "landing/home.html",
+  "#/landing": "landing/home.html",
+  "#/landing-events": "landing/events.html",
+  "#/landing-calendar": "landing/calendar.html",
+  "#/landing-about": "landing/about.html",
+
+  // Auth Routes
   "#/login": "pages/login.html",
   "#/register": "pages/register.html",
   
-  // Authenticated pages
+  // App/Protected Routes
   "#/home": "pages/home.html",
   "#/events": "pages/events.html",
   "#/calendar": "pages/calendar.html",
@@ -25,177 +24,96 @@ const routes = {
   "#/profile": "pages/profile.html"
 };
 
-const landingPages = ["", "#/", "#/landing", "#/landing-events", "#/landing-calendar", "#/landing-about"];
+// We split public pages into two types
+const landingPages = [
+  "#/", 
+  "#/landing", 
+  "#/landing-events", 
+  "#/landing-calendar", 
+  "#/landing-about"
+];
 const authPages = ["#/login", "#/register"];
-const protectedPages = ["#/home", "#/events", "#/calendar", "#/create-event", "#/planning", "#/ai-chat", "#/profile"];
-const adminOrganizerOnly = ["#/create-event", "#/planning"];
-
-async function loadLandingNavbar() {
-  const navbarContainer = document.getElementById("landingNavbarContainer");
-  if (!navbarContainer) return;
-  
-  try {
-    const response = await fetch("pages/landing-index.html");
-    const html = await response.text();
-    navbarContainer.innerHTML = html;
-    
-    // Re-execute scripts in the navbar
-    navbarContainer.querySelectorAll("script[type='module']").forEach((oldScript) => {
-      const newScript = document.createElement("script");
-      newScript.type = "module";
-      newScript.textContent = oldScript.textContent;
-      navbarContainer.appendChild(newScript);
-    });
-  } catch (error) {
-    console.error("Failed to load landing navbar:", error);
-  }
-}
 
 async function router() {
-  let path = window.location.hash || "#/landing";
+  const path = window.location.hash || "#/landing";
   
-  // Normalize empty hash to #/landing
-  if (path === "" || path === "#") {
-    path = "#/landing";
-    window.location.hash = path;
-  }
+  // Check which type of page it is
+  const isLandingPage = landingPages.includes(path);
+  const isAuthPage = authPages.includes(path);
   
-  console.log("Router: Current path:", path);
-  
-  // Check if route exists
-  if (!routes[path]) {
-    console.warn("Route not found:", path, "- redirecting to landing");
-    window.location.hash = "#/landing";
-    return;
-  }
-  
-  // Get elements
+  // Get all navigation elements
+  const landingNavbar = document.getElementById("landingNavbar");
   const sidebar = document.getElementById("sidebar");
   const mobileHeader = document.getElementById("mobileHeader");
   const mainContent = document.querySelector(".main-content");
-  const landingNavbarContainer = document.getElementById("landingNavbarContainer");
   
-  // Check if user is authenticated
-  const token = localStorage.getItem("token");
-  const isAuthenticated = !!token;
-  
-  console.log("Router: Is authenticated:", isAuthenticated);
-  
-  // Determine page type
-  const isLandingPage = landingPages.includes(path);
-  const isAuthPage = authPages.includes(path);
-  const isProtectedPage = protectedPages.includes(path);
-  
-  console.log("Router: Page type - Landing:", isLandingPage, "Auth:", isAuthPage, "Protected:", isProtectedPage);
-  
-  // Handle landing pages
-  if (isLandingPage) {
-    console.log("Router: Loading landing page");
-    // Show landing navbar, hide app sidebar
+  // Update the auth-aware buttons on the landing navbar
+  updateNavbarForAuth();
+
+  if (isLandingPage || isAuthPage) {
+    // --- ON A PUBLIC PAGE (EITHER LANDING OR AUTH) ---
+    
+    // Show landing nav, hide app UI
+    if (landingNavbar) landingNavbar.style.display = "flex";
     if (sidebar) sidebar.style.display = "none";
     if (mobileHeader) mobileHeader.style.display = "none";
-    if (landingNavbarContainer) {
-      landingNavbarContainer.style.display = "block";
-      await loadLandingNavbar();
-    }
     
+    // Adjust main content for full-width
     if (mainContent) {
       mainContent.style.marginLeft = "0";
-      mainContent.classList.remove("auth-page");
-      mainContent.classList.add("landing-content");
-    }
-    
-    await loadPage(routes[path]);
-    return;
-  }
-  
-  // Handle auth pages (login/register)
-  if (isAuthPage) {
-    console.log("Router: Loading auth page");
-    // If already logged in, redirect to home
-    if (isAuthenticated) {
-      console.log("Router: Already authenticated, redirecting to home");
-      window.location.hash = "#/home";
-      return;
-    }
-    
-    // Hide all navigation
-    if (sidebar) sidebar.style.display = "none";
-    if (mobileHeader) mobileHeader.style.display = "none";
-    if (landingNavbarContainer) landingNavbarContainer.style.display = "none";
-    
-    if (mainContent) {
-      mainContent.style.marginLeft = "0";
-      mainContent.classList.add("auth-page");
-      mainContent.classList.remove("landing-content");
-    }
-    
-    await loadPage(routes[path]);
-    return;
-  }
-  
-  // Handle protected pages
-  if (isProtectedPage) {
-    console.log("Router: Loading protected page");
-    // Check authentication
-    if (!checkAuthAndRedirect()) {
-      console.log("Router: Not authenticated, redirecting to landing");
-      window.location.hash = "#/landing";
-      return;
-    }
-    
-    // Check role-based access for admin/organizer pages
-    if (adminOrganizerOnly.includes(path)) {
-      const role = getRoleFromToken();
-      console.log("Router: Checking role for protected page. User role:", role);
-      if (role !== "admin" && role !== "organizer") {
-        alert("You don't have permission to access this page.");
-        window.location.hash = "#/home";
-        return;
-      }
-    }
-    
-    // Show app sidebar, hide landing navbar
-    if (landingNavbarContainer) landingNavbarContainer.style.display = "none";
-    if (sidebar) sidebar.style.display = "flex";
-    
-    // Handle mobile header visibility
-    if (mobileHeader) {
-      if (window.innerWidth <= 768) {
-        mobileHeader.style.display = "flex";
+      
+      if (isAuthPage) {
+        // Apply login/register layout (with padding and background)
+        mainContent.classList.add("auth-layout");
+        mainContent.classList.remove("landing-layout");
       } else {
-        mobileHeader.style.display = "none";
+        // Apply landing page layout (full-width, no padding)
+        mainContent.classList.add("landing-layout");
+        mainContent.classList.remove("auth-layout");
       }
     }
     
-    if (mainContent) {
-      mainContent.style.marginLeft = "";
-      mainContent.classList.remove("auth-page");
-      mainContent.classList.remove("landing-content");
-    }
-    
-    // Update user info in sidebar
-    updateUserInfo();
-    
-    // Update active nav item
-    updateActiveNav(path);
-    
     await loadPage(routes[path]);
-    return;
+
+  } else {
+    // --- ON A PROTECTED/APP PAGE ---
+    
+    const isAuthenticated = checkAuthAndRedirect();
+    
+    if (isAuthenticated) {
+      // Hide landing nav, show app UI
+      if (landingNavbar) landingNavbar.style.display = "none";
+      if (sidebar) sidebar.style.display = "flex";
+      if (mobileHeader) {
+        if (window.innerWidth <= 768) {
+          mobileHeader.style.display = "flex";
+        } else {
+          mobileHeader.style.display = "none";
+        }
+      }
+      
+      // Reset main content margin and remove special layouts
+      if (mainContent) {
+        mainContent.style.marginLeft = "";
+        mainContent.classList.remove("auth-layout");
+        mainContent.classList.remove("landing-layout");
+      }
+      
+      updateUserInfo();
+      await loadPage(routes[path]);
+    }
   }
   
-  // Default: redirect to landing
-  console.log("Router: No match, redirecting to landing");
-  window.location.hash = "#/landing";
+  updateActiveNav(path);
 }
 
-// Handle window resize for mobile header
+// Handle window resize (no changes here)
 window.addEventListener('resize', () => {
   const mobileHeader = document.getElementById("mobileHeader");
   const path = window.location.hash || "#/landing";
-  const isProtectedPage = protectedPages.includes(path);
+  const isPublicPage = landingPages.includes(path) || authPages.includes(path);
   
-  if (isProtectedPage && mobileHeader) {
+  if (!isPublicPage && mobileHeader) {
     if (window.innerWidth <= 768) {
       mobileHeader.style.display = "flex";
     } else {
@@ -204,6 +122,7 @@ window.addEventListener('resize', () => {
   }
 });
 
+// Update Active Nav (no changes here)
 function updateActiveNav(path) {
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(item => {
@@ -212,23 +131,59 @@ function updateActiveNav(path) {
       item.classList.add('active');
     }
   });
+  
+  const landingNavLinks = document.querySelectorAll('#landingNavbar [data-nav]');
+  landingNavLinks.forEach(link => {
+    link.classList.remove('active');
+  });
+
+  let activeLandingNav = null;
+  if (path === '#/landing' || path === '#/') {
+    activeLandingNav = 'landing';
+  } else if (path === '#/landing-events') {
+    activeLandingNav = 'events';
+  } else if (path === '#/landing-calendar') {
+    activeLandingNav = 'calendar';
+  } else if (path === '#/landing-about') {
+    activeLandingNav = 'about';
+  }
+  
+  if (activeLandingNav) {
+    document.querySelectorAll(`[data-nav="${activeLandingNav}"]`).forEach(el => el.classList.add('active'));
+  }
 }
 
-// Initialize router
-console.log("Router: Initializing...");
-window.addEventListener("hashchange", () => {
-  console.log("Router: Hash changed to", window.location.hash);
-  router();
-});
+// Mobile Menu Toggle (no changes here)
+function initializeLandingNavToggle() {
+  const hamburger = document.getElementById('navbarHamburger');
+  const mobileMenu = document.getElementById('navbarMobileMenu');
+
+  if (hamburger && mobileMenu) {
+    hamburger.addEventListener('click', (e) => {
+      e.stopPropagation();
+      hamburger.classList.toggle('active');
+      mobileMenu.classList.toggle('active');
+    });
+
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('active');
+      });
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('active');
+      }
+    });
+  }
+}
+
+// Run router (no changes here)
+window.addEventListener("hashchange", router);
 window.addEventListener("DOMContentLoaded", () => {
-  console.log("Router: DOM loaded, initial route:", window.location.hash);
-  router();
+  initializeLandingNavToggle(); 
+  router(); 
 });
-
-// Call router immediately if DOM is already loaded
-if (document.readyState === "loading") {
-  console.log("Router: Waiting for DOM...");
-} else {
-  console.log("Router: DOM already loaded, calling router now");
-  router();
-}

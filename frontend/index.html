@@ -12,7 +12,40 @@
 </head>
 <body>
     <!-- Landing Navigation (for public pages) -->
-    <div id="landingNavbarContainer" style="display: none;"></div>
+    <nav class="landing-navbar" id="landingNavbar">
+        <div class="navbar-container">
+        <a href="#/landing" class="navbar-brand">
+            <img src="assets/logo.png" alt="EventEcho Logo" onerror="this.style.display='none'">
+            <span>EventEcho</span>
+        </a>
+
+        <div class="navbar-links">
+            <a href="#/landing" data-nav="landing">Home</a>
+            <a href="#/landing-events" data-nav="events">Events</a>
+            <a href="#/landing-calendar" data-nav="calendar">Calendar</a>
+            <a href="#/landing-about" data-nav="about">About</a>
+        </div>
+
+        <div class="navbar-actions" id="navbarActions">
+            </div>
+
+        <button class="navbar-hamburger" id="navbarHamburger" aria-label="Toggle menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        </div>
+        </div>
+    </nav>
+
+    <div class="navbar-mobile-menu" id="navbarMobileMenu">
+        <a href="#/landing" data-nav="landing">Home</a>
+        <a href="#/landing-events" data-nav="events">Events</a>
+        <a href="#/landing-calendar" data-nav="calendar">Calendar</a>
+        <a href="#/landing-about" data-nav="about">About</a>
+        <div class="navbar-mobile-actions" id="navbarMobileActions">
+            </div>
+    </div>
 
     <!-- Mobile Header (for authenticated pages) -->
     <header class="mobile-header" id="mobileHeader" style="display: none;">
@@ -21,25 +54,27 @@
             <span></span>
             <span></span>
         </button>
-        <div class="logo">
+        <a href="#/calendar" class="logo">
             <img src="assets/logo.png" alt="EventEcho Logo" onerror="this.style.display='none'">
             <span>EventEcho</span>
-        </div>
+        </a>
         <button class="profile-btn" aria-label="Profile">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-            </svg>
+            <a href="#/profile">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            </a>
         </button>
     </header>
 
     <!-- Sidebar Navigation (for authenticated pages) -->
     <aside class="sidebar" id="sidebar" style="display: none;">
         <div class="sidebar-header">
-            <div class="logo">
+            <a href="#/calendar" class="logo">
                 <img src="assets/logo.png" alt="EventEcho Logo" onerror="this.style.display='none'">
                 <span>EventEcho</span>
-            </div>
+            </a>
         </div>
 
         <nav class="sidebar-nav">
@@ -130,13 +165,20 @@
         // Hide admin/organizer nav items for regular users
         function updateNavVisibility() {
             const role = getRoleFromToken();
+            
+            // Get all the nav items
+            const dashboardNav = document.querySelector('.nav-item[data-page="home"]');
             const createEventNav = document.getElementById('createEventNav');
             const planningNav = document.getElementById('planningNav');
             
             if (role !== 'admin' && role !== 'organizer') {
+                // --- Attendee View ---
+                if (dashboardNav) dashboardNav.style.display = 'none';
                 if (createEventNav) createEventNav.style.display = 'none';
                 if (planningNav) planningNav.style.display = 'none';
             } else {
+                // --- Admin/Organizer View ---
+                if (dashboardNav) dashboardNav.style.display = 'flex';
                 if (createEventNav) createEventNav.style.display = 'flex';
                 if (planningNav) planningNav.style.display = 'flex';
             }
@@ -166,6 +208,19 @@
                 }
             }
         });
+
+        const userProfile = document.querySelector('.user-profile');
+        if (userProfile) {
+            userProfile.addEventListener('click', () => {
+                // Check if it's in mobile view
+                if (window.innerWidth <= 768) {
+                    sidebar.classList.remove('active');
+                    menuToggle.classList.remove('active');
+                }
+                // Also navigate to the profile page
+                window.location.hash = '#/profile';
+            });
+        }
 
         // Active nav item
         document.querySelectorAll('.nav-item').forEach(item => {

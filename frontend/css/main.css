@@ -772,7 +772,12 @@ img {
 
 .stat-card,
 .event-card,
-.activity-item {
+.activity-item,
+.about-section,
+.team-member,
+.calendar-wrapper,
+#calendar,
+.create-event-form {
     animation: fadeIn 0.5s ease-out;
 }
 
@@ -798,7 +803,7 @@ a:focus-visible {
 }
 
 /* ===== Auth Pages (Login/Register) ===== */
-.main-content.auth-page {
+.main-content.auth-layout {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -807,6 +812,18 @@ a:focus-visible {
     /* linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(208, 208, 208, 0.2) 100%), */
         url('../assets/chapel_auditorium.jpeg') center/cover no-repeat;
     padding: 2rem;
+    margin-left: 0 !important; /* Override sidebar margin */
+}
+
+/* ===== Auth Pages (Login/Register) ===== */
+.main-content.auth-layout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background:
+        url('../assets/chapel_auditorium.jpeg') center/cover no-repeat;
+    padding: 2rem; /* This padding is for the login card */
     margin-left: 0 !important; /* Override sidebar margin */
 }
 
@@ -954,8 +971,9 @@ a:focus-visible {
     box-shadow: var(--shadow-sm);
 }
 
+/* FullCalendar custom styling */
+
 .fc {
-    /* FullCalendar custom styling */
     font-family: inherit;
 }
 
@@ -1225,20 +1243,8 @@ a:focus-visible {
     }
 }
 
-/* ===== Landing Content Padding ===== */
-.main-content.landing-content {
-    padding-top: 70px;
-    margin-left: 0;
-    background: var(--bg-secondary);
-}
 
-/* ===== Landing Page Overrides ===== */
-.landing-content .landing-container,
-.landing-content .landing-events-container,
-.landing-content .landing-calendar-container,
-.landing-content .landing-about-container {
-    min-height: calc(100vh - 70px);
-}
+/* ===== EVERYTHING BELOW THIS IS VOLATILE, EXPERIMENTAL, OR TEMPORARY ===== */
 
 /* ===== Mobile Responsiveness for Landing Navbar ===== */
 @media (max-width: 768px) {
@@ -1335,4 +1341,286 @@ a:focus-visible {
     .landing-content {
         padding-top: 0;
     }
+}
+
+/* ===== Dark Mode Support ===== */
+/* @media (prefers-color-scheme: dark) {
+    :root {
+        --bg-primary: #1a202c;
+        --bg-secondary: #2d3748;
+        --bg-tertiary: #4a5568;
+        --text-primary: #e2e8f0;
+        --text-secondary: #a0aec0;
+        --text-light: #718096;
+        --border-color: #4a5568;
+        --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+        --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+} */
+
+/* ===== LANDING PAGES (Hero, Events, etc.) ===== */
+.main-content.landing-layout {
+    /* margin-left: 0 !important; Override sidebar margin */
+    padding: 0; /* NO padding, so the hero page is full-width */
+    background: linear-gradient(135deg, rgba(185, 198, 255, 0.55), rgba(201, 146, 255, 0.75));
+}
+
+.landing-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  background: rgba(0,0,0,0.2); /* Making navbar transparent to see hero bg */
+  backdrop-filter: blur(5px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  display: flex; /* Used by the router to hide/show the nav */
+}
+
+.navbar-container {
+  max-width: 1400px;
+  height: 100%;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  width: 100%;
+  position: relative;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: #fff; /* Simplified gradient for demo */
+  text-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  flex-shrink: 0;
+}
+
+.navbar-brand img {
+  width: 40px;
+  height: 40px;
+  filter: drop-shadow(1px 1px 4px rgba(0, 0, 0, 0.3));
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%; /* Ensures it stays vertically centered */
+}
+
+.navbar-links a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1.2rem;
+  text-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transition: color 0.3s ease;
+}
+
+.navbar-links a:hover {
+  color: #fff;
+}
+
+.navbar-links a.active {
+  color: #fff;
+  font-weight: 600;
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+}
+
+.navbar-btn {
+  padding: 0.625rem 1.5rem;
+  border-radius: 2rem; /* Matches hero buttons */
+  font-weight: 600;
+  font-size: 0.9375rem;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.navbar-btn-secondary {
+  color: #fff;
+  text-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  border: 2px solid rgba(255, 255, 255, 0.7);
+}
+
+.navbar-btn-secondary:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-btn-primary {
+  background: #fff;
+  color: #5a4dbf;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.navbar-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  background: #f0f0f0;
+}
+
+/* Mobile Menu */
+.navbar-hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+
+.navbar-hamburger span {
+  width: 24px;
+  height: 2px;
+  background: #fff;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.navbar-hamburger.active span:nth-child(1) {
+  transform: rotate(45deg) translate(7px, 7px);
+}
+.navbar-hamburger.active span:nth-child(2) { opacity: 0; }
+.navbar-hamburger.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+.navbar-mobile-menu {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  top: 70px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #0a0a0a;
+  padding: 2rem;
+  flex-direction: column;
+  gap: 1.5rem;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  overflow-y: auto;
+}
+
+.navbar-mobile-menu.active {
+  transform: translateX(0);
+}
+
+.navbar-mobile-menu a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.125rem;
+  padding: 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.navbar-mobile-menu a:hover,
+.navbar-mobile-menu a.active {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.navbar-mobile-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-mobile-actions .navbar-btn {
+  width: 100%;
+  text-align: center;
+  display: block;
+  padding: 1rem;
+}
+
+/* Responsive rules for Navbar */
+@media (max-width: 768px) {
+  /* Navbar */
+  .navbar-container {
+    padding: 0 1rem;
+  }
+}
+
+@media (max-width: 867px) {
+  .navbar-links,
+  .navbar-actions {
+    display: none;
+  }
+  .navbar-hamburger,
+  .navbar-mobile-menu {
+    display: flex;
+  }
+}
+
+/* ===== Mobile Sidebar Fixes ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    /* Start sidebar *below* the mobile header */
+    top: var(--header-height); 
+    /* Fill *remaining* height */
+    height: calc(100vh - var(--header-height));
+    /* Keep the slide-in transform */
+    transform: translateX(-100%); 
+    z-index: 998; /* Below mobile header (1000) but above content */
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar-header {
+    display: none; /* Hide redundant logo header */
+  }
+
+  .sidebar-nav {
+    padding-top: 1rem; /* Add a little space */
+  }
+}
+
+/* ===== Gradient Overrides ===== */
+
+/* FullCalendar Buttons (Both Landing & App) */
+.fc .fc-button {
+    background: var(--primary-color); /* Use solid color */
+}
+.fc .fc-button:hover {
+    background: var(--primary-dark); /* Darker solid color on hover */
+}
+.fc .fc-button-active {
+    background: var(--primary-dark) !important;
+}
+
+/* FullCalendar Event Cards (Both Landing & App) */
+.fc .fc-event {
+    background: var(--primary-color); /* Use solid color */
+    color: white;
+    border: 1px solid var(--primary-dark);
 }

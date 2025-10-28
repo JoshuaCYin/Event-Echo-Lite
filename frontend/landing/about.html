@@ -1,9 +1,9 @@
 <!-- Landing About Page -->
 <style>
   .landing-about-container {
-    padding: 2rem;
     max-width: 1000px;
     margin: 0 auto;
+    padding: 90px 2rem 2rem 2rem;
   }
 
   .about-header {
@@ -77,9 +77,20 @@
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 2rem;
     margin-top: 2rem;
+    justify-items: center;
+  }
+
+  /* Center last item if it's alone on a row */
+  .team-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2rem;
+    margin-top: 2rem;
   }
 
   .team-member {
+    width: 200px;
     text-align: center;
     padding: 1.5rem;
     background: var(--bg-secondary);
@@ -90,6 +101,15 @@
   .team-member:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-md);
+  }
+
+  .team-avatar-img {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--primary-color);
   }
 
   .team-avatar {
@@ -156,7 +176,7 @@
 
   @media (max-width: 768px) {
     .landing-about-container {
-      padding: 1rem;
+      padding: 80px 1rem 1rem 1rem;
     }
 
     .about-header h1 {
@@ -227,9 +247,28 @@
     <h2>Our Team</h2>
     <div class="team-grid">
       <div class="team-member">
-        <div class="team-avatar">EE</div>
-        <div class="team-name">EventEcho Team</div>
-        <div class="team-role">Developers</div>
+        <img src="assets/team-member-1.jpg" alt="Team Member 1" class="team-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="team-avatar" style="display: none;">1</div>
+        <div class="team-name">Team Member 1</div>
+        <div class="team-role">Role</div>
+      </div>
+      <div class="team-member">
+        <img src="assets/team-member-2.jpg" alt="Team Member 2" class="team-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="team-avatar" style="display: none;">2</div>
+        <div class="team-name">Team Member 2</div>
+        <div class="team-role">Role</div>
+      </div>
+      <div class="team-member">
+        <img src="assets/team-member-3.jpg" alt="Team Member 3" class="team-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="team-avatar" style="display: none;">3</div>
+        <div class="team-name">Team Member 3</div>
+        <div class="team-role">Role</div>
+      </div>
+      <div class="team-member">
+        <img src="assets/team-member-4.jpg" alt="Team Member 4" class="team-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="team-avatar" style="display: none;">4</div>
+        <div class="team-name">Team Member 4</div>
+        <div class="team-role">Role</div>
       </div>
     </div>
   </div>
