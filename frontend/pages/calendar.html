@@ -39,6 +39,31 @@ async function loadCalendarView() {
                     description: e.description
                 }
             })),
+        // const calendar = new window.FullCalendar.Calendar(calendarEl, {
+        //     initialView: "dayGridMonth",
+        //     headerToolbar: {
+        //         left: 'prev,next today',
+        //         center: 'title',
+        //         right: 'dayGridMonth,timeGridWeek,listWeek'
+        //     },
+        //     buttonText: {
+        //         today: 'Today',
+        //         month: 'Month',
+        //         week: 'Week',
+        //         list: 'List'
+        //     },
+        //     height: 'auto',
+        //     aspectRatio: 1.8,
+        //     eventTextColor: '#ffffff',
+        //     events: events.map(e => ({
+        //         title: e.title,
+        //         start: e.start_time.replace(" ", "T"),
+        //         end: e.end_time.replace(" ", "T"),
+        //         extendedProps: {
+        //         location: e.location,
+        //         description: e.description
+        //         }
+        //     })),
             eventClick: function(info) {
                 alert(
                     'Event: ' + info.event.title + '\n' +

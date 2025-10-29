@@ -1,18 +1,10 @@
 <div class="events-list-container glass-card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
         <h2>All Events</h2>
-        <!-- unnecessary create event button (keeping in case this shortcut is needed
-         <a href="#/create-event" class="action-btn primary" style="text-decoration: none; display: inline-flex;">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="16"></line>
-                <line x1="8" y1="12" x2="16" y2="12"></line>
-            </svg>
-            New Event
-        </a> -->
+        <div id="eventActions"></div>
     </div>
     
-    <button id="loadEvents">Refresh Events</button>
+    <button id="loadEvents">Load Events</button>
     <div id="eventList"></div>
 </div>
 
@@ -21,6 +13,27 @@ import { api } from "../js/api.js";
 
 const eventList = document.getElementById("eventList");
 const loadBtn = document.getElementById("loadEvents");
+const eventActions = document.getElementById("eventActions");
+const token = localStorage.getItem("token");
+const isLoggedIn = !!token;
+
+// Show appropriate actions based on login status
+if (isLoggedIn) {
+    // Check if user can create events (organizer or admin)
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    if (payload.role === "organizer" || payload.role === "admin") {
+        eventActions.innerHTML = `
+            <a href="#/create-event" class="action-btn primary" style="text-decoration: none; display: inline-flex;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="16"></line>
+                    <line x1="8" y1="12" x2="16" y2="12"></line>
+                </svg>
+                New Event
+            </a>
+        `;
+    }
+}
 
 async function loadEvents() {
     try {
@@ -28,7 +41,6 @@ async function loadEvents() {
         loadBtn.textContent = "Loading...";
         eventList.innerHTML = '<div class="loading">Loading events</div>';
         
-        const token = localStorage.getItem("token");
         const events = await api("/events/", "GET", null, token);
         
         if (!events || events.length === 0) {
@@ -41,7 +53,7 @@ async function loadEvents() {
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
                     <h3>No Events Yet</h3>
-                    <p>Create your first event to get started!</p>
+                    <p>Check back soon for upcoming events!</p>
                 </div>
             `;
             loadBtn.disabled = false;
@@ -61,6 +73,14 @@ async function loadEvents() {
                 hour: 'numeric',
                 minute: '2-digit'
             });
+            
+            // Determine action button based on login status
+            let actionButton = '';
+            if (isLoggedIn) {
+                actionButton = '<button class="btn-primary" onclick="alert(\'RSVP feature coming soon!\')">RSVP</button>';
+            } else {
+                actionButton = '<a href="#/login" class="btn-primary" style="text-align: center; display: block;">Login to RSVP</a>';
+            }
             
             return `
                 <article class="event-card" style="margin-bottom: 1rem;">
@@ -84,6 +104,9 @@ async function loadEvents() {
                                 </svg>
                                 ${e.location}
                             </span>
+                        </div>
+                        <div class="event-actions">
+                            ${actionButton}
                         </div>
                     </div>
                 </article>

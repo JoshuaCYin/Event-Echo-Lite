@@ -32,6 +32,7 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(events_bp, url_prefix="/events")
 
+    # basic health checkpoints
     @app.route("/")
     def ping():
         return jsonify({"status": "ok"}), 200
