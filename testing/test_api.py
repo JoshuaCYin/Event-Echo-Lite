@@ -1,5 +1,5 @@
 """
-Quick API test for Event Echo Lite
+Quick API test for Event Echo Lite using local database, frontend, and backend
 Tests: register, login, create event, list events.
 """
 

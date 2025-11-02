@@ -1,6 +1,6 @@
 // Updated router with proper sidebar/navbar visibility
 import { loadPage } from "./utils.js";
-import { checkAuthAndRedirect, updateUserInfo, updateNavbarForAuth } from "./app.js";
+import { checkAuthAndRedirect, updateUserInfo, updateNavbarForAuth, getRoleFromToken } from "./app.js";
 
 const routes = {
   // Landing/Public Routes
@@ -15,7 +15,7 @@ const routes = {
   "#/register": "pages/register.html",
   
   // App/Protected Routes
-  "#/home": "pages/home.html",
+  "#/dashboard": "pages/home.html", // Renamed from #/home
   "#/events": "pages/events.html",
   "#/calendar": "pages/calendar.html",
   "#/create-event": "pages/create-event.html",
@@ -24,7 +24,6 @@ const routes = {
   "#/profile": "pages/profile.html"
 };
 
-// We split public pages into two types
 const landingPages = [
   "#/", 
   "#/landing", 
@@ -34,40 +33,46 @@ const landingPages = [
 ];
 const authPages = ["#/login", "#/register"];
 
+// --- Role-protected Pages ---
+const adminOnlyPages = [
+    "#/dashboard",
+    "#/create-event",
+    "#/planning"
+];
+
 async function router() {
-  const path = window.location.hash || "#/landing";
+  let path = window.location.hash || "#/landing";
   
-  // Check which type of page it is
+  // Handle 404
+  if (!routes[path]) {
+    path = "#/landing"; // Default to landing page
+    window.location.hash = path;
+  }
+  
   const isLandingPage = landingPages.includes(path);
   const isAuthPage = authPages.includes(path);
   
-  // Get all navigation elements
   const landingNavbar = document.getElementById("landingNavbar");
   const sidebar = document.getElementById("sidebar");
   const mobileHeader = document.getElementById("mobileHeader");
   const mainContent = document.querySelector(".main-content");
   
-  // Update the auth-aware buttons on the landing navbar
   updateNavbarForAuth();
 
   if (isLandingPage || isAuthPage) {
     // --- ON A PUBLIC PAGE (EITHER LANDING OR AUTH) ---
     
-    // Show landing nav, hide app UI
     if (landingNavbar) landingNavbar.style.display = "flex";
     if (sidebar) sidebar.style.display = "none";
     if (mobileHeader) mobileHeader.style.display = "none";
     
-    // Adjust main content for full-width
     if (mainContent) {
       mainContent.style.marginLeft = "0";
       
       if (isAuthPage) {
-        // Apply login/register layout (with padding and background)
         mainContent.classList.add("auth-layout");
         mainContent.classList.remove("landing-layout");
       } else {
-        // Apply landing page layout (full-width, no padding)
         mainContent.classList.add("landing-layout");
         mainContent.classList.remove("auth-layout");
       }
@@ -81,6 +86,14 @@ async function router() {
     const isAuthenticated = checkAuthAndRedirect();
     
     if (isAuthenticated) {
+      // --- Role-based Page Access ---
+      const role = getRoleFromToken();
+      if (adminOnlyPages.includes(path) && (role !== 'admin' && role !== 'organizer')) {
+          // Attendee trying to access admin page
+          window.location.hash = "#/calendar"; // Redirect to their default
+          return; // Stop execution
+      }
+
       // Hide landing nav, show app UI
       if (landingNavbar) landingNavbar.style.display = "none";
       if (sidebar) sidebar.style.display = "flex";
@@ -107,7 +120,6 @@ async function router() {
   updateActiveNav(path);
 }
 
-// Handle window resize (no changes here)
 window.addEventListener('resize', () => {
   const mobileHeader = document.getElementById("mobileHeader");
   const path = window.location.hash || "#/landing";
@@ -122,7 +134,6 @@ window.addEventListener('resize', () => {
   }
 });
 
-// Update Active Nav (no changes here)
 function updateActiveNav(path) {
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(item => {
@@ -153,7 +164,6 @@ function updateActiveNav(path) {
   }
 }
 
-// Mobile Menu Toggle (no changes here)
 function initializeLandingNavToggle() {
   const hamburger = document.getElementById('navbarHamburger');
   const mobileMenu = document.getElementById('navbarMobileMenu');
@@ -165,6 +175,7 @@ function initializeLandingNavToggle() {
       mobileMenu.classList.toggle('active');
     });
 
+    // Close menu when *any* link is clicked
     mobileMenu.querySelectorAll('a').forEach(link => {
       link.addEventListener('click', () => {
         hamburger.classList.remove('active');
@@ -172,6 +183,7 @@ function initializeLandingNavToggle() {
       });
     });
 
+    // Close menu when clicking outside
     document.addEventListener('click', (e) => {
       if (!mobileMenu.contains(e.target) && !hamburger.contains(e.target)) {
         hamburger.classList.remove('active');
@@ -181,7 +193,7 @@ function initializeLandingNavToggle() {
   }
 }
 
-// Run router (no changes here)
+// Run router
 window.addEventListener("hashchange", router);
 window.addEventListener("DOMContentLoaded", () => {
   initializeLandingNavToggle(); 

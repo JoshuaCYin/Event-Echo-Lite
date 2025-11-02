@@ -1605,6 +1605,394 @@ a:focus-visible {
   }
 }
 
+/* ===== Form Validation ===== */
+.form-error {
+  color: #e53e3e; /* Red */
+  font-size: 0.875rem;
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+}
+
+input.is-invalid {
+  border-color: #e53e3e !important;
+}
+
+/* ===== General Form Styles (for Create Event, Profile) ===== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1.5rem;
+}
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: var(--transition);
+  font-family: inherit;
+}
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+.form-group input[type="radio"],
+.form-group input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--primary-color);
+}
+.radio-group, .checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.radio-group label, .checkbox-group label {
+  font-weight: 500;
+  margin-bottom: 0;
+}
+.time-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+/* ===== Profile Page ===== */
+.profile-container {
+  max-width: 800px;
+}
+.profile-header {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+.profile-header .avatar {
+  width: 80px;
+  height: 80px;
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+.profile-header h1 {
+  margin-bottom: 0.5rem;
+  font-size: 2rem;
+}
+.profile-header p {
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+.profile-section {
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 2rem;
+}
+.profile-section h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.profile-section button {
+  width: auto;
+  min-width: 150px;
+  padding: 1rem 2rem;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: 1rem;
+}
+.profile-section button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+.profile-section button:disabled {
+  background: var(--text-light);
+  cursor: not-allowed;
+}
+.danger-zone {
+  background: #fff5f5;
+  border: 1px solid #f56565;
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+}
+.danger-zone h2 {
+  color: #c53030;
+  margin-bottom: 1rem;
+}
+.danger-zone p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+.danger-zone button {
+  background: #f56565;
+}
+.danger-zone button:hover {
+  background: #c53030;
+  box-shadow: var(--shadow-md);
+}
+
+/* ===== Events Page View Toggle ===== */
+.events-page-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+.events-page-header h1 {
+  font-size: 2.5rem;
+  color: var(--text-primary);
+}
+.view-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
+.view-toggle-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+}
+.view-toggle-btn.active {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===== Compact Event Card (Detail View) ===== */
+.compact-event-card {
+  display: flex;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: var(--transition);
+}
+.compact-event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+.event-date-box {
+  flex-shrink: 0;
+  width: 80px;
+  background: var(--gradient-primary);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  text-align: center;
+}
+.event-date-month {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+.event-date-day {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.event-details {
+  padding: 1.5rem;
+  flex-grow: 1;
+}
+.event-details h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+.event-meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+.event-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+}
+.event-meta-item svg {
+  flex-shrink: 0;
+}
+.event-actions {
+  padding: 1.5rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.event-rsvp-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: var(--transition);
+  border: none;
+}
+.event-rsvp-btn:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* ===== Event List View (Simple) ===== */
+.event-list-view {
+  list-style: none;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+  margin: 0;
+}
+.event-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+.event-list-item:hover {
+  background: var(--bg-secondary);
+}
+.event-list-item strong {
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+.event-list-item span {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* ===== Create Event Page ===== */
+.creation-choice {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-top: 3rem;
+}
+.choice-card {
+  width: 300px;
+  padding: 2rem;
+  background: var(--bg-primary);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+.choice-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+.choice-card h3 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+.choice-card p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+.choice-btn {
+  padding: 0.75rem 1.5rem;
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ===== Planning Page (Kanban) ===== */
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+.kanban-column {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+}
+.kanban-column h3 {
+  font-size: 1.25rem;
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+}
+.kanban-tasks {
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.kanban-task {
+  background: var(--bg-primary);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  font-weight: 500;
+}
+
+/* ===== Landing Page Event Card (Updated) ===== */
+.landing-events-container .event-card .event-location {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--text-light);
+  font-size: 0.875rem;
+}
+.landing-events-container .event-card .event-location a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+.landing-events-container .event-card .event-location a:hover {
+  text-decoration: underline;
+}
+
+
 /* ===== Gradient Overrides ===== */
 
 /* FullCalendar Buttons (Both Landing & App) */

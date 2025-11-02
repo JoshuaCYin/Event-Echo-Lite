@@ -1,30 +1,41 @@
 """
-Simple SQLite connection helper and schema initialization.
+PostgreSQL connection helper.
 Provides get_db() for use by services.
 """
 
-import sqlite3
-from pathlib import Path
-from dotenv import load_dotenv
 import os
+import psycopg2
+from psycopg2.extras import DictCursor
+from dotenv import load_dotenv
 
-load_dotenv()  # loads .env from project root
+# Load .env variables from the project root
+load_dotenv()
 
-DB_PATH = os.getenv("DATABASE_URL", "./eventecho.db")
-DB_PATH = str(Path(DB_PATH).resolve())
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set. Please set the environment variable.")
 
 def get_db():
     """
-    Return a new sqlite3.Connection with row access by name.
-    Caller is responsible for closing the connection.
+    Returns a new psycopg2 connection with dictionary-based row access.
+    
+    The caller is responsible for closing the connection.
+    Using 'with get_db() as conn:' is recommended.
     """
-    conn = sqlite3.connect(DB_PATH, detect_types=sqlite3.PARSE_DECLTYPES)
-    conn.row_factory = sqlite3.Row
-    return conn
+    try:
+        # Connect to the PostgreSQL database
+        conn = psycopg2.connect(DATABASE_URL)
+        
+        # Set the cursor factory to return rows as dictionaries 
+        # (e.g., {"user_id": 1, "email": "..."})
+        conn.cursor_factory = DictCursor
+        return conn
+    except Exception as e:
+        print(f"Error connecting to database: {e}")
+        # Re-raise the exception so the caller knows the connection failed
+        raise
 
-def init_db(schema_path: str):
-    """
-    Initialize or migrate database using provided SQL schema file path.
-    """
-    with get_db() as conn, open(schema_path, "r", encoding="utf-8") as f:
-        conn.executescript(f.read())
+# Note: Removed the redundant init_db() function.
+# The separate backend/database/init_db.py script is the correct
+# way to handle initialization and should be used instead.

@@ -1,42 +1,55 @@
 <div class="glass-card">
-  <h2>Create Account</h2>
-  <p style="color: var(--text-secondary); margin-bottom: 2rem;">Sign up to join the community!</p>
-  
-  <form id="registerForm">
-    <input 
-      id="regName" 
-      type="text" 
-      placeholder="Display Name" 
-      required
-      autocomplete="name"
-    >
-    <input 
-      id="regEmail" 
-      type="email" 
-      placeholder="Email" 
-      required
-      autocomplete="email"
-    >
-    <input 
-      id="regPass" 
-      type="password" 
-      placeholder="Password" 
-      required
-      autocomplete="new-password"
-      minlength="8"
-    >
-    <input 
-      id="regConfirmPass" 
-      type="password" 
-      placeholder="Confirm Password" 
-      required
-    >
-    <button type="submit" id="registerBtn">Create Account</button>
-  </form>
-  
-  <p class="text-auth-account-question">Already have an account? <a href="#/login" class="text-auth-account-answer">Log in</a></p>
-  
-  <div id="registerMessage" style="display: none; margin-top: 1rem;"></div>
+    <h2>Create Account</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Sign up to join the community!</p>
+    
+    <form id="registerForm">
+        <!-- Changed from 'Display Name' to First/Last Name -->
+        <div style="display: flex; gap: 1rem;">
+            <input 
+                id="regFirstName" 
+                type="text" 
+                placeholder="First Name" 
+                required
+                autocomplete="given-name"
+                style="width: 50%;"
+            >
+            <input 
+                id="regLastName" 
+                type="text" 
+                placeholder="Last Name" 
+                required
+                autocomplete="family-name"
+                style="width: 50%;"
+            >
+        </div>
+        <input 
+            id="regEmail" 
+            type="email" 
+            placeholder="Email" 
+            required
+            autocomplete="email"
+        >
+        <input 
+            id="regPass" 
+            type="password" 
+            placeholder="Password (min 8 characters)" 
+            required
+            autocomplete="new-password"
+            minlength="8"
+        >
+        <input 
+            id="regConfirmPass" 
+            type="password" 
+            placeholder="Confirm Password" 
+            required
+            autocomplete="new-password"
+        >
+        <button type="submit" id="registerBtn">Create Account</button>
+    </form>
+    
+    <p class="text-auth-account-question">Already have an account? <a href="#/login" class="text-auth-account-answer">Log in</a></p>
+    
+    <div id="registerMessage" style="display: none; margin-top: 1rem;"></div>
 </div>
 
 <script type="module">
@@ -45,60 +58,89 @@ import { api } from "../js/api.js";
 const form = document.getElementById("registerForm");
 const messageDiv = document.getElementById("registerMessage");
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  
-  const email = document.getElementById("regEmail").value;
-  const pass = document.getElementById("regPass").value;
-  const confirmPass = document.getElementById("regConfirmPass").value;
-  const name = document.getElementById("regName").value;
-  const registerBtn = document.getElementById("registerBtn");
+// Simple regex for email validation
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Simple regex for name validation (disallows numbers and most special chars)
+const nameRegex = /^[a-zA-Z-' ]+$/;
 
-  // Check if password and confirm password match
-  if (pass !== confirmPass) {
-    messageDiv.className = "error-message";
-    messageDiv.textContent = "Passwords do not match. Please try again.";
-    messageDiv.style.display = "block";
-    return;
-  }
-  
-  // Disable button and show loading
-  registerBtn.disabled = true;
-  registerBtn.textContent = "Creating account...";
-  messageDiv.style.display = "none";
-  
-  try {
-    const res = await api("/auth/register", "POST", { 
-      email, 
-      password: pass, 
-      display_name: name 
-    });
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
     
-    if (res.error) {
-      // Show error
-      messageDiv.className = "error-message";
-      messageDiv.textContent = res.error || "Registration failed. Please try again.";
-      messageDiv.style.display = "block";
-      
-      registerBtn.disabled = false;
-      registerBtn.textContent = "Create Account";
-    } else {
-      // Show success and redirect
-      messageDiv.className = "success-message";
-      messageDiv.textContent = "Account created! Redirecting to login...";
-      messageDiv.style.display = "block";
-      
-      setTimeout(() => {
-        window.location.hash = "#/login";
-      }, 1500);
+    const email = document.getElementById("regEmail").value;
+    const pass = document.getElementById("regPass").value;
+    const confirmPass = document.getElementById("regConfirmPass").value;
+    const firstName = document.getElementById("regFirstName").value.trim();
+    const lastName = document.getElementById("regLastName").value.trim();
+    const registerBtn = document.getElementById("registerBtn");
+
+    messageDiv.style.display = "none";
+
+    // --- Input Validation ---
+    if (pass !== confirmPass) {
+        messageDiv.className = "error-message";
+        messageDiv.textContent = "Passwords do not match. Please try again.";
+        messageDiv.style.display = "block";
+        return;
     }
-  } catch (error) {
-    messageDiv.className = "error-message";
-    messageDiv.textContent = "Network error. Please try again.";
-    messageDiv.style.display = "block";
     
-    registerBtn.disabled = false;
-    registerBtn.textContent = "Create Account";
-  }
+    if (pass.length < 8) {
+        messageDiv.className = "error-message";
+        messageDiv.textContent = "Password must be at least 8 characters.";
+        messageDiv.style.display = "block";
+        return;
+    }
+
+    if (!emailRegex.test(email)) {
+        messageDiv.className = "error-message";
+        messageDiv.textContent = "Please enter a valid email address.";
+        messageDiv.style.display = "block";
+        return;
+    }
+
+    if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+        messageDiv.className = "error-message";
+        messageDiv.textContent = "First and Last name can only contain letters, spaces, hyphens, or apostrophes.";
+        messageDiv.style.display = "block";
+        return;
+    }
+    
+    // Disable button and show loading
+    registerBtn.disabled = true;
+    registerBtn.textContent = "Creating account...";
+    
+    try {
+        const res = await api("/auth/register", "POST", { 
+            email, 
+            password: pass, 
+            first_name: firstName,
+            last_name: lastName
+        });
+        
+        if (res.error) {
+            // Show error
+            messageDiv.className = "error-message";
+            messageDiv.textContent = res.error || "Registration failed. Please try again.";
+            messageDiv.style.display = "block";
+            
+            registerBtn.disabled = false;
+            registerBtn.textContent = "Create Account";
+        } else {
+            // Show success and redirect
+            messageDiv.className = "success-message";
+            messageDiv.textContent = "Account created! Redirecting to login...";
+            messageDiv.style.display = "block";
+            
+            setTimeout(() => {
+                window.location.hash = "#/login";
+            }, 1500);
+        }
+    } catch (error) {
+        messageDiv.className = "error-message";
+        messageDiv.textContent = "Network error. Please try again.";
+        messageDiv.style.display = "block";
+        
+        registerBtn.disabled = false;
+        registerBtn.textContent = "Create Account";
+    }
 });
 </script>
