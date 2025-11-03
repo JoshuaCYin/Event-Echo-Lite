@@ -21,19 +21,25 @@ JWT_SECRET = os.getenv("JWT_SECRET")
 if not JWT_SECRET:
     raise RuntimeError("JWT_SECRET is not set. Please set the environment variable.")
 
-# --- Helper Functions (Omitted for brevity, unchanged) ---
+# --- Helper Functions ---
 
 def create_token(user_id: int, role: str, expires_minutes: int = 60 * 24):
+    """
+    Generates a new JWT for a given user.
+    """
     now = datetime.now(timezone.utc)
     payload = {
-        "sub": user_id,
-        "role": role,
-        "exp": now + timedelta(minutes=expires_minutes),
-        "iat": now
+        "sub": user_id,     # subject (user ID)
+        "role": role,       # role (e.g. attendee, organizer, admin)
+        "exp": now + timedelta(minutes=expires_minutes), # expiry
+        "iat": now          # issued at
     }
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
 def verify_token(token: str):
+    """
+    Verifies a JWT and returns the user ID if valid, otherwise None.
+    """
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
         return payload.get("sub")
@@ -60,11 +66,13 @@ def register():
     first_name = data.get("first_name")
     last_name = data.get("last_name")
 
+    # --- Validation ---
     if not email or not password:
         return jsonify({"error": "Email and password required"}), 400
-
     if not first_name or not last_name:
         return jsonify({"error": "First and last name required"}), 400
+    if len(password) < 8:
+        return jsonify({"error": "Password must be at least 8 characters"}), 400
 
     try:
         pw_hash = ph.hash(password)
@@ -144,7 +152,6 @@ def delete_account():
     Delete the authenticated user's account.
     Request header: Authorization: Bearer <token>
     """
-    # Use the utility to verify the token and get the user ID
     user_id, _, err, code = verify_token_from_request()
     if err:
         return err, code
@@ -172,7 +179,6 @@ def get_current_user():
     if err:
         return err, code
 
-    # Select all fields from the schema
     sql = """
         SELECT user_id, email, first_name, last_name, role, created_at,
                major_department, phone_number, hobbies, bio, profile_picture
@@ -192,7 +198,6 @@ def get_current_user():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    # Return all user data as a dictionary
     return jsonify(dict(user)), 200
 
 @auth_bp.route("/me", methods=["PUT"])
@@ -214,7 +219,6 @@ def update_current_user():
     fields = []
     values = []
     
-    # Define allowed fields (user cannot change email, role, or password here)
     allowed_fields = [
         "first_name", "last_name", "major_department", 
         "phone_number", "hobbies", "bio", "profile_picture"
@@ -228,7 +232,6 @@ def update_current_user():
     if not fields:
         return jsonify({"error": "No valid fields to update"}), 400
 
-    # Add the updated_at timestamp and user_id for the WHERE clause
     fields.append("updated_at = CURRENT_TIMESTAMP")
     values.append(user_id)
     

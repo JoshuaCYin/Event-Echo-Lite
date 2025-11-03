@@ -1,275 +1,114 @@
 <style>
-    .form-section {
-        margin-bottom: 1.5rem;
-        padding-bottom: 1.5rem;
+    .planning-container {
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .planning-header {
+        text-align: center;
         border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
-    .form-section:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
+    .planning-header h2 {
+        font-size: 1.75rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
     }
-    .form-section h3 {
-        font-size: 1.125rem;
+    .planning-header p {
+        font-size: 1.1rem;
         color: var(--text-secondary);
-        margin-bottom: 1rem;
+        max-width: 600px;
+        margin: 0 auto;
     }
-    .radio-group {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
+    .planning-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
     }
-    .radio-label {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1rem;
-        border: 2px solid var(--border-color);
-        border-radius: var(--radius-md);
-        cursor: pointer;
+    .plan-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        text-align: center;
         transition: var(--transition);
     }
-    .radio-label input {
-        width: auto;
-        margin-bottom: 0;
-    }
-    .radio-label:has(input:checked) {
-        background: var(--bg-tertiary);
+    .plan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
         border-color: var(--primary-color);
     }
-    #venueSelectContainer, #customLocationContainer {
-        display: none; /* Hidden by default */
+    .plan-card svg {
+        width: 48px;
+        height: 48px;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
     }
-    label {
-        display: block; 
-        margin-bottom: 0.5rem; 
-        color: var(--text-secondary); 
-        font-size: 0.875rem;
-        font-weight: 500;
+    .plan-card h3 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    .plan-card p {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+    }
+    .plan-card .action-btn {
+        width: 100%;
+        justify-content: center;
+        text-decoration: none;
+    }
+    @media (max-width: 768px) {
+        .planning-options {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
     }
 </style>
 
-<div class="create-event-form" style="max-width: 700px; margin: 0 auto;">
-    <h2>Create New Event</h2>
-    
-    <form id="createEventForm">
-        
-        <div class="form-section">
-            <label for="evTitle">Event Title*</label>
-            <input 
-                id="evTitle" 
-                type="text" 
-                placeholder="e.g. Spring Hackathon" 
-                required
-            >
-            
-            <label for="evDescription">Description</label>
-            <textarea 
-                id="evDescription" 
-                placeholder="Tell attendees about your event..."
-            ></textarea>
+<!-- FIXED: This div now contains the "Choice" UI instead of the old form -->
+<div class="planning-container page-transition-enter-active">
+    <div class="planning-header">
+        <h2>Create a New Event</h2>
+        <p>Choose how you'd like to get started. You can use the standard form or our guided wizard.</p>
+    </div>
+
+    <div class="planning-options">
+        <!-- Option 1: Standard Form -->
+        <div class="plan-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <h3>Standard Form</h3>
+            <p>For experienced organizers. Fill out all the event details on a single page.</p>
+            <a href="#/event-form" class="action-btn primary">
+                Use Standard Form
+            </a>
         </div>
 
-        <div class="form-section">
-            <h3>Date & Time*</h3>
-            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                <div style="flex: 1; min-width: 200px;">
-                    <label for="evStart">Start Time</label>
-                    <input id="evStart" type="datetime-local" required>
-                </div>
-                <div style="flex: 1; min-width: 200px;">
-                    <label for="evEnd">End Time</label>
-                    <input id="evEnd" type="datetime-local" required>
-                </div>
-            </div>
+        <!-- Option 2: Event Wizard (Coming Soon) -->
+        <div class="plan-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2.69l.34 2.08.38 2.3.9 1.67.6 1.1.94.3 2.1.75 1.3.47.7.5.7-.5 1.3-.47 2.1-.75.94-.3.6-1.1.9-1.67.38-2.3.34-2.08L12 2.69zM12 2.69l-.34 2.08-.38 2.3-.9 1.67-.6 1.1-.94.3-2.1.75-1.3.47-.7.5.7.5 1.3.47 2.1.75.94.3.6-1.1.9-1.67.38-2.3.34-2.08L12 2.69zM12 2.69L12 22"></path>
+            </svg>
+            <h3>Event Wizard</h3>
+            <p>Perfect for new users. We'll guide you through the creation process step-by-step.</p>
+            <button class="action-btn secondary" disabled title="Coming Soon!">
+                Start Wizard (Soon)
+            </button>
         </div>
-
-        <div class="form-section">
-            <h3>Location*</h3>
-            <div class="radio-group">
-                <label class="radio-label">
-                    <input type="radio" name="location_type" value="venue" checked>
-                    On-Campus Venue
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="location_type" value="custom">
-                    Custom Address
-                </label>
-            </div>
-
-            <div id="venueSelectContainer">
-                <label for="evVenue">Select a Venue</label>
-                <select id="evVenue">
-                    <option value="">Loading venues...</option>
-                </select>
-            </div>
-
-            <div id="customLocationContainer">
-                <label for="evCustomLocation">Custom Address</label>
-                <input 
-                    id="evCustomLocation" 
-                    type="text" 
-                    placeholder="e.g. 123 Main St, Marion, IN"
-                >
-            </div>
-            
-            <label for="evMapsLink">Google Maps Link (Optional)</label>
-            <input 
-                id="evMapsLink" 
-                type="url" 
-                placeholder="https://maps.app.goo.gl/..."
-            >
-        </div>
-
-        <div class="form-section">
-            <h3>Settings</h3>
-            <label>Visibility*</label>
-            <div class="radio-group">
-                <label class="radio-label">
-                    <input type="radio" name="visibility" value="public" checked>
-                    Public (Visible to everyone)
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="visibility" value="private">
-                    Private (Only visible to you)
-                </label>
-            </div>
-        </div>
-        
-        <button type="submit" id="createBtn">Create Event</button>
-    </form>
-    
-    <div id="createMessage" style="display: none; margin-top: 1rem;"></div>
+    </div>
 </div>
 
-<script type="module">
-import { api } from "../js/api.js";
-
-const form = document.getElementById("createEventForm");
-const messageDiv = document.getElementById("createMessage");
-const token = localStorage.getItem("token");
-
-// --- Form Elements ---
-const venueSelectContainer = document.getElementById("venueSelectContainer");
-const customLocationContainer = document.getElementById("customLocationContainer");
-const venueSelect = document.getElementById("evVenue");
-const customLocationInput = document.getElementById("evCustomLocation");
-const locationTypeRadios = document.querySelectorAll('input[name="location_type"]');
-
-// --- Location Toggle Logic ---
-function handleLocationTypeChange() {
-    if (this.value === 'venue') {
-        venueSelectContainer.style.display = 'block';
-        customLocationContainer.style.display = 'none';
-        venueSelect.required = true;
-        customLocationInput.required = false;
-    } else {
-        venueSelectContainer.style.display = 'none';
-        customLocationContainer.style.display = 'block';
-        venueSelect.required = false;
-        customLocationInput.required = true;
-    }
-}
-locationTypeRadios.forEach(radio => radio.addEventListener('change', handleLocationTypeChange));
-
-// --- Load Venues into Dropdown ---
-async function loadVenues() {
-    try {
-        const venues = await api("/venues/", "GET", null, token);
-        if (venues && venues.length > 0) {
-            venueSelect.innerHTML = '<option value="">-- Select a venue --</option>'; // Clear loading
-            venues.forEach(venue => {
-                const option = document.createElement('option');
-                option.value = venue.venue_id;
-                // Format: "Name (Building, Room)"
-                option.textContent = `${venue.name} ${venue.building ? `(${venue.building}${venue.room_number ? `, ${venue.room_number}` : ''})` : ''}`;
-                venueSelect.appendChild(option);
-            });
-        } else {
-            venueSelect.innerHTML = '<option value="">No venues found. Create one first.</option>';
-        }
-    } catch (error) {
-        console.error("Failed to load venues:", error);
-        venueSelect.innerHTML = '<option value="">Error loading venues</option>';
-    }
-}
-
-// --- Initial Page Load ---
-// Trigger change to set initial state
-handleLocationTypeChange.call(document.querySelector('input[name="location_type"]:checked'));
-loadVenues();
-
-// --- Form Submission ---
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    
-    const createBtn = document.getElementById("createBtn");
-    messageDiv.style.display = "none";
-    
-    // --- Get All Values ---
-    const title = document.getElementById("evTitle").value;
-    const description = document.getElementById("evDescription").value;
-    // Use .value to get 'YYYY-MM-DDTHH:MM' and send as ISO string
-    const start = document.getElementById("evStart").value;
-    const end = document.getElementById("evEnd").value;
-    
-    const location_type = document.querySelector('input[name="location_type"]:checked').value;
-    const venue_id = venueSelect.value;
-    const custom_location_address = customLocationInput.value;
-    const google_maps_link = document.getElementById("evMapsLink").value;
-    const visibility = document.querySelector('input[name="visibility"]:checked').value;
-
-    // --- Validation ---
-    if (new Date(start) >= new Date(end)) {
-        messageDiv.className = "error-message";
-        messageDiv.textContent = "End time must be after start time";
-        messageDiv.style.display = "block";
-        return;
-    }
-    
-    // Build payload
-    const payload = {
-        title,
-        description,
-        start_time: start, // Send as ISO-compatible string
-        end_time: end,     // Send as ISO-compatible string
-        location_type,
-        google_maps_link,
-        visibility,
-        venue_id: location_type === 'venue' ? venue_id : null,
-        custom_location_address: location_type === 'custom' ? custom_location_address : null,
-    };
-
-    // Disable button
-    createBtn.disabled = true;
-    createBtn.textContent = "Creating...";
-    
-    try {
-        const res = await api("/events/", "POST", payload, token);
-        
-        if (res.error) {
-            messageDiv.className = "error-message";
-            messageDiv.textContent = res.error || "Failed to create event";
-            messageDiv.style.display = "block";
-            
-            createBtn.disabled = false;
-            createBtn.textContent = "Create Event";
-        } else {
-            messageDiv.className = "success-message";
-            messageDiv.textContent = "Event created successfully! Redirecting...";
-            messageDiv.style.display = "block";
-            
-            setTimeout(() => {
-                window.location.hash = "#/calendar"; // Redirect to calendar
-            }, 1500);
-        }
-    } catch (error) {
-        messageDiv.className = "error-message";
-        messageDiv.textContent = "Network error. Please try again.";
-        messageDiv.style.display = "block";
-        
-        createBtn.disabled = false;
-        createBtn.textContent = "Create Event";
-    }
-});
-</script>
+<!-- Removed the old form script, as this is now a navigation page -->

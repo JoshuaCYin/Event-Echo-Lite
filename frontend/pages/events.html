@@ -1,200 +1,428 @@
-<!-- Landing Events Page -->
-<style>
-  .landing-events-container {
-    max-width: 1400px;
-    margin: 0 auto;
-    /* 90px top padding for navbar, 1rem for mobile */
-    padding: 90px 2rem 2rem 2rem;
-  }
-  @media (max-width: 768px) {
-    .landing-events-container {
-      padding: 80px 1rem 1rem 1rem;
-    }
-  }
+<!-- Event Hub: Combines Card View, List View, and Calendar View -->
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
-  .events-header {
-    text-align: center;
-    margin-bottom: 3rem;
-  }
-  .events-header h1 {
-    font-size: 2.5rem;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.5rem;
-  }
-  .events-header p {
-    color: var(--text-secondary);
-    font-size: 1.125rem;
-  }
-  .events-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 2rem;
-  }
-  .event-card {
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-md);
-    transition: all 0.3s ease;
-    border: 1px solid var(--border-color);
-  }
-  .event-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
-  }
-  .event-image {
-    width: 100%;
-    height: 220px;
-    background: var(--gradient-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 3rem;
-    font-weight: 700;
-  }
-  .event-content {
-    padding: 1.5rem;
-  }
-  .event-date {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--primary-color);
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 1rem;
-  }
-  .event-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.75rem;
-  }
-  .event-description {
-    color: var(--text-secondary);
-    font-size: 0.9375rem;
-    line-height: 1.6;
-    margin-bottom: 1rem;
-  }
-  .event-meta {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 1rem;
-  }
-  .event-location {
-    display: flex;
-    align-items: center;
-    gap: 0.375rem;
-    color: var(--text-light);
-    font-size: 0.875rem;
-  }
-  .event-location a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 600;
-  }
-  .event-location a:hover {
-    text-decoration: underline;
-  }
-</style>
+<!-- FIXED: Added page transition class -->
+<div class="event-hub-container page-content-wrapper page-transition-enter-active">
+    <div style="text-align: center; margin-bottom: 1.5rem;">
+        <h1>Event Hub</h1>
+        <p style="color: var(--text-secondary); font-size: 1.1rem;">Explore, filter, and plan your events.</p>
+    </div>
 
-<div class="landing-events-container">
-  <div class="events-header">
-    <h1>Upcoming Events</h1>
-    <p>Discover exciting events happening on campus</p>
-  </div>
-  
-  <div class="events-grid" id="eventsGrid">
-    <div class="loading">Loading events...</div>
-  </div>
+    <div class="event-hub-controls">
+        <div class="search-filter-group">
+            <input type="text" id="eventSearchInput" placeholder="Search event titles or descriptions..." title="Search" style="flex-grow: 1;">
+            <input type="date" id="eventDateFilter" title="Filter by date">
+            <button class="action-btn secondary" id="resetFiltersBtn" title="Reset Filters">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <!-- Reset icon (e.g., a counter-clockwise arrow) -->
+                    <path d="M2.5 2v6h6M21.5 22v-6h-6"></path>
+                    <path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="view-toggle-buttons">
+            <button class="action-btn primary active" data-view="cards" id="cardsViewBtn" title="Card View">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+            </button>
+            <button class="action-btn secondary" data-view="list" id="listViewBtn" title="List View">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+            </button>
+            <button class="action-btn secondary" data-view="calendar" id="calendarViewBtn" title="Calendar View">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <!-- View Containers -->
+    <div id="eventCardsView" class="app-events-grid"></div>
+    <div id="eventListView" class="app-events-grid" style="display: none; grid-template-columns: 1fr;"></div>
+    <div id="eventCalendarView" class="calendar-view-wrapper" style="display: none; background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <div id="calendar"></div>
+    </div>
+
+    <!-- Non-alert Event Detail Modal -->
+    <div id="eventDetailModal">
+        <div style="max-height: 80vh; overflow-y: auto;">
+            <button class="detail-close" id="closeDetailModal">&times;</button>
+            <h3 id="detailTitle"></h3>
+            <p><span class="detail-date" id="detailDate"></span></p>
+            <p><span class="detail-location" id="detailLocation"></span></p>
+            <p id="detailDescription"></p>
+            <div id="detailActions" class="event-actions" style="margin-top: 1.5rem;"></div>
+        </div>
+    </div>
 </div>
 
 <script type="module">
-// Fix: The script tag is executed within the context of the main index.html file, 
-// so the module specifier must be relative to the application root (/) to correctly find js/api.js.
-import { api } from "/js/api.js";
+import { api } from "../js/api.js";
+import { getRoleFromToken, token } from "../js/app.js";
+
+const cardsView = document.getElementById("eventCardsView");
+const listView = document.getElementById("eventListView");
+const calendarView = document.getElementById("eventCalendarView");
+const viewButtons = document.querySelectorAll(".view-toggle-buttons .action-btn");
+const searchInput = document.getElementById("eventSearchInput");
+const dateFilter = document.getElementById("eventDateFilter");
+const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+let allEvents = [];
+let currentEvents = [];
+let currentView = "cards";
+const userRole = getRoleFromToken();
+const userId = token ? JSON.parse(atob(token.split('.')[1])).sub : null; // Use 'sub' for user_id
+
+
+// --- Helper Functions ---
+
+/**
+ * FIXED: Standardized location helper function
+ * @param {object} event - The event object from the API.
+ * @returns {string} A formatted location string.
+ */
+function getEventLocation(event) {
+    if (event.location_type === 'custom') {
+        return event.custom_location_address || 'Location TBA';
+    }
+    if (event.location_type === 'venue') {
+        let name = event.venue_name || 'On-Campus Venue';
+        let building = event.venue_building || '';
+        let room = event.venue_room || event.venue_room_number || '';
+        
+        if (building && room) {
+            return `${name} (${building}, ${room})`;
+        }
+        if (building) {
+            return `${name} (${building})`;
+        }
+        return name;
+    }
+    return 'Location TBA';
+}
+
+
+/**
+ * Generates a Google Maps link.
+ */
+function getMapLink(event) {
+    if (event.google_maps_link) {
+        return `<a href="${event.google_maps_link}" target="_blank" class="map-link" onclick="event.stopPropagation()">View Map</a>`;
+    }
+    const location = getEventLocation(event);
+    if (location && location !== 'Location TBA' && location !== 'On-Campus Venue') {
+        const encodedLocation = encodeURIComponent(location);
+        return `<a href="https://www.google.com/maps/search/?api=1&query=${encodedLocation}" target="_blank" class="map-link" onclick="event.stopPropagation()">Search on Map</a>`;
+    }
+    return '';
+}
+
+/**
+ * Shows the custom event detail modal.
+ */
+function showDetailModal(event) {
+    if (!event) return;
+    const modal = document.getElementById('eventDetailModal');
+    document.getElementById('detailTitle').textContent = event.title;
+    
+    const formattedDate = new Date(event.start_time).toLocaleString('en-US', { 
+        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' 
+    });
+    
+    document.getElementById('detailDate').textContent = `📅 ${formattedDate}`;
+    document.getElementById('detailLocation').textContent = `📍 ${getEventLocation(event)}`;
+    document.getElementById('detailDescription').textContent = event.description || 'No description provided.';
+
+    const detailActions = document.getElementById('detailActions');
+    detailActions.innerHTML = '';
+    
+    // Add RSVP/Actions for Logged-In Users
+    const rsvpBtn = document.createElement('button');
+    rsvpBtn.className = 'action-btn primary';
+    rsvpBtn.textContent = 'RSVP';
+    rsvpBtn.onclick = () => {
+        const rsvpMsg = document.createElement('p');
+        rsvpMsg.textContent = 'RSVP functionality not yet implemented.';
+        rsvpMsg.style.color = 'var(--text-secondary)';
+        detailActions.appendChild(rsvpMsg);
+        rsvpBtn.disabled = true;
+    };
+    detailActions.appendChild(rsvpBtn);
+
+    if (userRole === 'admin' || (userRole === 'organizer' && event.organizer_id === userId)) {
+        const editBtn = document.createElement('a');
+        editBtn.className = 'action-btn secondary';
+        editBtn.href = `#/event-form?edit=${event.event_id}`;
+        editBtn.textContent = 'Edit Event';
+        detailActions.appendChild(editBtn);
+    }
+
+    modal.style.display = 'block';
+}
+
+document.getElementById('closeDetailModal').addEventListener('click', () => {
+    document.getElementById('eventDetailModal').style.display = 'none';
+});
+
+// --- Event Rendering ---
+
+/**
+ * Renders the events into the currently active view (Card or List).
+ * @param {Array} events - The array of events to render.
+ */
+function renderEvents(events, isList = false) {
+    const container = isList ? listView : cardsView;
+    const listClass = isList ? 'list-card-style' : '';
+    
+    if (events.length === 0) {
+        container.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><h3>No Events Found</h3><p>Try adjusting your search or date filters.</p></div>';
+        return;
+    }
+
+    container.innerHTML = events.map(event => {
+        const startDate = new Date(event.start_time);
+        const formattedDate = startDate.toLocaleString('en-US', { 
+            weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+        });
+        const formattedTime = startDate.toLocaleTimeString('en-US', {
+            hour: 'numeric', minute: '2-digit'
+        });
+
+        const locationText = getEventLocation(event);
+        const mapLinkHtml = getMapLink(event);
+        
+        let actionButtons = `<button class="action-btn primary" onclick="event.stopPropagation(); alert('RSVP for ${event.title}!')">RSVP</button>`;
+        
+        if (userRole === 'admin' || (userRole === 'organizer' && event.organizer_id === userId)) {
+            actionButtons += `<a href="#/event-form?edit=${event.event_id}" class="action-btn secondary" onclick="event.stopPropagation()">Edit</a>`;
+        }
+
+        const eventId = event.event_id;
+        
+        return `
+            <article class="app-event-card ${listClass}" data-event-id="${eventId}">
+                <div class="event-image">${event.title.charAt(0)}</div>
+                <div class="event-content">
+                    <div class="event-date">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        ${formattedDate} at ${formattedTime}
+                    </div>
+                    <h3>${event.title}</h3>
+                    ${event.description ? `<p class="event-description">${event.description}</p>` : ''}
+                    <div class="event-meta">
+                        <span class="event-location">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                <circle cx="12" cy="10" r="3"></circle>
+                            </svg>
+                            ${locationText}
+                        </span>
+                        ${mapLinkHtml}
+                    </div>
+                    <div class="event-actions">
+                        ${actionButtons}
+                    </div>
+                </div>
+            </article>
+        `;
+    }).join("");
+
+    // Add click listeners for modals *after* rendering
+    container.querySelectorAll('.app-event-card').forEach(card => {
+        card.addEventListener('click', (e) => {
+            const eventId = e.currentTarget.dataset.eventId;
+            const eventData = allEvents.find(e => e.event_id == eventId);
+            showDetailModal(eventData);
+        });
+    });
+}
+
+// --- Calendar Functionality ---
+
+/**
+ * Robust normalization of various date formats into ISO strings.
+ */
+function normalizeDateTime(dt) {
+    if (!dt && dt !== 0) return null;
+    if (dt instanceof Date) return dt.toISOString();
+    if (typeof dt === 'number') {
+        if (String(dt).length <= 10) dt = dt * 1000;
+        return new Date(dt).toISOString();
+    }
+    if (typeof dt === 'string') {
+        const trimmed = dt.trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return `${trimmed}T00:00:00Z`;
+        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(trimmed)) return trimmed.replace(' ', 'T') + 'Z';
+        const parsed = new Date(trimmed);
+        if (!isNaN(parsed.getTime())) return parsed.toISOString();
+        return trimmed;
+    }
+    return null;
+}
+
+let fcCalendar = null;
+
+/**
+ * Renders or updates the FullCalendar instance with the given events.
+ * @param {Array} events - The array of event objects to display.
+ */
+function renderCalendar(events) {
+    const calendarEl = document.getElementById('calendar');
+    const calendarEvents = events.map(e => ({
+        title: e.title,
+        start: normalizeDateTime(e.start_time),
+        end: normalizeDateTime(e.end_time),
+        extendedProps: e
+    }));
+
+    if (!fcCalendar) {
+        fcCalendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+            },
+            buttonText: {
+                today: 'Today',
+                month: 'Month',
+                week: 'Week',
+                day: 'Day',
+                list: 'List'
+            },
+            height: 'auto',
+            aspectRatio: 1.8,
+            eventClick(info) {
+                info.jsEvent.preventDefault();
+                showDetailModal(info.event.extendedProps);
+            }
+        });
+        fcCalendar.render();
+    }
+
+    // Always clear and re-add events
+    fcCalendar.removeAllEvents();
+    fcCalendar.addEventSource(calendarEvents);
+}
+
+// --- Filtering and View Logic ---
+
+function applyFilters() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const filterDate = dateFilter.value;
+    
+    currentEvents = allEvents.filter(event => {
+        const titleMatch = event.title.toLowerCase().includes(searchTerm);
+        const descriptionMatch = (event.description || '').toLowerCase().includes(searchTerm);
+        const searchMatch = titleMatch || descriptionMatch;
+
+        if (filterDate) {
+            const eventStartDate = event.start_time ? String(event.start_time).split('T')[0] : null;
+            const eventEndDate = event.end_time ? String(event.end_time).split('T')[0] : null;
+            if (!eventStartDate || !eventEndDate) return false;
+            return searchMatch && filterDate >= eventStartDate && filterDate <= eventEndDate;
+        }
+
+        return searchMatch;
+    });
+
+    if (currentView === 'calendar') {
+        renderCalendar(currentEvents);
+    } else {
+        const isList = currentView === 'list';
+        renderEvents(currentEvents, isList);
+    }
+}
+
+/**
+ * Handles switching between Card, List, and Calendar views.
+ */
+function switchView(view) {
+    currentView = view;
+
+    cardsView.style.display = 'none';
+    listView.style.display = 'none';
+    calendarView.style.display = 'none';
+
+    viewButtons.forEach(btn => {
+        btn.classList.remove('active', 'primary');
+        btn.classList.add('secondary');
+    });
+
+    const activeBtn = document.querySelector(`[data-view="${view}"]`);
+    activeBtn.classList.remove('secondary');
+    activeBtn.classList.add('active', 'primary');
+
+    if (view === 'cards') {
+        cardsView.style.display = 'grid';
+        renderEvents(currentEvents, false);
+    } else if (view === 'list') {
+        listView.style.display = 'grid';
+        renderEvents(currentEvents, true);
+    } else if (view === 'calendar') {
+        calendarView.style.display = 'block';
+        // Ensure proper reflow and layout after visibility change
+        setTimeout(() => {
+            if (fcCalendar) {
+                fcCalendar.render();
+                fcCalendar.updateSize();
+            } else {
+                renderCalendar(currentEvents);
+            }
+        }, 50);
+    }
+}
+
+// --- Initialization ---
 
 async function loadEvents() {
-  const grid = document.getElementById("eventsGrid");
-  
-  try {
-    const events = await api("/events/", "GET", null, null);
-    
-    if (!events || events.length === 0) {
-      grid.innerHTML = `
-        <div class="empty-state" style="grid-column: 1/-1; text-align: center;">
-          <h3>No Events Yet</h3>
-          <p>Check back soon for upcoming events!</p>
-        </div>
-      `;
-      return;
+    try {
+        const events = await api("/events/", "GET", null, token);
+        allEvents = events;
+        currentEvents = [...allEvents];
+        renderEvents(allEvents);
+    } catch (err) {
+        console.error("Failed to load events:", err);
+        cardsView.innerHTML = '<p class="error-message">Unable to load events. Please try again later.</p>';
     }
-    
-    grid.innerHTML = events.map(event => {
-      const startDate = new Date(event.start_time);
-      const formattedDate = startDate.toLocaleDateString('en-US', { 
-        weekday: 'long',
-        month: 'long', 
-        day: 'numeric'
-      });
-      const formattedTime = startDate.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit'
-      });
-      
-      // Build location string
-      let locationHtml = 'Location TBD';
-      let mapsLink = event.google_maps_link;
-      
-      if (event.location_type === 'venue' && event.venue_name) {
-        locationHtml = `${event.venue_name} (${event.building || 'N/A'})`;
-        if (event.venue_google_maps_link && !mapsLink) {
-          mapsLink = event.venue_google_maps_link;
-        }
-      } else if (event.custom_location_address) {
-        locationHtml = event.custom_location_address;
-      }
-      
-      return `
-        <article class="event-card">
-          <div class="event-image">${event.title.charAt(0)}</div>
-          <div class="event-content">
-            <div class="event-date">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                <line x1="16" y1="2" x2="16" y2="6"></line>
-                <line x1="8" y1="2" x2="8" y2="6"></line>
-                <line x1="3" y1="10" x2="21" y2="10"></line>
-              </svg>
-              ${formattedDate} at ${formattedTime}
-            </div>
-            <h2 class="event-title">${event.title}</h2>
-            ${event.description ? `<p class="event-description">${event.description.substring(0, 100)}...</p>` : ''}
-            <div class="event-meta">
-              <span class="event-location">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3"></circle>
-                </svg>
-                ${locationHtml}
-                ${mapsLink ? `<a href="${mapsLink}" target="_blank" style="margin-left: 0.5rem;">(Map)</a>` : ''}
-              </span>
-            </div>
-          </div>
-        </article>
-      `;
-    }).join("");
-    
-  } catch (error) {
-    console.error("Failed to load events:", error);
-    grid.innerHTML = '<div class="error-message" style="grid-column: 1/-1;">Failed to load events. Please try again.</div>';
-  }
 }
 
 loadEvents();
+
+// --- Event Listeners ---
+
+searchInput.addEventListener('input', applyFilters);
+dateFilter.addEventListener('change', applyFilters);
+resetFiltersBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    dateFilter.value = '';
+    currentEvents = [...allEvents];
+    applyFilters();
+});
+
+viewButtons.forEach(btn => {
+    btn.addEventListener('click', () => switchView(btn.dataset.view));
+});
+
 </script>

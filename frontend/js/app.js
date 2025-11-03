@@ -180,17 +180,17 @@ export function updateNavbarForAuth() {
       `;
     }
   } else {
-    // User is logged out - show default "Login" / "Sign Up" buttons
+    // User is logged out - show default "Log In" / "Sign Up" buttons
      if (navbarActions) {
       navbarActions.innerHTML = `
-        <a href="#/login" class="navbar-btn navbar-btn-secondary">Login</a>
+        <a href="#/login" class="navbar-btn navbar-btn-secondary">Log In</a>
         <a href="#/register" class="navbar-btn navbar-btn-primary">Sign Up</a>
       `;
     }
     
     if (navbarMobileActions) {
       navbarMobileActions.innerHTML = `
-        <a href="#/login" class="navbar-btn navbar-btn-secondary">Login</a>
+        <a href="#/login" class="navbar-btn navbar-btn-secondary">Log In</a>
         <a href="#/register" class="navbar-btn navbar-btn-primary" style="color: #5a4dbf;">Sign Up</a>
       `;
     }
@@ -203,3 +203,4 @@ export function updateNavbarForAuth() {
     }
   });
 }
+

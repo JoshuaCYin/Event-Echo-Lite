@@ -5,7 +5,7 @@ Events service routes: create, read, update, delete events, and RSVP.
 from flask import Blueprint, request, jsonify
 from backend.database.db_connection import get_db
 from backend.auth_service.utils import verify_token_from_request
-from backend.auth_service.routes import verify_token
+from backend.auth_service.routes import verify_token # Simple token check
 import os
 from datetime import datetime
 from dotenv import load_dotenv
@@ -16,13 +16,12 @@ events_bp = Blueprint("events", __name__)
 
 def parse_dt(val):
     """
-    Safely parse an ISO-8601 datetime string.
+    Safely parse an ISO-8601 or datetime-local string.
     """
     if not val:
         return None
     try:
-        # datetime-local input format is 'YYYY-MM-DDTHH:MM'
-        # fromisoformat handles this, and also full ISO strings
+        # Handles 'YYYY-MM-DDTHH:MM' and '...Z' or '...+00:00'
         if val.endswith('Z'):
             val = val[:-1] + '+00:00'
         return datetime.fromisoformat(val)
@@ -37,14 +36,12 @@ def list_events():
     - Logged in: Returns all 'public' events AND 'private' events
       created by the authenticated user.
     """
-    # Check for authentication token (optional)
     auth_user_id = None
     auth = request.headers.get("Authorization", "")
     if auth.startswith("Bearer "):
         token = auth.split(" ", 1)[1]
-        auth_user_id = verify_token(token) # Simple verify, doesn't reject
+        auth_user_id = verify_token(token)
 
-    # Base query selects public, upcoming events
     base_sql = """
         SELECT 
             e.event_id, e.title, e.description, e.start_time, e.end_time,
@@ -84,20 +81,12 @@ def list_events():
 @events_bp.route("/", methods=["POST"])
 def create_event():
     """
-    Create an event. (Schema updated)
-    Body JSON: {
-        "title": "...", 
-        "description": "...",
-        "start_time": "ISO_STRING", 
-        "end_time": "ISO_STRING",
-        "location_type": "venue" | "custom",
-        "venue_id": INT (if 'venue'),
-        "custom_location_address": "..." (if 'custom'),
-        "google_maps_link": "..." (optional),
-        "visibility": "public" | "private" (optional, default 'public')
-    }
+    Create an event.
+    - Any authenticated user can create a 'private' event.
+    - Only 'organizer' or 'admin' can create a 'public' event.
     """
-    user_id, role, err, code = verify_token_from_request(required_roles=["organizer", "admin"])
+    # 1. Verify *any* authenticated user
+    user_id, role, err, code = verify_token_from_request()
     if err:
         return err, code
 
@@ -121,7 +110,7 @@ def create_event():
         return jsonify({"error": "start_time must be before end_time"}), 400
 
     # --- Location Handling ---
-    location_type = data.get("location_type", "venue")
+    location_type = data.get("location_type", "custom") # Default to custom
     venue_id = data.get("venue_id")
     custom_location = data.get("custom_location_address")
     
@@ -130,12 +119,21 @@ def create_event():
     if location_type == 'custom' and not custom_location:
         return jsonify({"error": "custom_location_address is required for location_type 'custom'"}), 400
 
-    # --- Optional Fields ---
+    # --- Optional Fields & Visibility ---
     description = data.get("description")
     google_maps_link = data.get("google_maps_link")
     visibility = data.get("visibility", "public")
+    
     if visibility not in ['public', 'private']:
         visibility = 'public'
+
+    # 2. **Permission Check**
+    if visibility == 'public' and role not in ['organizer', 'admin']:
+        return jsonify({
+            "error": "Permission denied. Only organizers and admins can create public events."
+        }), 403
+
+    # (If an attendee submits 'private', this check passes, which is correct)
 
     # --- Conflict Check (Simple) ---
     if location_type == 'venue':
@@ -190,6 +188,146 @@ def create_event():
 
     return jsonify({"event_id": event_id}), 201
 
-# --- /<int:event_id> PUT and DELETE (Omitted for brevity, unchanged) ---
-# --- /<int:event_id>/rsvp POST (Omitted for brevity, unchanged) ---
+@events_bp.route("/<int:event_id>", methods=["PUT"])
+def update_event(event_id):
+    """
+    Update an event if the caller is the organizer or admin.
+    Allows partial updates.
+    """
+    user_id, role, err, code = verify_token_from_request() # Get user first
+    if err:
+        return err, code
 
+    data = request.get_json() or {}
+    if not data:
+        return jsonify({"error": "No update data provided"}), 400
+
+    conn = get_db()
+    try:
+        # First, verify ownership or admin status
+        with conn.cursor() as cur:
+            cur.execute("SELECT organizer_id, created_by FROM events WHERE event_id = %s;", (event_id,))
+            ev = cur.fetchone()
+            if not ev:
+                conn.close()
+                return jsonify({"error": "Event not found"}), 404
+
+            # Allow update if user is Admin, Organizer, or *created* the event
+            if role not in ['admin', 'organizer'] and ev["created_by"] != user_id:
+                conn.close()
+                return jsonify({"error": "Permission denied"}), 403
+            
+            # **Role-based check for visibility**
+            if 'visibility' in data and data['visibility'] == 'public':
+                if role not in ['admin', 'organizer']:
+                    conn.close()
+                    return jsonify({"error": "Only organizers/admins can make events public"}), 403
+
+        # --- Build partial update query ---
+        fields = []
+        values = []
+        
+        allowed_fields = [
+            "title", "description", "start_time", "end_time", 
+            "location_type", "venue_id", "custom_location_address", 
+            "google_maps_link", "visibility", "status"
+        ]
+        
+        for key in allowed_fields:
+            if key in data:
+                fields.append(f"{key} = %s")
+                if key in ("start_time", "end_time"):
+                    values.append(parse_dt(data[key]))
+                else:
+                    values.append(data[key])
+        
+        if "updated_at" not in fields:
+             fields.append("updated_at = CURRENT_TIMESTAMP")
+
+        if fields:
+            values.append(event_id)
+            sql = f"UPDATE events SET {', '.join(fields)} WHERE event_id = %s;"
+            
+            with conn.cursor() as cur:
+                cur.execute(sql, values)
+                conn.commit()
+        else:
+            return jsonify({"error": "No valid fields to update"}), 400
+
+    except Exception as e:
+        conn.rollback()
+        print(f"Database error updating event {event_id}: {e}")
+        return jsonify({"error": "Failed to update event"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+    return jsonify({"status": "updated"}), 200
+
+@events_bp.route("/<int:event_id>", methods=["DELETE"])
+def delete_event(event_id):
+    """
+    Delete an event if the caller is the organizer, admin, or creator.
+    """
+    user_id, role, err, code = verify_token_from_request()
+    if err:
+        return err, code
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                # Verify ownership before deleting
+                cur.execute("SELECT organizer_id, created_by FROM events WHERE event_id = %s;", (event_id,))
+                ev = cur.fetchone()
+                if not ev:
+                    return jsonify({"error": "Event not found"}), 404
+
+                # Allow delete if user is Admin, Organizer, or *created* the event
+                if role not in ['admin', 'organizer'] and ev["created_by"] != user_id:
+                    return jsonify({"error": "Permission denied"}), 403
+
+                # Perform the delete
+                cur.execute("DELETE FROM events WHERE event_id = %s;", (event_id,))
+                conn.commit()
+                
+                if cur.rowcount == 0:
+                    return jsonify({"error": "Event not found or already deleted"}), 404
+                    
+    except Exception as e:
+        print(f"Database error deleting event {event_id}: {e}")
+        return jsonify({"error": "Failed to delete event"}), 500
+
+    return jsonify({"status": "deleted"}), 200
+
+@events_bp.route("/<int:event_id>/rsvp", methods=["POST"])
+def rsvp(event_id):
+    """
+    RSVP to an event. Uses PostgreSQL's "UPSERT" (ON CONFLICT)
+    """
+    user_id, _, err, code = verify_token_from_request()
+    if err:
+        return err, code
+
+    data = request.get_json() or {}
+    status = data.get("status", "going")
+    
+    if status not in ["going", "maybe", "canceled"]:
+        return jsonify({"error": "Invalid status. Must be 'going', 'maybe', or 'canceled'"}), 400
+
+    sql = """
+        INSERT INTO rsvps (user_id, event_id, rsvp_status) 
+        VALUES (%s, %s, %s)
+        ON CONFLICT (user_id, event_id) 
+        DO UPDATE SET rsvp_status = EXCLUDED.rsvp_status;
+    """
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, (user_id, event_id, status))
+                conn.commit()
+    except Exception as e:
+        print(f"Database error RSVPing: {e}")
+        return jsonify({"error": "Failed to RSVP. The event may not exist."}), 500
+
+    return jsonify({"status": status}), 200

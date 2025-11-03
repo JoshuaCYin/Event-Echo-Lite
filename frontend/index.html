@@ -89,27 +89,16 @@
                 <span>Dashboard</span>
             </a>
 
-            <!-- Calendar (Attendee default) -->
+            <!-- Events & Calendar (All Users) - Merged Link -->
             <a href="#/calendar" class="nav-item" data-page="calendar">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
-                <span>Calendar</span>
+                <span>Events & Calendar</span>
             </a>
 
-            <!-- Events (All users) -->
-            <a href="#/events" class="nav-item" data-page="events">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-                <span>Events</span>
-            </a>
-            
-            <!-- Create Event (Admin/Org only) -->
+            <!-- Create Event (All Users) -->
             <a href="#/create-event" class="nav-item" data-page="create-event" id="createEventNav">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -174,28 +163,27 @@
         function updateNavVisibility() {
             const role = getRoleFromToken();
             
-            // Get all the nav items
             const dashboardNav = document.getElementById('dashboardNav');
-            const createEventNav = document.getElementById('createEventNav');
             const planningNav = document.getElementById('planningNav');
+            // "Create Event" is now visible to ALL users
+            const createEventNav = document.getElementById('createEventNav');
             
             if (role !== 'admin' && role !== 'organizer') {
                 // --- Attendee View ---
                 if (dashboardNav) dashboardNav.style.display = 'none';
-                if (createEventNav) createEventNav.style.display = 'none';
                 if (planningNav) planningNav.style.display = 'none';
+                if (createEventNav) createEventNav.style.display = 'flex'; // Ensure it's visible
             } else {
                 // --- Admin/Organizer View ---
                 if (dashboardNav) dashboardNav.style.display = 'flex';
-                if (createEventNav) createEventNav.style.display = 'flex';
                 if (planningNav) planningNav.style.display = 'flex';
+                if (createEventNav) createEventNav.style.display = 'flex'; // Ensure it's visible
             }
         }
         
         // Update nav visibility on load and on hash change
         window.addEventListener('hashchange', updateNavVisibility);
-        // Also call it immediately on script load
-        updateNavVisibility();
+        updateNavVisibility(); // Call immediately
         
         // Mobile menu toggle
         const menuToggle = document.getElementById('menuToggle');
@@ -226,14 +214,12 @@
                     sidebar.classList.remove('active');
                     menuToggle.classList.remove('active');
                 }
-                // Navigation to #/profile is handled by the <a> tag
             });
         }
 
-        // Active nav item
+        // Close sidebar on any nav item click
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
-                // Close mobile menu after navigation
                 if (window.innerWidth <= 768) {
                     sidebar.classList.remove('active');
                     menuToggle.classList.remove('active');
@@ -250,3 +236,4 @@
     <script type="module" src="js/router.js"></script>
 </body>
 </html>
+

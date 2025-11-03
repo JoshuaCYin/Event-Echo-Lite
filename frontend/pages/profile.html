@@ -76,7 +76,8 @@
     }
 </style>
 
-<div class="profile-container" style="max-width: 800px; margin: 0 auto;">
+<!-- FIXED: Added page transition class -->
+<div class="profile-container page-transition-enter-active" style="max-width: 800px; margin: 0 auto;">
     <div class="profile-header" style="background: var(--bg-primary); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-sm); margin-bottom: 2rem;">
         <div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;">
             <div class="avatar" style="width: 80px; height: 80px; font-size: 2rem; flex-shrink: 0;">
@@ -279,19 +280,16 @@ profileForm.addEventListener("submit", async (e) => {
 
 // --- Delete Account ---
 document.getElementById("deleteAccountBtn").addEventListener("click", async () => {
-    // NOTE: Using custom modals instead of confirm() is better,
-    // but confirm() is used here for simplicity as requested.
-    if (!window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
-        return;
-    }
-    
-    if (!window.confirm("This will permanently delete all your data. Are you absolutely sure?")) {
+    // NOTE: A custom modal is better than confirm()
+    // This is a placeholder until a modal component is built.
+    const a = window.prompt("Type DELETE to confirm account deletion.");
+    if (a !== "DELETE") {
         return;
     }
     
     try {
         await api("/auth/delete", "POST", null, token);
-        alert("Account deleted successfully");
+        alert("Account deleted successfully"); //
         localStorage.removeItem("token");
         window.location.hash = "#/landing";
         window.location.reload();

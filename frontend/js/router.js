@@ -15,11 +15,12 @@ const routes = {
   "#/register": "pages/register.html",
   
   // App/Protected Routes
-  "#/dashboard": "pages/home.html", // Renamed from #/home
-  "#/events": "pages/events.html",
-  "#/calendar": "pages/calendar.html",
-  "#/create-event": "pages/create-event.html",
-  "#/planning": "pages/planning.html",
+  "#/dashboard": "pages/dashboard.html", // Admin/Org home
+  "#/calendar": "pages/events.html", // Attendee home / Event Hub
+  "#/events": "pages/events.html", // The "cards" list view
+  "#/create-event": "pages/create-event.html", // FIXED: Points to the new choice page
+  "#/event-form": "pages/event-form.html",     // The actual form
+  "#/planning": "pages/planning.html", // Kanban board placeholder
   "#/ai-chat": "pages/ai-chat.html",
   "#/profile": "pages/profile.html"
 };
@@ -36,8 +37,9 @@ const authPages = ["#/login", "#/register"];
 // --- Role-protected Pages ---
 const adminOnlyPages = [
     "#/dashboard",
-    "#/create-event",
+    // "/create-event" is now open to all
     "#/planning"
+    // "/event-form" is open to all, but backend/form logic handles permissions
 ];
 
 async function router() {
@@ -94,7 +96,6 @@ async function router() {
           return; // Stop execution
       }
 
-      // Hide landing nav, show app UI
       if (landingNavbar) landingNavbar.style.display = "none";
       if (sidebar) sidebar.style.display = "flex";
       if (mobileHeader) {
@@ -105,7 +106,6 @@ async function router() {
         }
       }
       
-      // Reset main content margin and remove special layouts
       if (mainContent) {
         mainContent.style.marginLeft = "";
         mainContent.classList.remove("auth-layout");
@@ -138,7 +138,12 @@ function updateActiveNav(path) {
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(item => {
     item.classList.remove('active');
-    if (item.getAttribute('href') === path) {
+    // Special handling for merged "Events & Calendar" tab
+    if (path === '#/calendar' || path === '#/events') {
+        if (item.getAttribute('href') === '#/calendar') {
+            item.classList.add('active');
+        }
+    } else if (item.getAttribute('href') === path) {
       item.classList.add('active');
     }
   });
@@ -175,12 +180,13 @@ function initializeLandingNavToggle() {
       mobileMenu.classList.toggle('active');
     });
 
-    // Close menu when *any* link is clicked
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        mobileMenu.classList.remove('active');
-      });
+    // **FIX:** Use event delegation on the menu itself
+    mobileMenu.addEventListener('click', (e) => {
+        // Check if the clicked element is a link
+        if (e.target.tagName === 'A' || e.target.closest('a')) {
+            hamburger.classList.remove('active');
+            mobileMenu.classList.remove('active');
+        }
     });
 
     // Close menu when clicking outside
