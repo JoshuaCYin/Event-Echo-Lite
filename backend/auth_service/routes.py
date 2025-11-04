@@ -280,4 +280,3 @@ def set_role():
         return jsonify({"error": "Failed to update role"}), 500
 
     return jsonify({"status": f"user {target_id} role set to {new_role}"}), 200
-

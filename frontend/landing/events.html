@@ -1,6 +1,7 @@
 <!-- Landing Events Page -->
 <style>
-  .landing-events-container { /* or .landing-calendar-container, etc. */
+  /* Landing events page event card formatting is different from main app's */
+  .landing-events-container {
     max-width: 1400px;
     margin: 0 auto;
     /* Set padding for Top, Right, Bottom, Left.
@@ -90,7 +91,7 @@
 
   .event-meta {
     display: flex;
-    flex-direction: column; /* FIXED: Stack location and map link */
+    flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem; /* Add gap between location and map link */
     margin-bottom: 1rem;
@@ -104,7 +105,7 @@
     font-size: 0.875rem;
   }
   
-  /* FIXED: Style for the map link */
+  /* Style for the map link */
   .map-link {
     font-size: 0.875rem;
     font-weight: 500;
@@ -192,7 +193,7 @@ function getEventLocation(event) {
 }
 
 /**
- * FIXED: Generates a Google Maps link.
+ * Generates a Google Maps link.
  * @param {object} event - The event object from the API.
  * @returns {string} An HTML anchor tag string.
  */
@@ -242,7 +243,7 @@ async function loadEvents() {
         minute: '2-digit'
       });
       
-      // FIXED: Get location and map link
+      // Get location and map link
       const locationHtml = getEventLocation(event);
       const mapLinkHtml = getMapLink(event);
       

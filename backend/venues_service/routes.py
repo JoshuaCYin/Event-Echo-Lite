@@ -76,4 +76,3 @@ def create_venue():
         return jsonify({"error": "Failed to create venue"}), 500
 
     return jsonify({"venue_id": venue_id, "name": name}), 201
-

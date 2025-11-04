@@ -1,2 +1,2 @@
 # backend/auth_service/__init__.py
-# package marker for auth_service
+# Marks this directory as a Python package.

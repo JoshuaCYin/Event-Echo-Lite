@@ -12,11 +12,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-print("DEBUG_DATABASE_URL:", os.getenv("DATABASE_URL")) # Database URL debugging
+print("DEBUG_DATABASE_URL:", os.getenv("DATABASE_URL")) # For database URL debugging
 
 # Basic console logging during API requests
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(asctime)s - %(message)s")
-
 
 def create_app():
     """
@@ -64,5 +63,5 @@ def create_app():
 
 if __name__ == "__main__":
     app = create_app()
-    port = int(os.getenv("GATEWAY_PORT", 5050)) # Use 5050 from .env
+    port = int(os.getenv("GATEWAY_PORT", 5050))
     app.run(host="0.0.0.0", port=port, debug=True)

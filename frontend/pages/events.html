@@ -115,7 +115,7 @@ const userId = token ? JSON.parse(atob(token.split('.')[1])).sub : null; // Use 
 // --- Helper Functions ---
 
 /**
- * FIXED: Standardized location helper function
+ * Standardized location helper function
  * @param {object} event - The event object from the API.
  * @returns {string} A formatted location string.
  */
@@ -210,7 +210,7 @@ document.getElementById('closeDetailModal').addEventListener('click', () => {
  */
 function renderEvents(events, isList = false) {
     const container = isList ? listView : cardsView;
-    // FIX: Use the class you defined to toggle list styles
+    // Use the class defined to toggle list styles
     const listClass = isList ? 'list-card-style' : '';
     
     if (events.length === 0) {
@@ -237,9 +237,8 @@ function renderEvents(events, isList = false) {
         const locationText = getEventLocation(event);
         const mapLinkHtml = getMapLink(event);
         
-        // FIX: Reworked button logic for card vs list
         let actionButtons = `<button class="action-btn primary" onclick="event.stopPropagation(); alert('RSVP for ${event.title}!')">RSVP</button>`;
-        let editIconHtml = ''; // New variable for card view edit icon
+        let editIconHtml = ''; // Variable for card view edit icon
         
         const canEdit = userRole === 'admin' || (userRole === 'organizer' && event.organizer_id === userId);
 
@@ -269,8 +268,6 @@ function renderEvents(events, isList = false) {
                 ${editIconHtml} <!-- This will be empty for list view, or populated for card view -->
                 <div class="event-image">${event.title.charAt(0)}</div>
                 <div class="event-content">
-                    
-                    <!-- FIX: New wrapper for list view text content -->
                     <div class="event-info-wrapper">
                         <h3>${event.title}</h3>
                         <div class="event-date">
@@ -285,7 +282,6 @@ function renderEvents(events, isList = false) {
                         ${event.description ? `<p class="event-description">${event.description}</p>` : ''}
                     </div>
                     
-                    <!-- FIX: New wrapper for list view meta -->
                     <div class="event-meta-wrapper">
                         <div class="event-meta">
                             <div class="event-location-group">
@@ -301,7 +297,6 @@ function renderEvents(events, isList = false) {
                         </div>
                     </div>
 
-                    <!-- FIX: New wrapper for list view actions -->
                     <div class="event-actions-wrapper">
                         <div class="event-actions">
                             ${actionButtons}
@@ -312,7 +307,7 @@ function renderEvents(events, isList = false) {
         `;
     }).join("");
 
-    // Add click listeners for modals *after* rendering
+    // Add click listeners for modals after rendering
     container.querySelectorAll('.app-event-card').forEach(card => {
         card.addEventListener('click', (e) => {
             // Don't open modal if a button or link was clicked
@@ -409,11 +404,11 @@ function applyFilters() {
             const eventStartDate = event.start_time ? String(event.start_time).split('T')[0] : null;
             const eventEndDate = event.end_time ? String(event.end_time).split('T')[0] : null;
             if (!eventStartDate || !eventEndDate) return false;
-            // Handle one-day events: check if filterDate is *on* that day
+            // Handle one-day events: check if filterDate is on that day
             if (eventStartDate === eventEndDate) {
                 return searchMatch && filterDate === eventStartDate;
             }
-            // Handle multi-day events: check if filterDate is *within* the range
+            // Handle multi-day events: check if filterDate is within the range
             return searchMatch && filterDate >= eventStartDate && filterDate <= eventEndDate;
         }
 
@@ -451,7 +446,7 @@ function switchView(view) {
         cardsView.style.display = 'grid';
         renderEvents(currentEvents, false);
     } else if (view === 'list') {
-        // FIX: Use 'grid' for list view container
+        // Use 'grid' for list view container
         listView.style.display = 'grid'; 
         renderEvents(currentEvents, true);
     } else if (view === 'calendar') {

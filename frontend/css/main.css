@@ -1,88 +1,47 @@
 /*
 main.css Table of Contents
-
-/* ===================================
-   1. CSS Variables (:root)
-   =================================== */
-
-/* ===================================
-   2. Reset & Base Styles
-   =================================== */
-
-/* ===================================
-   3. Reusable Components & Utilities
-   =================================== */
-/* This is the key section for the shared styles.
-   e.g., .btn-primary, .glass-card, .stat-card, etc.
+1. CSS Variables (:root)
+2. Reset & Base Styles
+3. Reusable Components & Utilities
+    This is the key section for the shared styles. e.g., .btn-primary, .glass-card, .stat-card, etc.
+    --- Buttons ---
+    --- Cards ---
+    --- Badges ---
+    --- Forms ---
+    --- Other Components (Logo, Avatar, etc.) ---
+4. Core Layout
+    --- Main Content Area ---
+    --- Sidebar ---
+    --- Mobile Header ---
+5. Page-Specific Styles
+    --- 5a. Auth (Login/Register) ---
+    --- 5b. Landing Page & Navbar ---
+    --- 5c. Dashboard ---
+    --- 5d. Events Pages (Create, List, Shared) ---
+    --- 5e. Calendar Page ---
+    --- 5f. Planning & AI Chat Pages ---
+    --- 5g. Profile Page ---
+6. Animations
+    --- Page Transition Animation ---
+    --- Fade In Animation (Used by many components) ---
+    --- Slide Up Animation (Used by Auth card) ---
+    --- Spin Animation (Used by Loading) ---
+7. Helpers & Overrides
+    --- Accessibility ---
+    --- Scrollbar ---
+    --- Loading States ---
+    --- Error & Success Messages ---
+    --- Empty States ---
+    --- Gradient & Color Overrides ---
+8. Responsive Media Queries
+    --- 1200px ---
+    --- 900px (List View) ---
+    --- 867px (Desktop Nav Override) ---
+    --- 768px (Tablet & Mobile) ---
+    --- 600px (Small Mobile) ---
+    --- 480px (Extra Small Mobile) ---
+9. Print Styles
 */
-
-/* --- Buttons --- */
-/* --- Cards --- */
-/* --- Badges --- */
-/* --- Forms --- */
-/* --- Other Components (Logo, Avatar, etc.) --- */
-
-
-/* ===================================
-   4. Core Layout
-   =================================== */
-
-/* --- Main Content Area --- */
-/* --- Sidebar --- */
-/* --- Mobile Header --- */
-
-
-/* ===================================
-   5. Page-Specific Styles
-   =================================== */
-
-/* --- 5a. Auth (Login/Register) --- */
-/* --- 5b. Landing Page & Navbar --- */
-/* --- 5c. Dashboard --- */
-/* --- 5d. Events Pages (Create, List, Shared) --- */
-/* --- 5e. Calendar Page --- */
-/* --- 5f. Planning & AI Chat Pages --- */
-/* --- 5g. Profile Page --- */
-
-
-/* ===================================
-   6. Animations
-   =================================== */
-/* --- Page Transition Animation --- */
-/* --- Fade In Animation (Used by many components) --- */
-/* --- Slide Up Animation (Used by Auth card) --- */
-/* --- Spin Animation (Used by Loading) --- */
-
-
-/* ===================================
-   7. Helpers & Overrides
-   =================================== */
-
-/* --- Accessibility --- */
-/* --- Scrollbar --- */
-/* --- Loading States --- */
-/* --- Error & Success Messages --- */
-/* --- Empty States --- */
-/* --- Gradient & Color Overrides --- */
-
-
-/* ===================================
-   8. Responsive Media Queries
-   =================================== */
-
-/* --- 1200px --- */
-/* --- 900px (List View) --- */
-/* --- 867px (Desktop Nav Override) --- */
-/* --- 768px (Tablet & Mobile) --- */
-/* --- 600px (Small Mobile) --- */
-/* --- 480px (Extra Small Mobile) --- */
-
-
-/* ===================================
-   9. Print Styles
-   =================================== */
-
-/* ===================================*/
 
 /* ===================================
    1. CSS Variables (:root)
@@ -606,12 +565,11 @@ img {
     display: flex; 
     flex-direction: column; 
     
-    /* FIX 2: Prevent single card from stretching horizontally */
+    /* Prevent single card from stretching horizontally */
     max-width: 420px;
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    /* End Fix 2 */
     
     position: relative; /* For edit button */
 }
@@ -672,7 +630,7 @@ img {
     border: none;
 }
 .app-event-card .event-meta span {
-    /* FIX: Removed display:block to allow inline alignment */
+    /* Removed display:block to allow inline alignment */
     margin-bottom: 0.0rem;
 }
 .app-event-card .event-meta .event-location {
@@ -707,15 +665,12 @@ img {
 .app-event-card .event-actions {
     display: flex;
     gap: 0.5rem;
-    /* FIX: Reduced padding around buttons */
+    /* Reduced padding around buttons */
     margin-top: 0.75rem;
 }
 .app-event-card .event-actions .action-btn {
-    /* FIX: Button is now full-width in card view */
     flex: 1; 
     justify-content: center;
-    /* End Fix */
-    
     padding: 0.6rem 1rem;
     text-align: center;
 }
@@ -734,13 +689,11 @@ img {
 }
 
 .list-card-style .event-content {
-    /* New layout */
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
     flex-wrap: nowrap;
-    /* End New */
     width: 100%;
     padding: 0.75rem 1.5rem; /* Reduced vertical padding */
 }
@@ -765,7 +718,7 @@ img {
     color: var(--text-secondary);
 }
 .list-card-style .event-description {
-    /* FIX: Show 1 line of description in list view */
+    /* Show 1 line of description in list view */
     display: -webkit-box;
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
@@ -945,10 +898,8 @@ input.is-invalid {
 
 .event-location-group {
     display: flex;
-    /* FIX: Changed baseline to center for better alignment */
     align-items: center;
     flex-wrap: wrap; /* Allow map link to wrap if needed */
-    /* FIX: Simplified gap */
     gap: 0.5rem;
 }
 
@@ -2217,7 +2168,7 @@ a:focus-visible {
     text-align: center;
     padding: 3rem 2rem;
     color: var(--text-light);
-    /* FIX: Make empty state stretch across grid columns */
+    /* Make empty state stretch across grid columns */
     grid-column: 1 / -1; 
     width: 100%;
     max-width: 100%; /* Ensure it can be full width in list view */
@@ -2324,7 +2275,7 @@ a:focus-visible {
     .sidebar {
         /* Start sidebar *below* the mobile header */
         top: var(--header-height); 
-        /* Fill *remaining* height */
+        /* Fill remaining height */
         height: calc(100vh - var(--header-height));
         /* Keep the slide-in transform */
         transform: translateX(-100%); 

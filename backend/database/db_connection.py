@@ -11,8 +11,8 @@ from dotenv import load_dotenv
 # Load .env variables from the project root
 load_dotenv()
 
+# Get the database URL from environment variable
 DATABASE_URL = os.getenv("DATABASE_URL")
-
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL is not set. Please set the environment variable.")
 
@@ -35,7 +35,3 @@ def get_db():
         print(f"Error connecting to database: {e}")
         # Re-raise the exception so the caller knows the connection failed
         raise
-
-# Note: Removed the redundant init_db() function.
-# The separate backend/database/init_db.py script is the correct
-# way to handle initialization and should be used instead.

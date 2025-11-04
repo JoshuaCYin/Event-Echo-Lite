@@ -85,7 +85,7 @@ def create_event():
     - Any authenticated user can create a 'private' event.
     - Only 'organizer' or 'admin' can create a 'public' event.
     """
-    # 1. Verify *any* authenticated user
+    # 1. Verify any authenticated user
     user_id, role, err, code = verify_token_from_request()
     if err:
         return err, code
@@ -127,13 +127,12 @@ def create_event():
     if visibility not in ['public', 'private']:
         visibility = 'public'
 
-    # 2. **Permission Check**
+    # 2. Permission Checks
     if visibility == 'public' and role not in ['organizer', 'admin']:
         return jsonify({
             "error": "Permission denied. Only organizers and admins can create public events."
         }), 403
-
-    # (If an attendee submits 'private', this check passes, which is correct)
+        # (If an attendee submits 'private', this check passes)
 
     # --- Conflict Check (Simple) ---
     if location_type == 'venue':
@@ -217,7 +216,7 @@ def update_event(event_id):
                 conn.close()
                 return jsonify({"error": "Permission denied"}), 403
             
-            # **Role-based check for visibility**
+            # Role-based check for visibility
             if 'visibility' in data and data['visibility'] == 'public':
                 if role not in ['admin', 'organizer']:
                     conn.close()
@@ -282,7 +281,7 @@ def delete_event(event_id):
                 if not ev:
                     return jsonify({"error": "Event not found"}), 404
 
-                # Allow delete if user is Admin, Organizer, or *created* the event
+                # Allow delete if user is Admin, Organizer, or created the event
                 if role not in ['admin', 'organizer'] and ev["created_by"] != user_id:
                     return jsonify({"error": "Permission denied"}), 403
 

@@ -1,2 +1,2 @@
 # backend/gateway/__init__.py
-# package marker for gateway
+# Marks this directory as a Python package.

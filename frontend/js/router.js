@@ -1,4 +1,4 @@
-// Updated router with proper sidebar/navbar visibility
+// Main frontend router
 import { loadPage } from "./utils.js";
 import { checkAuthAndRedirect, updateUserInfo, updateNavbarForAuth, getRoleFromToken } from "./app.js";
 
@@ -18,7 +18,7 @@ const routes = {
   "#/dashboard": "pages/dashboard.html", // Admin/Org home
   "#/calendar": "pages/events.html", // Attendee home / Event Hub
   "#/events": "pages/events.html", // The "cards" list view
-  "#/create-event": "pages/create-event.html", // FIXED: Points to the new choice page
+  "#/create-event": "pages/create-event.html", // Points to the choice page
   "#/event-form": "pages/event-form.html",     // The actual form
   "#/planning": "pages/planning.html", // Kanban board placeholder
   "#/ai-chat": "pages/ai-chat.html",
@@ -180,7 +180,7 @@ function initializeLandingNavToggle() {
       mobileMenu.classList.toggle('active');
     });
 
-    // **FIX:** Use event delegation on the menu itself
+    // Use event delegation on the menu itself
     mobileMenu.addEventListener('click', (e) => {
         // Check if the clicked element is a link
         if (e.target.tagName === 'A' || e.target.closest('a')) {

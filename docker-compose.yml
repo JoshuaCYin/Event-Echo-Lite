@@ -1,7 +1,7 @@
-# This file defines your local development services
+# This file defines the local development services
 version: '3.8'
 services:
-  # This is your PostgreSQL database
+  # This is the PostgreSQL database
   db:
     image: postgres:15
     restart: always
@@ -9,12 +9,11 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=mysecretpassword #export DATABASE_URL="postgresql://postgres:Reds0404!@10.162.28.53:5432/eventecho
+      - POSTGRES_PASSWORD=mysecretpassword
       - POSTGRES_DB=eventecho
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
-    # This creates a persistent "volume" so your data
-    # doesn't get erased every time you restart the container
+    # This creates a persistent "volume" so the data doesn't get erased every time the container is restarted

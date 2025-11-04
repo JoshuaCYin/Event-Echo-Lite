@@ -57,7 +57,6 @@
     }
 </style>
 
-<!-- FIXED: Added page transition class -->
 <div class="create-event-form page-transition-enter-active" style="max-width: 700px; margin: 0 auto;">
     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem;">
         <a href="#/create-event" style="color: var(--primary-color); text-decoration: none;">&larr; Back to options</a>
@@ -241,7 +240,7 @@ form.addEventListener("submit", async (e) => {
     const custom_location_address = customLocationInput.value;
     const google_maps_link = document.getElementById("evMapsLink").value;
     
-    // **Set visibility based on role**
+    // Set visibility based on role
     let visibility = 'private'; // Default to private for attendees
     if (userRole === 'admin' || userRole === 'organizer') {
         visibility = document.querySelector('input[name="visibility"]:checked').value;
