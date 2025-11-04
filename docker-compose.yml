@@ -9,7 +9,7 @@ services:
       - "5432:5432"
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=mysecretpassword #export DATABASE_URL="postgresql://postgres:Reds0404!@10.162.28.53:5432/eventech$
+      - POSTGRES_PASSWORD=mysecretpassword #export DATABASE_URL="postgresql://postgres:Reds0404!@10.162.28.53:5432/eventecho
       - POSTGRES_DB=eventecho
     volumes:
       - postgres_data:/var/lib/postgresql/data

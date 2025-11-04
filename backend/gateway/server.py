@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+print("DEBUG_DATABASE_URL:", os.getenv("DATABASE_URL")) # Database URL debugging
+
 # Basic console logging during API requests
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(asctime)s - %(message)s")
 

@@ -1,11 +1,7 @@
 <style>
-  /* The "RESET & BASE" styles have been REMOVED from here 
-    and MOVED to /css/main.css.
-  */
-
   /* === HERO SECTION === */
   .hero-section {
-    height: 100vh;
+    min-height: 100vh;
     width: 100vw;
     display: flex;
     flex-direction: column;
@@ -13,10 +9,10 @@
     align-items: center;
     background: url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1600') center/cover no-repeat;
     position: relative;
-    overflow: hidden; /* Kept this to contain hero elements */
     color: white;
     margin: 0;
-    padding: 0;
+    /* MODIFIED: Replaced padding: 0 */
+    padding: 70px 0 3rem 0; /* 70px top, 3rem bottom */
     box-sizing: border-box;
   }
   
@@ -177,7 +173,6 @@
   @media (max-width: 967px) {
     .hero-section {
       padding-top: 80px; /* Keep this from the last fix */
-      /* ADD THIS LINE: */
       justify-content: flex-start; /* Aligns content to the (padded) top */
     }
   }
@@ -216,6 +211,7 @@
     <div class="hero-cta">
       <a href="#/register" class="cta-button cta-primary" aria-label="Get started with EventEcho">Get Started</a>
       <a href="#/landing-events" class="cta-button cta-secondary" aria-label="Browse campus events">Browse Events</a>
+      <a href="#/about" class="cta-button cta-secondary" aria-label="About Us">About Us</a>
     </div>
     <div class="hero-features">
       <div class="feature-card">
