@@ -1,4 +1,7 @@
 <!-- Landing Calendar Page -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css' rel='stylesheet' />
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
+
 <style>
   .landing-calendar-container {
     max-width: 1200px;
@@ -33,16 +36,8 @@
   }
 
   /* Force calendar event text to be white */
-  .fc-event-title {
-    color: #ffffff !important;
-  }
-
-  .fc-event-time {
-    color: #ffffff !important;
-  }
-
-  .fc-list-event-title,
-  .fc-list-event-time {
+  .fc-event-title, .fc-event-time,
+  .fc-list-event-title, .fc-list-event-time {
     color: #ffffff !important;
   }
 
@@ -66,7 +61,7 @@
     <h1>Event Calendar</h1>
     <p>View all upcoming events at a glance</p>
   </div>
-  
+
   <div class="calendar-wrapper">
     <div id="calendar"></div>
   </div>
@@ -75,54 +70,70 @@
 <script type="module">
 import { api } from "../js/api.js";
 
-async function loadCalendar() {
+/**
+ * Use a unique variable name to avoid conflicts with main app calendars.
+ */
+const calendarEl = document.getElementById("calendar");
+let landingCalendar = null;
+
+/**
+ * Normalize any datetime string to ISO 8601.
+ * Handles:
+ * - "YYYY-MM-DD HH:MM:SS"
+ * - ISO strings with or without 'Z'
+ * - Date objects
+ */
+function normalizeDateTime(dt) {
+  if (!dt) return null;
+  const d = new Date(dt);
+  return isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+async function loadCalendarView() {
   try {
+    // Public landing view does not require token
     const events = await api("/events/", "GET", null, null);
-    
-    const calendarEl = document.getElementById("calendar");
-    
-    const calendar = new window.FullCalendar.Calendar(calendarEl, {
+
+    if (!Array.isArray(events)) {
+      console.error("API did not return an array:", events);
+      calendarEl.innerHTML = '<div class="error-message">Failed to load calendar. Invalid data received.</div>';
+      return;
+    }
+
+    // Prepare events for FullCalendar
+    const fcEvents = events
+      .map(e => ({
+        title: e.title,
+        start: normalizeDateTime(e.start_time),
+        end: normalizeDateTime(e.end_time),
+        extendedProps: {
+          location: e.location_type === 'custom' ? e.custom_location_address : e.venue_name || '',
+          description: e.description || ''
+        }
+      }))
+      // Filter out events with invalid start times
+      .filter(e => e.start !== null);
+
+    // Initialize FullCalendar
+    landingCalendar = new FullCalendar.Calendar(calendarEl, {
       initialView: "dayGridMonth",
       headerToolbar: {
         left: 'prev,next today',
         center: 'title',
-        right: 'dayGridMonth,timeGridWeek,listWeek'
+        right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
       },
       buttonText: {
-        today: 'Today',
-        month: 'Month',
-        week: 'Week',
-        list: 'List'
+        today: 'Today', month: 'Month', week: 'Week', day: 'Day', list: 'List'
       },
       height: 'auto',
       aspectRatio: 1.8,
-      eventTextColor: '#ffffff',
-      events: events.map(e => ({
-        title: e.title,
-        start: e.start_time.replace(" ", "T"),
-        end: e.end_time.replace(" ", "T"),
-        extendedProps: {
-          location: e.location,
-          description: e.description
-        }
-      })),
+      events: fcEvents,
       eventClick: function(info) {
-        const event = info.event;
-        const startDate = event.start.toLocaleDateString('en-US', {
-          weekday: 'long',
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit'
-        });
-        
+        info.jsEvent.preventDefault();
         alert(
-          `${event.title}\n\n` +
-          `📅 ${startDate}\n` +
-          `📍 ${event.extendedProps.location || 'Location TBA'}\n\n` +
-          `${event.extendedProps.description || ''}\n\n` +
-          `Login to RSVP for this event!`
+          'Event: ' + info.event.title + '\n' +
+          'Location: ' + (info.event.extendedProps.location || 'N/A') + '\n' +
+          'Start: ' + info.event.start.toLocaleString()
         );
       },
       eventMouseEnter: function(info) {
@@ -133,15 +144,16 @@ async function loadCalendar() {
         info.el.style.opacity = '1';
       }
     });
-    
-    calendar.render();
-    
+
+    // Render calendar
+    landingCalendar.render();
+
   } catch (error) {
     console.error("Failed to load calendar:", error);
-    document.getElementById("calendar").innerHTML = 
-      '<div class="error-message">Failed to load calendar. Please try again.</div>';
+    calendarEl.innerHTML = '<div class="error-message">Failed to load calendar. Please try again.</div>';
   }
 }
 
-loadCalendar();
+// Load calendar on page load
+loadCalendarView();
 </script>

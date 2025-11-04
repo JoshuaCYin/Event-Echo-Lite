@@ -1,118 +1,111 @@
-<div class="create-event-form" style="max-width: 600px; margin: 0 auto;">
-    <h2>Create New Event</h2>
-    
-    <form id="createEventForm">
-        <input 
-            id="evTitle" 
-            type="text" 
-            placeholder="Event Title" 
-            required
-        >
-        
-        <textarea 
-            id="evDescription" 
-            placeholder="Event Description (optional)"
-        ></textarea>
-        
-        <input 
-            id="evLocation" 
-            type="text" 
-            placeholder="Location" 
-            required
-        >
-        
-        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
-            Start Date & Time
-        </label>
-        <input 
-            id="evStart" 
-            type="datetime-local" 
-            required
-        >
-        
-        <label style="display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem;">
-            End Date & Time
-        </label>
-        <input 
-            id="evEnd" 
-            type="datetime-local" 
-            required
-        >
-        
-        <button type="submit" id="createBtn">Create Event</button>
-    </form>
-    
-    <div id="createMessage" style="display: none; margin-top: 1rem;"></div>
-</div>
-
-<script type="module">
-import { api } from "../js/api.js";
-
-const form = document.getElementById("createEventForm");
-const messageDiv = document.getElementById("createMessage");
-
-// Format datetime-local to "YYYY-MM-DD HH:MM:SS" format
-function formatDateTime(datetimeLocal) {
-    return datetimeLocal.replace('T', ' ') + ':00';
-}
-
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    
-    const token = localStorage.getItem("token");
-    const createBtn = document.getElementById("createBtn");
-    
-    const title = document.getElementById("evTitle").value;
-    const description = document.getElementById("evDescription").value;
-    const start = formatDateTime(document.getElementById("evStart").value);
-    const end = formatDateTime(document.getElementById("evEnd").value);
-    const location = document.getElementById("evLocation").value;
-    
-    // Validate dates
-    if (new Date(start) >= new Date(end)) {
-        messageDiv.className = "error-message";
-        messageDiv.textContent = "End time must be after start time";
-        messageDiv.style.display = "block";
-        return;
+<style>
+    .planning-container {
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+        max-width: 900px;
+        margin: 0 auto;
     }
-    
-    // Disable button
-    createBtn.disabled = true;
-    createBtn.textContent = "Creating...";
-    messageDiv.style.display = "none";
-    
-    try {
-        const res = await api("/events/", "POST", { 
-            title, 
-            description,
-            start_time: start, 
-            end_time: end, 
-            location 
-        }, token);
-        
-        if (res.error) {
-            messageDiv.className = "error-message";
-            messageDiv.textContent = res.error || "Failed to create event";
-            messageDiv.style.display = "block";
-            
-            createBtn.disabled = false;
-            createBtn.textContent = "Create Event";
-        } else {
-            messageDiv.className = "success-message";
-            messageDiv.textContent = "Event created successfully! Redirecting...";
-            messageDiv.style.display = "block";
-            
-            setTimeout(() => {
-                window.location.hash = "#/events";
-            }, 1500);
+    .planning-header {
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .planning-header h2 {
+        font-size: 1.75rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+    .planning-header p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .planning-options {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    .plan-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        text-align: center;
+        transition: var(--transition);
+    }
+    .plan-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-color);
+    }
+    .plan-card svg {
+        width: 48px;
+        height: 48px;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    .plan-card h3 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    .plan-card p {
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+    }
+    .plan-card .action-btn {
+        width: 100%;
+        justify-content: center;
+        text-decoration: none;
+    }
+    @media (max-width: 768px) {
+        .planning-options {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
         }
-    } catch (error) {
-        messageDiv.className = "error-message";
-        messageDiv.textContent = "Network error. Please try again.";
-        messageDiv.style.display = "block";
-        
-        createBtn.disabled = false;
-        createBtn.textContent = "Create Event";
     }
-});
-</script>
+</style>
+
+<div class="planning-container page-transition-enter-active">
+    <div class="planning-header">
+        <h2>Create a New Event</h2>
+        <p>Choose how you'd like to get started. You can use the standard form or our guided wizard.</p>
+    </div>
+
+    <div class="planning-options">
+        <!-- Option 1: Standard Form -->
+        <div class="plan-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <h3>Standard Form</h3>
+            <p>For experienced organizers. Fill out all the event details on a single page.</p>
+            <a href="#/event-form" class="action-btn primary">
+                Use Standard Form
+            </a>
+        </div>
+
+        <!-- Option 2: Event Wizard (Coming Soon) -->
+        <div class="plan-card">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2.69l.34 2.08.38 2.3.9 1.67.6 1.1.94.3 2.1.75 1.3.47.7.5.7-.5 1.3-.47 2.1-.75.94-.3.6-1.1.9-1.67.38-2.3.34-2.08L12 2.69zM12 2.69l-.34 2.08-.38 2.3-.9 1.67-.6 1.1-.94.3-2.1.75-1.3.47-.7.5.7.5 1.3.47 2.1.75.94.3.6-1.1.9-1.67.38-2.3.34-2.08L12 2.69zM12 2.69L12 22"></path>
+            </svg>
+            <h3>Event Wizard</h3>
+            <p>Perfect for new users. We'll guide you through the creation process step-by-step.</p>
+            <button class="action-btn secondary" disabled title="Coming Soon!">
+                Start Wizard (Soon)
+            </button>
+        </div>
+    </div>
+</div>

@@ -1,5 +1,6 @@
 // Cleaned up authentication and user management
-import { api } from "./api.js";  // Use the api.js function instead
+import { api } from "./api.js";
+import { API_BASE } from "./config.js";
 
 export let token = localStorage.getItem("token") || null;
 
@@ -24,7 +25,7 @@ export function getRoleFromToken() {
 // Check authentication and redirect if needed
 export function checkAuthAndRedirect() {
   token = localStorage.getItem("token");
-  const path = window.location.hash;
+  const path = window.location.hash || "#/landing";
   
   // List of public pages that don't require auth
   const publicPages = [
@@ -40,7 +41,6 @@ export function checkAuthAndRedirect() {
   if (!token) {
     // Not logged in - only redirect if trying to access protected page
     if (!publicPages.includes(path) && path !== "") {
-      // **FIX:** Redirect to landing page, not login
       window.location.hash = "#/landing"; 
       return false;
     }
@@ -52,15 +52,20 @@ export function checkAuthAndRedirect() {
   if (!payload) {
     // Invalid token
     localStorage.removeItem("token");
-    // **FIX:** Redirect to landing page, not login
     window.location.hash = "#/landing";
     return false;
   }
+
+  // --- Role-based Redirect Logic ---
+  const role = payload.role;
   
   // If visiting login/register but already logged in, redirect to app home
   if (["#/login", "#/register"].includes(path)) {
-    // Redirect to app home or calendar
-    window.location.hash = "#/home"; 
+    if (role === 'admin' || role === 'organizer') {
+        window.location.hash = "#/dashboard"; // Admin/Org go to Dashboard
+    } else {
+        window.location.hash = "#/calendar"; // Attendees go to Calendar
+    }
     return true;
   }
   
@@ -69,7 +74,6 @@ export function checkAuthAndRedirect() {
 
 // Update user info in sidebar
 export function updateUserInfo() {
-  // ... (this function is unchanged)
   const token = localStorage.getItem("token");
   if (!token) return;
   
@@ -79,20 +83,7 @@ export function updateUserInfo() {
   const userName = document.getElementById("userName");
   const userRole = document.getElementById("userRole");
   
-  if (userName) {
-    userName.textContent = `User #${payload.sub}`;
-    
-    api("/auth/me", "GET", null, token).then(res => {
-      if (res.display_name) {
-        userName.textContent = res.display_name;
-      } else if (res.email) {
-        userName.textContent = res.email.split('@')[0];
-      }
-    }).catch(err => {
-      console.log("Could not fetch user info:", err);
-    });
-  }
-  
+  // Set default role text
   if (userRole) {
     const roleText = {
       'admin': 'Administrator',
@@ -101,18 +92,45 @@ export function updateUserInfo() {
     };
     userRole.textContent = roleText[payload.role] || 'Attendee';
   }
+
+  // Fetch full user info for display name
+  if (userName) {
+    api("/auth/me", "GET", null, token).then(res => {
+      if (res.first_name || res.last_name) {
+        // Use first and last name
+        userName.textContent = `${res.first_name || ''} ${res.last_name || ''}`.trim();
+      } else if (res.email) {
+        // Fallback to email prefix
+        userName.textContent = res.email.split('@')[0];
+      } else {
+        // Fallback to user ID from token
+         userName.textContent = `User #${payload.sub}`;
+      }
+    }).catch(err => {
+      console.log("Could not fetch user info:", err);
+      // Fallback to user ID from token
+      userName.textContent = `User #${payload.sub}`;
+    });
+  }
 }
 
 // Login handler
 export async function handleLogin(email, password) {
-  // ... (this function is unchanged)
   try {
     const res = await api("/auth/login", "POST", { email, password });
     
     if (res.token) {
       localStorage.setItem("token", res.token);
       token = res.token;
-      window.location.hash = "#/home"; // Redirect to app home on login
+      
+      // --- Role-based Redirect on Login ---
+      const payload = decodeToken(res.token);
+      if (payload.role === 'admin' || payload.role === 'organizer') {
+        window.location.hash = "#/dashboard"; // Admin/Org go to Dashboard
+      } else {
+        window.location.hash = "#/calendar"; // Attendees go to Calendar
+      }
+      
       return { success: true, ...res };
     }
     
@@ -132,41 +150,47 @@ export function handleLogout() {
   localStorage.removeItem("token");
   token = null;
   window.location.hash = "#/landing"; // Redirect to landing page on logout
+  // Force a reload to clear all state
+  window.location.reload();
 }
 
-
-// **NEW FUNCTION (Moved from landing/index.html)**
 // Check if user is logged in and update landing navbar buttons
 export function updateNavbarForAuth() {
   const token = localStorage.getItem('token');
   const navbarActions = document.getElementById('navbarActions');
   const navbarMobileActions = document.getElementById('navbarMobileActions');
   
+  const payload = decodeToken(token);
+  let dashboardUrl = "#/calendar"; // Default for attendees
+  if (payload && (payload.role === 'admin' || payload.role === 'organizer')) {
+    dashboardUrl = "#/dashboard"; // Admin/Org go to Dashboard
+  }
+
   if (token) {
-    // User is logged in - show "Go to Dashboard" button
+    // User is logged in - show "Go to App" button
     if (navbarActions) {
       navbarActions.innerHTML = `
-        <a href="#/home" class="navbar-btn navbar-btn-primary">Go to Dashboard</a>
+        <a href="${dashboardUrl}" class="navbar-btn navbar-btn-primary">Go to App</a>
       `;
     }
     
     if (navbarMobileActions) {
       navbarMobileActions.innerHTML = `
-        <a href="#/home" class="navbar-btn navbar-btn-primary" style="color: #5a4dbf;">Go to Dashboard</a>
+        <a href="${dashboardUrl}" class="navbar-btn navbar-btn-primary" style="color: #5a4dbf;">Go to App</a>
       `;
     }
   } else {
-    // User is logged out - show default "Login" / "Sign Up" buttons
+    // User is logged out - show default "Log In" / "Sign Up" buttons
      if (navbarActions) {
       navbarActions.innerHTML = `
-        <a href="#/login" class="navbar-btn navbar-btn-secondary">Login</a>
+        <a href="#/login" class="navbar-btn navbar-btn-secondary">Log In</a>
         <a href="#/register" class="navbar-btn navbar-btn-primary">Sign Up</a>
       `;
     }
     
     if (navbarMobileActions) {
       navbarMobileActions.innerHTML = `
-        <a href="#/login" class="navbar-btn navbar-btn-secondary">Login</a>
+        <a href="#/login" class="navbar-btn navbar-btn-secondary">Log In</a>
         <a href="#/register" class="navbar-btn navbar-btn-primary" style="color: #5a4dbf;">Sign Up</a>
       `;
     }
@@ -179,3 +203,4 @@ export function updateNavbarForAuth() {
     }
   });
 }
+
