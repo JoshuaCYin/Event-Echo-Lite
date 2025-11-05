@@ -34,3 +34,6 @@ build/
 # Temporary files
 *.tmp
 *.bak
+
+# Non-local server config files
+ecosystem.config.js
