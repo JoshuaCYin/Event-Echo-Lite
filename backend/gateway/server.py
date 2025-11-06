@@ -33,10 +33,12 @@ def create_app():
         from backend.auth_service.routes import auth_bp
         from backend.events_service.routes import events_bp
         from backend.venues_service.routes import venues_bp
+        from backend.ai_service.routes import ai_blueprint
 
         app.register_blueprint(auth_bp, url_prefix="/auth")
         app.register_blueprint(events_bp, url_prefix="/events")
         app.register_blueprint(venues_bp, url_prefix="/venues")
+        app.register_blueprint(ai_blueprint, url_prefix="/ai")
         
         logging.info("All blueprints registered successfully.")
 
