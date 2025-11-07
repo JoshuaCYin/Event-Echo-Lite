@@ -1,0 +1,315 @@
+<!-- 
+This page uses existing classes from main.css for styling (like .stat-card, .btn-primary)
+to maintain a consistent look and feel with the rest of the application.
+-->
+<style>
+    /* Specific styles for the discover page */
+    .discover-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .discover-header {
+        text-align: left;
+        margin-bottom: 2rem;
+    }
+
+    .discover-header h1 {
+        font-size: 2.5rem;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .discover-header p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        max-width: 800px;
+    }
+
+    /* A simple message box for the experimental note */
+    .experiment-note {
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
+        border-radius: var(--radius-lg);
+        margin-bottom: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    .experiment-note svg {
+        flex-shrink: 0;
+        color: var(--primary-color);
+    }
+    
+    .experiment-note p {
+        margin: 0;
+        color: var(--text-secondary);
+        line-height: 1.6;
+    }
+    
+    .experiment-note strong {
+        color: var(--text-primary);
+    }
+
+    .discover-section {
+        margin-bottom: 3rem;
+    }
+
+    .discover-section h2 {
+        font-size: 1.75rem;
+        color: var(--text-primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .discover-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    /* Re-using and adapting .stat-card style for our links */
+    .discover-link-card {
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        border: 1px solid var(--border-color);
+    }
+
+    .discover-link-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-3px);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .card-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: white;
+    }
+
+    .card-icon.calendar {
+        background: var(--gradient-blue);
+    }
+    .card-icon.presence {
+        background: var(--gradient-sunset);
+    }
+    .card-icon.athletics {
+        background: var(--gradient-fire); /* Using a new color for variety */
+    }
+    .card-icon.instagram {
+        background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+    }
+
+    .card-header h3 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .discover-link-card p {
+        color: var(--text-secondary);
+        font-size: 0.9375rem;
+        flex-grow: 1;
+        margin-bottom: 1.5rem;
+    }
+
+    .discover-link-card a.action-btn {
+        display: flex; /* Ensure <a> tag behaves like a button */
+        justify-content: center;
+        align-items: center;
+        text-decoration: none;
+        background: var(--gradient-primary);
+        color: white;
+    }
+    
+    .discover-link-card a.action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+</style>
+
+<div class="discover-container">
+    <div class="discover-header">
+        <h1>Discover More</h1>
+        <p>Explore what's happening across the Indiana Wesleyan University community. This directory connects you to official calendars and social media feeds.</p>
+    </div>
+
+    <!-- Note about the experiment -->
+    <div class="experiment-note">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+            <path d="M12 16v-4"></path>
+            <path d="M12 8h.01"></path>
+        </svg>
+        <p>
+            <strong>This is a new experimental feature.</strong> We're testing the idea of bringing all IWU event sources into one place. Please let us know if you find this page useful!
+        </p>
+    </div>
+
+    <!-- Section 1: Official Calendars -->
+    <div class="discover-section">
+        <h2>Official Calendars & Event Hubs</h2>
+        <div class="discover-grid">
+            
+            <!-- IWU Main Calendar -->
+            <div class="discover-link-card">
+                <div class="card-header">
+                    <div class="card-icon calendar">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    </div>
+                    <h3>IWU Main Calendar</h3>
+                </div>
+                <p>The official university-wide event calendar for academics, arts, and major campus happenings.</p>
+                <a href="https://www.indwes.edu/calendar" target="_blank" rel="noopener noreferrer" class="action-btn primary">
+                    Visit Calendar
+                </a>
+            </div>
+
+            <!-- IWU Presence -->
+            <div class="discover-link-card">
+                <div class="card-header">
+                    <div class="card-icon presence">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </div>
+                    <h3>IWU Presence (Student Events)</h3>
+                </div>
+                <p>Explore student life. This is the hub for student organizations, clubs, and campus life events.</p>
+                <a href="https://indwes.presence.io/events" target="_blank" rel="noopener noreferrer" class="action-btn primary">
+                    Visit Presence
+                </a>
+            </div>
+            
+            <!-- IWU Athletics -->
+            <div class="discover-link-card">
+                <div class="card-header">
+                    <div class="card-icon athletics">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16.24 7.76 1.42 1.42-1.42 1.42-1.41-1.42 1.41-1.42zM12 10.91l1.42 1.42-1.42 1.42L10.59 12.33 12 10.91zM7.76 14.07l1.42 1.42-1.42 1.42-1.41-1.42 1.41-1.42zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path></svg>
+                    </div>
+                    <h3>IWU Athletics</h3>
+                </div>
+                <p>The main hub for Wildcat sports. Find game schedules, team rosters, and live results.</p>
+                <a href="https://iwuwildcats.com/" target="_blank" rel="noopener noreferrer" class="action-btn primary">
+                    Visit Athletics
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Section 2: Social Media Feeds -->
+    <div class="discover-section">
+        <h2>Social Media Feeds</h2>
+        <div class="discover-grid">
+
+            <!-- NOTE: Easily expandable. Just copy this whole card block to add a new one. -->
+            
+            <!-- Indiana Wesleyan University -->
+            <div class="discover-link-card">
+                <div class="card-header">
+                    <div class="card-icon instagram">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </div>
+                    <h3>Indiana Wesleyan (Main)</h3>
+                </div>
+                <p>The main IWU account. News, stories, and highlights from across the university.</p>
+                <a href="https://www.instagram.com/indwes/" target="_blank" rel="noopener noreferrer" class="action-btn primary">
+                    View on Instagram
+                </a>
+            </div>
+            
+            <!-- IWU Chapel -->
+            <div class="discover-link-card">
+                <div class="card-header">
+                    <div class="card-icon instagram">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </div>
+                    <h3>IWU Chapel</h3>
+                </div>
+                <p>Spiritual life updates, speaker info, and worship nights from the Chapel team.</p>
+                <a href="httpshttps://www.instagram.com/indweschapel/" target="_blank" rel="noopener noreferrer" class="action-btn primary">
+                    View on Instagram
+                </a>
+            </div>
+
+            <!-- IWU Wildcats (Social) -->
+            <div class="discover-link-card">
+                <div class="card-header">
+                    <div class="card-icon instagram">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </div>
+                    <h3>IWU Wildcats (Social)</h3>
+                </div>
+                <p>The official social media for Wildcat Athletics. Game updates, scores, and athlete spotlights.</p>
+                <a href="https://www.instagram.com/iwuwildcats/" target="_blank" rel="noopener noreferrer" class="action-btn primary">
+                    View on Instagram
+                </a>
+            </div>
+            
+            <!-- IWU SGA -->
+            <div class="discover-link-card">
+                <div class="card-header">
+                    <div class="card-icon instagram">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </div>
+                    <h3>IWU SGA</h3>
+                </div>
+                <p>Updates from your Student Government Association. Get involved and stay informed.</p>
+                <a href="https://www.instagram.com/iwusga/" target="_blank" rel="noopener noreferrer" class="action-btn primary">
+                    View on Instagram
+                </a>
+            </div>
+            
+            <!-- McConn Coffee -->
+            <div class="discover-link-card">
+                <div class="card-header">
+                    <div class="card-icon instagram">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </div>
+                    <h3>McConn Coffee Co.</h3>
+                </div>
+                <p>Specials, hours, and vibes from the on-campus coffee hub. (Plus, great photos!)</p>
+                <a href="https://www.instagram.com/mcconncoffee/" target="_blank" rel="noopener noreferrer" class="action-btn primary">
+                    View on Instagram
+                </a>
+            </div>
+            
+            <!-- The Catalyst -->
+            <div class="discover-link-card">
+                <div class="card-header">
+                    <div class="card-icon instagram">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </div>
+                    <h3>The Catalyst</h3>
+                </div>
+                <p>The Official Student Section of the @iwuwildcats</p>
+                <a href="https://www.instagram.com/thecatalyst_iwu/" target="_blank" rel="noopener noreferrer" class="action-btn primary">
+                    View on Instagram
+                </a>
+            </div>
+            
+            <!-- Add more Instagram accounts here... -->
+
+        </div>
+    </div>
+</div>

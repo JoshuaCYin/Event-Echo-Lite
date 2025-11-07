@@ -22,7 +22,8 @@ const routes = {
   "#/event-form": "pages/event-form.html",     // The actual form
   "#/planning": "pages/planning.html", // Kanban board placeholder
   "#/ai-chat": "pages/ai-chat.html",
-  "#/profile": "pages/profile.html"
+  "#/profile": "pages/profile.html",
+  "#/discover": "pages/discover.html"
 };
 
 const landingPages = [
