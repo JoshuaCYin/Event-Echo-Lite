@@ -1903,8 +1903,7 @@ input.is-invalid {
 }
 
 /* --- 5f. Planning & AI Chat Pages --- */
-.planning-container,
-.ai-chat-container {
+.planning-container {
     background: var(--bg-primary);
     border-radius: var(--radius-lg);
     padding: 2rem;
@@ -1912,8 +1911,7 @@ input.is-invalid {
     min-height: 500px;
 }
 
-.planning-container h2,
-.ai-chat-container h2 {
+.planning-container h2 {
     font-size: 1.5rem;
     margin-bottom: 1rem;
     color: var(--text-primary);
