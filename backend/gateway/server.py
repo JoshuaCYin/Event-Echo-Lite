@@ -23,11 +23,14 @@ def create_app():
     """
     app = Flask(__name__)
     # Configure CORS for S3 bucket
+    # For local development include common dev origins (add more as needed)
     CORS(app, resources={
         r"/*": {
             "origins": [
                 "http://event-echo-s3.s3-website.us-east-2.amazonaws.com",  # S3 website endpoint
-                "http://localhost:5500",  # Local development
+                "http://localhost:5500",  # Local development (some editors)
+                "http://localhost:5050",  # Local development gateway (if served from same host)
+                "http://localhost:8080",  # Local static server used in this workspace
                 "null"  # For local file testing
             ],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
