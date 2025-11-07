@@ -11,6 +11,7 @@ import jwt
 import psycopg2.errors
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
+import logging
 
 load_dotenv()
 
@@ -47,6 +48,17 @@ def verify_token(token: str):
         return None
 
 # --- Routes ---
+
+@auth_bp.before_request
+def before_request():
+    """Log incoming requests"""
+    logging.info(f"Auth request: {request.method} {request.path} - Headers: {dict(request.headers)}")
+
+@auth_bp.after_request
+def after_request(response):
+    """Log response status"""
+    logging.info(f"Auth response: {response.status} - Headers: {dict(response.headers)}")
+    return response
 
 @auth_bp.route("/register", methods=["POST"])
 def register():

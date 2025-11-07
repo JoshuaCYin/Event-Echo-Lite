@@ -22,7 +22,20 @@ def create_app():
     Application factory for creating the Flask app.
     """
     app = Flask(__name__)
-    CORS(app)
+    # Configure CORS for S3 bucket
+    CORS(app, resources={
+        r"/*": {
+            "origins": [
+                "http://event-echo-s3.s3-website.us-east-2.amazonaws.com",  # S3 website endpoint
+                "http://localhost:5500",  # Local development
+                "null"  # For local file testing
+            ],
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization"],
+            "expose_headers": ["Content-Type", "Authorization"],
+            "supports_credentials": True
+        }
+    })
 
     # Add the project root to Python path
     # This allows imports like 'from backend.auth_service.routes import auth_bp'
