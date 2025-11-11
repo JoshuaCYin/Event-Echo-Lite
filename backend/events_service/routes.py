@@ -59,11 +59,11 @@ def list_events():
     
     if auth_user_id:
         # User is logged in: show public events OR their own private events
-        base_sql += "AND (e.visibility = 'public' OR e.organizer_id = %s)"
+        base_sql += " AND (e.visibility = 'public' OR e.organizer_id = %s)"
         params.append(auth_user_id)
     else:
         # Not logged in: show only public events
-        base_sql += "AND e.visibility = 'public'"
+        base_sql += " AND e.visibility = 'public'"
 
     base_sql += " ORDER BY e.start_time;"
 

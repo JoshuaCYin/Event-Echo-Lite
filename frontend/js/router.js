@@ -18,8 +18,12 @@ const routes = {
   "#/dashboard": "pages/dashboard.html", // Admin/Org home
   "#/calendar": "pages/events.html", // Attendee home / Event Hub
   "#/events": "pages/events.html", // The "cards" list view
-  "#/create-event": "pages/create-event.html", // Points to the choice page
-  "#/event-form": "pages/event-form.html",     // The actual form
+
+  // --- EVENT CREATION FLOW ---
+  "#/create-event": "pages/create-event.html",   // The choice page
+  "#/event-form": "pages/event-form.html",     // The standard form
+  "#/event-wizard": "pages/event-wizard.html", // NEW WIZARD ROUTE
+
   "#/planning": "pages/planning.html", // Kanban board placeholder
   "#/ai-chat": "pages/ai-chat.html",
   "#/profile": "pages/profile.html",
@@ -139,9 +143,15 @@ function updateActiveNav(path) {
   const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(item => {
     item.classList.remove('active');
+    
     // Special handling for merged "Events & Calendar" tab
     if (path === '#/calendar' || path === '#/events') {
         if (item.getAttribute('href') === '#/calendar') {
+            item.classList.add('active');
+        }
+    // Special handling for new Create flow
+    } else if (path === '#/event-form' || path === '#/event-wizard') {
+        if (item.getAttribute('href') === '#/create-event') {
             item.classList.add('active');
         }
     } else if (item.getAttribute('href') === path) {

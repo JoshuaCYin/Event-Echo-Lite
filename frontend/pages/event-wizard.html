@@ -1,0 +1,687 @@
+<style>
+    .wizard-container {
+        display: flex;
+        gap: 1.5rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        flex-direction: row;
+    }
+
+    .wizard-content {
+        flex: 3;
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        box-shadow: var(--shadow-sm);
+        min-height: 70vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .wizard-sidebar {
+        flex: 2;
+        min-width: 300px;
+        max-width: 350px;
+    }
+
+    /* --- STEPPER NAVIGATION --- */
+    .wizard-stepper {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        list-style: none;
+    }
+    .stepper-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        cursor: not-allowed;
+        opacity: 0.5;
+        position: relative;
+    }
+    .stepper-item.completed, .stepper-item.active {
+        opacity: 1;
+    }
+    /* Allow clicking on completed steps */
+    .stepper-item.completed {
+        cursor: pointer;
+    }
+    .stepper-dot {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border: 2px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        transition: var(--transition);
+        z-index: 2;
+    }
+    .stepper-label {
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        text-align: center;
+    }
+    .stepper-item.active .stepper-dot {
+        background: var(--gradient-primary);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    .stepper-item.active .stepper-label {
+        color: var(--text-primary);
+    }
+    .stepper-item.completed .stepper-dot {
+        background: var(--bg-primary);
+        color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    .stepper-item.completed .stepper-label {
+        color: var(--text-primary);
+    }
+    /* Connector line logic */
+    .stepper-item:not(:first-child)::before {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        background: var(--border-color);
+        top: 16px; /* center of dot */
+        right: 50%;
+        transform: translateY(-50%);
+        z-index: 1;
+    }
+    /* The line before a 'completed' OR 'active' step should be filled */
+    .stepper-item.completed:not(:first-child)::before,
+    .stepper-item.active:not(:first-child)::before {
+        background: var(--primary-color);
+    }
+
+    /* --- Step-by-Step Form --- */
+    .wizard-step { display: none; animation: fadeIn 0.3s ease-out; }
+    .wizard-step.active { display: block; }
+    .wizard-step h2 { font-size: 1.75rem; }
+    .wizard-step p.step-intro { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem; }
+    .step-content { flex-grow: 1; }
+    .step-navigation { display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
+    .step-navigation .action-btn { padding: 0.75rem 1.5rem; width: 120px; justify-content: center; }
+
+    /* Re-using form styles */
+    .form-section { margin-bottom: 1.5rem; }
+    .form-section label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; }
+    .form-section input, .form-section textarea, .form-section select { width: 100%; padding: 0.875rem 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem; }
+    .form-section input:focus, .form-section textarea:focus, .form-section select:focus { outline: none; border-color: var(--primary-color); }
+    .radio-group { display: flex; gap: 1rem; margin-bottom: 1rem; }
+    .radio-label { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; }
+    .radio-label input { width: auto; margin-bottom: 0; }
+    .radio-label:has(input:checked) { background: var(--bg-tertiary); border-color: var(--primary-color); }
+    #w-venueSelectContainer, #w-customLocationContainer { display: none; }
+
+    /* --- Review Step Formatting --- */
+    #reviewStepContainer .review-item { margin-bottom: 1.25rem; }
+    #reviewStepContainer .review-label { 
+        display: block;
+        font-weight: 600;
+        color: var(--text-secondary); 
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+    #reviewStepContainer .review-value { 
+        color: var(--text-primary); 
+        font-size: 1.05rem; 
+    }
+    #reviewStepContainer .review-value.description { 
+        white-space: pre-wrap; 
+        background: var(--bg-secondary); 
+        padding: 0.75rem 1rem; 
+        border-radius: var(--radius-sm);
+        line-height: 1.6;
+    }
+    #reviewStepContainer .review-value.missing { color: var(--text-light); font-style: italic; }
+
+    /* --- AI Helper Sidebar --- */
+    .ai-helper-card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 2rem; 
+        max-height: calc(100vh - 4rem); /* Constrain height */
+    }
+    .ai-helper-header {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
+    }
+    .ai-helper-header h3 { font-size: 1.25rem; color: var(--text-primary); margin: 0; }
+    
+    .ai-helper-messages {
+        flex-grow: 1;
+        overflow-y: auto; /* Makes messages scroll */
+        padding: 0 0.5rem;
+        min-height: 200px;
+    }
+
+    /* Message styles copied from ai-chat.html */
+    .ai-helper-msg { display: flex; align-items: flex-end; margin-bottom: 1rem; max-width: 95%; }
+    .ai-helper-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 0.5rem; }
+    .ai-helper-msg.ai .ai-helper-avatar { background: var(--gradient-primary); color: white; }
+    .ai-helper-msg.user { flex-direction: row-reverse; margin-left: auto; }
+    .ai-helper-msg.user .ai-helper-avatar { margin-right: 0; margin-left: 0.5rem; background: var(--bg-tertiary); }
+    .ai-helper-bubble { padding: 0.6rem 1rem; border-radius: var(--radius-lg); font-size: 0.9rem; line-height: 1.5; }
+    .ai-helper-msg.user .ai-helper-bubble { background: var(--gradient-primary); color: white; }
+    .ai-helper-msg.ai .ai-helper-bubble { background: var(--bg-tertiary); color: var(--text-primary); }
+    .ai-helper-msg.is-loading .ai-helper-bubble { background: var(--bg-tertiary); color: var(--text-light); }
+    .ai-helper-msg.is-loading .ai-helper-bubble { font-style: italic; }
+    
+    /* Input form copied from ai-chat.html */
+    .ai-helper-form { flex-shrink: 0; margin-top: 1rem; }
+    .ai-helper-input-wrapper { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 0.25rem 0.5rem 0.25rem 1rem; }
+    .ai-helper-input-wrapper input { flex-grow: 1; border: none; background: transparent; font-size: 0.9rem; padding: 0.5rem 0; }
+    .ai-helper-input-wrapper input:focus { outline: none; }
+    .ai-helper-input-wrapper button { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px; background: var(--gradient-primary); color: white; border: none; border-radius: var(--radius-md); cursor: pointer; }
+    .ai-helper-input-wrapper button:disabled { background: var(--text-light); }
+
+    .step-error { color: #c53030; background: #fff5f5; border: 1px solid #f56565; padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; display: none; }
+    #wizardSubmitMessage { display: none; margin-top: 1rem; }
+
+    /* --- Mobile breakpoint and layout --- */
+    @media (max-width: 768px) {
+        .wizard-container { 
+            flex-direction: column-reverse; /* Keep AI helper at bottom */
+        }
+        .wizard-sidebar { 
+            max-width: 100%; 
+            position: static;
+            max-height: 400px; 
+            margin-bottom: 1.5rem; /* Add spacing */
+        }
+        .wizard-content { min-height: auto; }
+        .wizard-stepper { font-size: 0.8rem; }
+        .stepper-label { font-size: 0.75rem; max-width: 60px; line-height: 1.2; }
+    }
+</style>
+
+<div class="wizard-container page-transition-enter-active">
+    
+    <!-- Left Side: Wizard Steps -->
+    <div class="wizard-content">
+        
+        <ol class="wizard-stepper" id="wizard-stepper">
+            <li class="stepper-item active" data-step-target="1">
+                <div class="stepper-dot">1</div>
+                <div class="stepper-label">Basics</div>
+            </li>
+            <li class="stepper-item" data-step-target="2">
+                <div class="stepper-dot">2</div>
+                <div class="stepper-label">Date & Time</div>
+            </li>
+            <li class="stepper-item" data-step-target="3">
+                <div class="stepper-dot">3</div>
+                <div class="stepper-label">Location</div>
+            </li>
+            <li class="stepper-item" data-step-target="4">
+                <div class="stepper-dot">4</div>
+                <div class="stepper-label">Settings</div>
+            </li>
+            <li class="stepper-item" data-step-target="5">
+                <div class="stepper-dot">5</div>
+                <div class="stepper-label">Review</div>
+            </li>
+        </ol>
+
+        <!-- Step 1: Basics -->
+        <div class="wizard-step active" data-step="1" data-context="Event Title and Description">
+            <h2>Step 1: The Basics</h2>
+            <p class="step-intro">Let's start with the "what" and "why." A great title and clear description are key.</p>
+            <div class="step-content">
+                <div class="step-error" id="error-1"></div>
+                <div class="form-section">
+                    <label for="w-title">Event Title*</label>
+                    <input id="w-title" type="text" placeholder="e.g. Annual Design Symposium" required>
+                </div>
+                <div class="form-section">
+                    <label for="w-description">Description</label>
+                    <textarea id="w-description" placeholder="What is this event about? Who should attend?" rows="5"></textarea>
+                </div>
+            </div>
+            <div class="step-navigation">
+                <button class="action-btn secondary" disabled>Back</button>
+                <button class="action-btn primary" onclick="navigateWizard(1, 'next')">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Date & Time -->
+        <div class="wizard-step" data-step="2" data-context="Event Date and Time">
+            <h2>Step 2: Date & Time</h2>
+            <p class="step-intro">When is your event happening? Be sure to check for conflicts.</p>
+            <div class="step-content">
+                <div class="step-error" id="error-2"></div>
+                <div class="form-section" style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="w-start">Start Time*</label>
+                        <input id="w-start" type="datetime-local" required>
+                    </div>
+                    <div style="flex: 1; min-width: 200px;">
+                        <label for="w-end">End Time*</label>
+                        <input id="w-end" type="datetime-local" required>
+                    </div>
+                </div>
+            </div>
+            <div class="step-navigation">
+                <button class="action-btn secondary" onclick="navigateWizard(2, 'prev')">Back</button>
+                <button class="action-btn primary" onclick="navigateWizard(2, 'next')">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Location -->
+        <div class="wizard-step" data-step="3" data-context="Event Location">
+            <h2>Step 3: Location</h2>
+            <p class="step-intro">Where will your event be held? On-campus or a custom address.</p>
+            <div class="step-content">
+                <div class="step-error" id="error-3"></div>
+                <div class="form-section">
+                    <div class="radio-group">
+                        <label class="radio-label"> <input type="radio" name="w-location_type" value="custom" checked> Custom Address </label>
+                        <label class="radio-label"> <input type="radio" name="w-location_type" value="venue"> On-Campus Venue </label>
+                    </div>
+                    <div id="w-customLocationContainer">
+                        <label for="w-customLocation">Custom Address*</label>
+                        <input id="w-customLocation" type="text" placeholder="e.g. 123 Main St, Marion, IN" required>
+                    </div>
+                    <div id="w-venueSelectContainer" style="display: none;">
+                        <label for="w-venue">Select a Venue*</label>
+                        <select id="w-venue" required> <option value="">Loading venues...</option> </select>
+                    </div>
+                </div>
+                <div class="form-section">
+                    <label for="w-mapsLink">Google Maps Link (Optional)</label>
+                    <input id="w-mapsLink" type="url" placeholder="https://maps.app.goo.gl/...">
+                </div>
+            </div>
+            <div class="step-navigation">
+                <button class="action-btn secondary" onclick="navigateWizard(3, 'prev')">Back</button>
+                <button class="action-btn primary" onclick="navigateWizard(3, 'next')">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Settings -->
+        <div class="wizard-step" data-step="4" data-context="Event Visibility Settings">
+            <h2>Step 4: Settings</h2>
+            <p class="step-intro">Who should be able to see this event?</p>
+            <div class="step-content">
+                <div class="step-error" id="error-4"></div>
+                <div class="form-section" id="w-visibilityContainer">
+                    <h3>Visibility*</h3>
+                    <div class="radio-group">
+                        <label class="radio-label"> <input type="radio" name="w-visibility" value="public" checked> Public (Visible to everyone) </label>
+                        <label class="radio-label"> <input type="radio" name="w-visibility" value="private"> Private (Only visible to you) </label>
+                    </div>
+                    <p style="color: var(--text-light); font-size: 0.875rem;" id="w-visibilityWarning">
+                        Note: "Public" events may require approval.
+                    </p>
+                </div>
+            </div>
+            <div class="step-navigation">
+                <button class="action-btn secondary" onclick="navigateWizard(4, 'prev')">Back</button>
+                <button class="action-btn primary" onclick="navigateWizard(4, 'next')">Review</button>
+            </div>
+        </div>
+
+        <!-- Step 5: Review & Submit -->
+        <div class="wizard-step" data-step="5" data-context="Reviewing Event Details">
+            <h2>Step 5: Review & Submit</h2>
+            <p class="step-intro">One final look. If everything is correct, submit your event!</p>
+            <div class="step-content">
+                <div id="reviewStepContainer"> <!-- Review content injected by JS --> </div>
+                <div id="wizardSubmitMessage"></div>
+            </div>
+            <div class="step-navigation">
+                <button class="action-btn secondary" onclick="navigateWizard(5, 'prev')">Back</D>
+                <button id="wizardSubmitBtn" class="action-btn primary" onclick="submitWizard()">Submit Event</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Side: AI Helper (New UI) -->
+    <aside class="wizard-sidebar">
+        <div class="ai-helper-card">
+            <div class="ai-helper-header">
+                <h3>AI Brainstorm Helper</h3>
+            </div>
+            <div class="ai-helper-messages" id="ai-helper-messages">
+                <div class="ai-helper-msg ai">
+                    <div class="ai-helper-avatar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>
+                    </div>
+                    <div class="ai-helper-bubble">
+                        <p id="ai-helper-intro-text">Stuck on your event title? Ask me for ideas!</p>
+                    </div>
+                </div>
+            </div>
+            <form class="ai-helper-form" id="ai-helper-form">
+                <div class="ai-helper-input-wrapper">
+                    <input type="text" id="ai-helper-input" placeholder="e.g. 'Suggest 3 titles'">
+                    <button type="submit" id="ai-helper-send" aria-label="Send">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 3L22 12L2 21L5 13L15 12L5 11L2 3Z"/></svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </aside>
+
+</div>
+
+<script type="module">
+    import { api } from '../js/api.js';
+    import { getRoleFromToken } from '../js/app.js';
+
+    const token = localStorage.getItem("token");
+    const userRole = getRoleFromToken();
+
+    let currentStep = 1;
+    let maxStepCompleted = 1; // Variable for stepper logic
+    const wizardData = {};
+
+    // --- DOM Elements ---
+    const steps = document.querySelectorAll('.wizard-step');
+    const stepperItems = document.querySelectorAll('.stepper-item');
+    const venueSelect = document.getElementById('w-venue');
+    const locationTypeRadios = document.querySelectorAll('input[name="w-location_type"]');
+    const visibilityContainer = document.getElementById('w-visibilityContainer');
+    const visibilityWarning = document.getElementById('w-visibilityWarning');
+
+    // --- Role-Based UI ---
+    if (userRole !== 'admin' && userRole !== 'organizer') {
+        visibilityContainer.querySelector('input[value="public"]').disabled = true;
+        visibilityContainer.querySelector('input[value="private"]').checked = true;
+        visibilityWarning.textContent = 'As an attendee, your events will be created as "Private". Contact an admin to make it public.';
+    }
+
+    // --- Location Toggle Logic ---
+    function handleLocationTypeChange() {
+        const type = document.querySelector('input[name="w-location_type"]:checked').value;
+        document.getElementById('w-venueSelectContainer').style.display = (type === 'venue') ? 'block' : 'none';
+        document.getElementById('w-customLocationContainer').style.display = (type === 'custom') ? 'block' : 'none';
+    }
+    locationTypeRadios.forEach(radio => radio.addEventListener('change', handleLocationTypeChange));
+
+    // --- Load Venues ---
+    async function loadVenues() {
+        try {
+            const venues = await api("/venues/", "GET", null, token);
+            if (venues && venues.length > 0) {
+                venueSelect.innerHTML = '<option value="">-- Select a venue --</option>';
+                venues.forEach(venue => {
+                    const option = new Option(`${venue.name} ${venue.building ? `(${venue.building}${venue.room_number ? `, ${venue.room_number}` : ''})` : ''}`, venue.venue_id);
+                    venueSelect.appendChild(option);
+                });
+            } else {
+                venueSelect.innerHTML = '<option value="">No on-campus venues found</option>';
+            }
+        } catch (error) { console.error("Failed to load venues:", error); }
+    }
+
+    // --- Wizard Navigation ---
+    window.navigateWizard = (stepNum, direction) => {
+        if (direction === 'next') {
+            if (!validateStep(stepNum)) return;
+            saveStepData(stepNum);
+            currentStep++;
+            maxStepCompleted = Math.max(maxStepCompleted, currentStep);
+        } else {
+            currentStep--;
+        }
+        updateWizardView();
+    }
+    
+    // --- Go to specific step ---
+    window.goToStep = (stepNum) => {
+        // Allow jumping to steps <= max completed step
+        if (stepNum <= maxStepCompleted) {
+            currentStep = stepNum;
+            updateWizardView();
+        }
+    }
+
+    function updateWizardView() {
+        steps.forEach(step => {
+            step.classList.toggle('active', parseInt(step.dataset.step) === currentStep);
+        });
+        
+        stepperItems.forEach((item, index) => {
+            const step = index + 1;
+            item.classList.toggle('active', step === currentStep);
+            item.classList.toggle('completed', step < maxStepCompleted); // Use maxStep
+            
+            if (step < maxStepCompleted) { // Allow clicking any completed step
+                item.onclick = () => goToStep(step);
+                item.style.cursor = 'pointer';
+            } else {
+                // Allow clicking the current step (or max)
+                item.onclick = (step === currentStep) ? () => goToStep(step) : null;
+                item.style.cursor = (step === currentStep) ? 'pointer' : 'not-allowed';
+            }
+        });
+
+        // Update AI helper context
+        const activeStepEl = document.querySelector(`.wizard-step.active`);
+        if (activeStepEl) {
+            const context = activeStepEl.dataset.context;
+            document.getElementById('ai-helper-intro-text').textContent = `Stuck on ${context.toLowerCase()}? Ask me for ideas!`;
+            document.getElementById('ai-helper-messages').dataset.context = context;
+        }
+
+        if (currentStep === 5) {
+            populateReviewStep();
+        }
+    }
+
+    // --- Step Validation ---
+    function validateStep(stepNum) {
+        const errorDiv = document.getElementById(`error-${stepNum}`);
+        errorDiv.style.display = 'none';
+        let isValid = true;
+
+        if (stepNum === 1) {
+            if (!document.getElementById('w-title').value) {
+                errorDiv.textContent = 'Event Title is required.'; isValid = false;
+            }
+        }
+        if (stepNum === 2) {
+            const start = document.getElementById('w-start').value;
+            const end = document.getElementById('w-end').value;
+            if (!start || !end) {
+                errorDiv.textContent = 'Start Time and End Time are required.'; isValid = false;
+            } else if (new Date(start) >= new Date(end)) {
+                errorDiv.textContent = 'End Time must be after Start Time.'; isValid = false;
+            }
+        }
+        if (stepNum === 3) {
+            const type = document.querySelector('input[name="w-location_type"]:checked').value;
+            if (type === 'venue' && !document.getElementById('w-venue').value) {
+                errorDiv.textContent = 'Please select an On-Campus Venue.'; isValid = false;
+            }
+            if (type === 'custom' && !document.getElementById('w-customLocation').value) {
+                errorDiv.textContent = 'Please enter a Custom Address.'; isValid = false;
+            }
+        }
+        
+        if (!isValid) errorDiv.style.display = 'block';
+        return isValid;
+    }
+
+    // --- Data Handling ---
+    function saveStepData(stepNum) {
+        if (stepNum === 1) {
+            wizardData.title = document.getElementById('w-title').value;
+            wizardData.description = document.getElementById('w-description').value;
+        }
+        if (stepNum === 2) {
+            wizardData.start_time = document.getElementById('w-start').value;
+            wizardData.end_time = document.getElementById('w-end').value;
+        }
+        if (stepNum === 3) {
+            wizardData.location_type = document.querySelector('input[name="w-location_type"]:checked').value;
+            wizardData.venue_id = document.getElementById('w-venue').value;
+            wizardData.custom_location_address = document.getElementById('w-customLocation').value;
+            wizardData.google_maps_link = document.getElementById('w-mapsLink').value;
+        }
+        if (stepNum === 4) {
+            wizardData.visibility = (userRole === 'admin' || userRole === 'organizer')
+                ? document.querySelector('input[name="w-visibility"]:checked').value
+                : 'private';
+        }
+    }
+
+    function populateReviewStep() {
+        const container = document.getElementById('reviewStepContainer');
+        const venueSelect = document.getElementById('w-venue');
+        const venueText = venueSelect.value ? venueSelect.options[venueSelect.selectedIndex].text : 'N/A';
+        
+        const f = (label, value, isDesc = false) => {
+            const val = value || 'Not provided';
+            const valClass = value ? (isDesc ? 'description' : '') : 'missing';
+            // Use <div> for review items to ensure vertical stacking
+            return `<div class="review-item"><span class="review-label">${label}</span><span class="review-value ${valClass}">${val}</span></div>`;
+        };
+        container.innerHTML = `
+            ${f('Title', wizardData.title)}
+            ${f('Start Time', wizardData.start_time ? new Date(wizardData.start_time).toLocaleString() : '')}
+            ${f('End Time', wizardData.end_time ? new Date(wizardData.end_time).toLocaleString() : '')}
+            ${f('Location', wizardData.location_type === 'venue' ? venueText : wizardData.custom_location_address)}
+            ${f('Google Maps Link', wizardData.google_maps_link)}
+            ${f('Visibility', wizardData.visibility)}
+            ${f('Description', wizardData.description, true)}
+        `;
+    }
+
+    // --- AI Helper Chat ---
+    const aiForm = document.getElementById('ai-helper-form');
+    const aiInput = document.getElementById('ai-helper-input');
+    const aiSendBtn = document.getElementById('ai-helper-send');
+    const aiMessages = document.getElementById('ai-helper-messages');
+
+    aiForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const prompt = aiInput.value.trim();
+        if (!prompt) return;
+
+        const context = document.querySelector('.wizard-step.active').dataset.context || "general event planning";
+        aiInput.value = '';
+        aiInput.disabled = true;
+        aiSendBtn.disabled = true;
+
+        addHelperMessage('user', prompt);
+        const loadingMsg = addHelperMessage('is-loading', '...');
+
+        try {
+            const result = await api('/ai/wizard-helper', 'POST', { prompt, context }, token);
+            loadingMsg.remove();
+            if (result.response) {
+                addHelperMessage('ai', result.response);
+            } else {
+                addHelperMessage('ai', `Error: ${result.error || 'No response'}`);
+            }
+        } catch (err) {
+            loadingMsg.remove();
+            addHelperMessage('ai', 'Error connecting to AI helper.');
+        } finally {
+            aiInput.disabled = false;
+            aiSendBtn.disabled = false;
+            aiInput.focus();
+        }
+    });
+
+    function addHelperMessage(sender, text) {
+        const msg = document.createElement('div');
+        msg.className = `ai-helper-msg ${sender}`;
+        
+        const avatar = document.createElement('div');
+        avatar.className = 'ai-helper-avatar';
+        const bubble = document.createElement('div');
+        bubble.className = 'ai-helper-bubble';
+
+        if (sender === 'ai' || sender === 'is-loading') {
+            avatar.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>`;
+            bubble.innerHTML = (sender === 'is-loading') 
+                ? '...' 
+                : text.replace(/\n/g, '<br>'); // Simple formatting
+        } else { // user
+            avatar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+            bubble.textContent = text;
+        }
+        
+        msg.appendChild(avatar);
+        msg.appendChild(bubble);
+        aiMessages.appendChild(msg);
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+        return msg;
+    }
+    
+    // --- FINAL SUBMIT ---
+    window.submitWizard = async () => {
+        const submitBtn = document.getElementById('wizardSubmitBtn');
+        const msgDiv = document.getElementById('wizardSubmitMessage');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Submitting...';
+
+        const payload = {
+            title: wizardData.title,
+            description: wizardData.description,
+            start_time: wizardData.start_time,
+            end_time: wizardData.end_time,
+            location_type: wizardData.location_type,
+            google_maps_link: wizardData.google_maps_link || null,
+            visibility: wizardData.visibility,
+            venue_id: wizardData.location_type === 'venue' ? wizardData.venue_id : null,
+            custom_location_address: wizardData.location_type === 'custom' ? wizardData.custom_location_address : null,
+        };
+
+        try {
+            const res = await api("/events/", "POST", payload, token);
+            if (res.error) {
+                msgDiv.className = "error-message";
+                msgDiv.textContent = res.error || "Failed to create event";
+                msgDiv.style.display = "block";
+                submitBtn.disabled = false;
+                submitBtn.textContent = "Submit Event";
+            } else {
+                msgDiv.className = "success-message";
+                msgDiv.textContent = "Event created successfully! Redirecting...";
+                msgDiv.style.display = "block";
+                setTimeout(() => { window.location.hash = "#/calendar"; }, 1500);
+            }
+        } catch (error) {
+            msgDiv.className = "error-message";
+            msgDiv.textContent = "Network error. Please try again.";
+            msgDiv.style.display = "block";
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Submit Event";
+        }
+    }
+
+    // --- Initial Load ---
+    handleLocationTypeChange();
+    loadVenues();
+    updateWizardView();
+    // Add click listeners to stepper items
+    stepperItems.forEach((item, index) => {
+        item.onclick = () => goToStep(index + 1);
+    });
+</script>
