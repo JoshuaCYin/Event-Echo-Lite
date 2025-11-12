@@ -111,27 +111,28 @@ if ACTIVE_AI_SERVICE is None:
 
 
 # --- System Prompt (Main Chatbot) ---
-# --- FIX: Added "You MUST reply in the specified JSON format." to fix 400 error ---
+# --- FIX: Overhauled prompt to fix contradictions and improve drafting logic ---
 MAIN_SYSTEM_PROMPT = f"""
 You are an AI assistant for the "EventEcho" campus event planning app.
 Your identity: You are the "EventEcho AI Assistant". You are powered by {ACTIVE_AI_SERVICE}.
-Your role is to be helpful, professional, and concise.
 *** CRITICAL: You MUST reply in the specified JSON format. ***
 
-**CRITICAL RULE: DO NOT HALLUCINATE OR INVENT EVENTS.**
-You will be given a list of "Upcoming Public Events". This is the *only* source of truth.
-If the list is empty or an event is not on the list, you MUST state that you do not have that information or that there are no upcoming events.
-*Do not, under any circumstances, create a fake event, even as an example.*
+**CONTEXT:**
+You will be given a list of "Upcoming Public Events" and the user's "Conversation History".
+This event list is the *only* source of truth.
+* If the user asks for events and the list is empty, you MUST state that there are no upcoming public events.
+* If the user asks for a specific event that is not on the list, you MUST state you do not have information on that event.
+* **DO NOT** say "I don't have information..." and then list events. Use the list *first*.
+* **DO NOT** invent or hallucinate any events under any circumstances.
 
-You have two main capabilities:
-1. CONVERSATION: Answer questions about event planning, campus, or the provided event data.
-2. EVENT DRAFTING: If the user asks you to create, draft, or "make an event" about something, you MUST generate a draft.
+**TASKS:**
+1.  **CONVERSATION:** Answer user questions about event planning or the provided event data.
+2.  **EVENT DRAFTING:** If the user's *latest prompt* asks to create, draft, or "make an event" (e.g., "draft a description for a workshop", "make an event for a fundraiser"), you MUST populate the `eventDraft` object.
 
 **RULES:**
-- You will be given the user's conversation history. Use it to understand the context.
-- **DRAFTING:** If the user's latest prompt is a request for a new event (e.g., "draft a description for a workshop", "make an event for a fundraiser"), you MUST populate the `eventDraft` object.
-- **NO DRAFTING:** If the user is just chatting or asking a question, you MUST set `eventDraft` to `null`.
-- Always provide a friendly, conversational `response` in markdown.
+* For a simple chat or question (e.g., "what events are happening?"), `eventDraft` MUST be `null`.
+* For an event creation request, `eventDraft` MUST be populated.
+* Always provide a friendly, conversational `response` in markdown.
 """
 
 @ai_blueprint.route('/chat', methods=['POST'])
@@ -151,38 +152,41 @@ def handle_chat():
         # --- FIX: Prioritize OpenAI as requested ---
         if ACTIVE_AI_SERVICE == "openai":
             messages = [{"role": "system", "content": MAIN_SYSTEM_PROMPT}]
-            messages.append({"role": "system", "content": f"--- UPCOMING PUBLIC EVENTS ---\n{event_context}\n------------------------------"})
             
             for item in history:
                 role = "assistant" if item["role"] == "ai" else item["role"]
                 messages.append({"role": role, "content": item["content"]})
             
             messages.append({"role": "user", "content": user_prompt})
+            messages.append({"role": "system", "content": f"--- UPCOMING PUBLIC EVENTS ---\n{event_context}\n------------------------------"})
 
             response = openai_client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=messages,
-                response_format={"type": "json_object"} # Request JSON output
+                response_format={"type": "json_object"}  # Request JSON output
             )
             result_json = json.loads(response.choices[0].message.content)
+
+            # --- If user asks to create or draft an event, populate the eventDraft object and show the event creation button ---
+            if "eventDraft" in result_json and result_json["eventDraft"] is not None:
+                result_json["showEventCreationButton"] = True  # Indicate the button should be shown
+
             return jsonify(result_json)
 
         elif ACTIVE_AI_SERVICE == "gemini":
             # --- Gemini Logic (Fallback) ---
-            
-            # --- FIX: Correctly map 'ai' to 'model' for Gemini history ---
             gemini_history = []
             for item in history:
                 role = "model" if item["role"] == "ai" else "user"
                 gemini_history.append(types.Part(text=item["content"], role=role))
             
-            # --- FIX: Use system_instruction for main prompt, contents for history ---
-            system_instruction = f"{MAIN_SYSTEM_PROMPT}\n\n--- UPCOMING PUBLIC EVENTS ---\n{event_context}\n------------------------------"
+            system_instruction = MAIN_SYSTEM_PROMPT
             
             contents = [
                 *gemini_history,
                 types.Part(text=user_prompt, role="user"),
-                types.Part(text="", role="model") # Start the response
+                types.Part(text=f"\n--- UPCOMING PUBLIC EVENTS ---\n{event_context}\n------------------------------", role="user"),
+                types.Part(text="", role="model")  # Start the response
             ]
 
             response = gemini_model.generate_content(
@@ -190,6 +194,11 @@ def handle_chat():
                 system_instruction=system_instruction
             )
             result_json = json.loads(response.text)
+
+            # --- If user asks to create or draft an event, populate the eventDraft object and show the event creation button ---
+            if "eventDraft" in result_json and result_json["eventDraft"] is not None:
+                result_json["showEventCreationButton"] = True  # Indicate the button should be shown
+
             return jsonify(result_json)
 
     # --- Error Handling ---

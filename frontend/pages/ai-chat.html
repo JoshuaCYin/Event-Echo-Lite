@@ -2,8 +2,7 @@
     :host .ai-chat-container,
     .ai-chat-container {
         display: flex !important; flex-direction: column !important;
-        height: calc(100dvh - 4rem); /* use 100dvh for mobile safety */
-        min-height: 0 !important;
+        height: calc(100vh - 4rem); min-height: 0 !important;
         padding: 0 !important; background: none !important;
         box-shadow: none !important; flex-shrink: 0;
     }
@@ -11,7 +10,7 @@
         display: flex; flex-direction: column; height: 100%;
         width: 100%; background: var(--bg-primary);
         box-shadow: var(--shadow-sm); border-radius: var(--radius-lg);
-        padding: 1.5rem; overflow: hidden;
+        padding: 1.5rem; overflow: hidden; 
     }
     .aichat-header {
         text-align: left; border-bottom: 1px solid var(--border-color);
@@ -20,7 +19,7 @@
     .aichat-header h2 {
         font-size: 1.5rem; margin: 0; background: var(--gradient-primary);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        background-clip: text; display: inline-block;
+        background-clip: text; display: inline-block; 
     }
     .aichat-header p { font-size: 0.9rem; color: var(--text-secondary); margin: 0.25rem 0 0 0; }
 
@@ -61,26 +60,33 @@
     .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
     @keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }
 
-    .smart-start-container {
-        padding: 0.5rem 0.5rem 0 0.5rem;
+    /* --- SMART START & DRAFT BUTTON --- */
+    .smart-start-container { 
+        padding: 0.5rem 0.5rem 0 0.5rem; 
         flex-shrink: 0;
     }
     .smart-start-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-
+    
+    /* --- FIX: Compact button style --- */
     .smart-start-btn {
         padding: 0.75rem 1rem;
-        font-size: 0.875rem;
+        font-size: 0.875rem; 
         font-weight: 500;
-        color: var(--text-primary);
+        color: var(--text-primary); 
         background: var(--bg-tertiary);
-        border: 1px solid var(--border-color);
+        border: 1px solid var(--border-color); 
         border-radius: var(--radius-md);
-        text-align: left;
-        transition: var(--transition);
+        text-align: left; 
+        transition: var(--transition); 
         cursor: pointer;
-        line-height: 1.4;
+        line-height: 1.4; /* Ensure text doesn't feel cramped */
     }
     .smart-start-btn:hover { background: var(--bg-primary); border-color: var(--primary-color); }
+    .smart-start-btn strong { /* This is no longer used, but good to keep */
+        color: var(--primary-color); 
+        display: block; 
+        font-size: 0.9rem; 
+    }
 
     .ai-draft-button {
         display: inline-flex; align-items: center; gap: 0.5rem;
@@ -94,15 +100,26 @@
         cursor: not-allowed; box-shadow: none; transform: none;
     }
 
+    /* Markdown & Error Styles */
+    .chat-message.ai .message-bubble p { margin: 0.5rem 0; }
+    .chat-message.ai .message-bubble p:first-child { margin-top: 0; }
+    .chat-message.ai .message-bubble p:last-child { margin-bottom: 0; }
+    .chat-message.ai .message-bubble h2, .chat-message.ai .message-bubble h3 { margin-top: 1rem; margin-bottom: 0.5rem; font-weight: 600; }
+    .chat-message.ai .message-bubble hr { margin: 1rem 0; border: 0; border-top: 1px solid var(--border-color); }
+    .chat-message.ai .message-bubble ul, .chat-message.ai .message-bubble ol { padding-left: 1.5rem; margin: 0.75rem 0; }
+    .chat-message.ai .message-bubble code:not(pre code) { background: var(--bg-primary); padding: 2px 5px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+    .chat-message.ai .message-bubble pre { background: var(--text-primary); color: var(--bg-tertiary); padding: 1rem; border-radius: var(--radius-md); overflow-x: auto; }
+    
     .chat-error {
         text-align: center; padding: 0.75rem; background: #fff5f5;
         border: 1px solid #f56565;
         border-radius: var(--radius-md); margin: 0 0.5rem 1rem 0.5rem;
-        box-shadow: none !important; flex-shrink: 0;
-        display: none;
+        flex-shrink: 0;
+        /* display: none; <-- This is handled by inline style */
     }
 
-    .chat-form { flex-shrink: 0; margin-top: 1rem; }
+    /* Chat Form & Input */
+    .chat-form { flex-shrink: 0; margin-top: 1rem; } /* Added margin-top */
     .input-wrapper {
         display: flex; align-items: center; gap: 0.75rem;
         background: var(--bg-tertiary); border: 1px solid var(--border-color);
@@ -126,9 +143,9 @@
     .chat-form button span { display: none; }
     .chat-form button:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .chat-form button:disabled { background: var(--text-light); cursor: not-allowed; transform: none; box-shadow: none; }
-
+    
     @media (max-width: 768px) {
-        .ai-chat-container { height: calc(100dvh - var(--header-height) - 2rem); }
+        .ai-chat-container { height: calc(100vh - var(--header-height) - 2rem); }
         .aichat-wrapper { padding: 1rem; }
         .chat-message { max-width: 95%; }
         .chat-avatar { width: 32px; height: 32px; }
@@ -137,7 +154,6 @@
     }
 </style>
 
-
 <div class="ai-chat-container">
     <div class="aichat-wrapper">
         <div class="aichat-header">
@@ -145,31 +161,32 @@
             <p>Your partner in planning campus events.</p>
         </div>
         
-        <!-- Added error style to ensure it's hidden on load -->
-        <div id="chat-error" class="chat-error" style="display: none !important;"></div>
+        <!-- FIX: Added style="display: none;" to hide on load -->
+        <div id="chat-error" class="chat-error" style="display: none;"></div>
 
         <div class="chat-window" id="chat-window">
+            
             <div class="chat-message ai">
                 <div class="chat-avatar">
                     <svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>
                 </div>
                 <div class="message-bubble">
-                    <p>Hello! I'm the EventEcho AI. I can see upcoming campus events and help you plan your own. How can I help?</p>
+                    <p>Hello! I'm EventEcho, your AI assistant. I can see upcoming campus events and help you plan your own. How can I help?</p>
                 </div>
             </div>
-            
+
         </div>
 
         <div class="smart-start-container" id="smart-start-container">
             <div class="smart-start-grid">
-                <!-- More compact button text -->
                 <button class="smart-start-btn" data-prompt="What public events are happening this week?">
                     Check upcoming events
                 </button>
                 <button class="smart-start-btn" data-prompt="Suggest 3 themes for a spring fundraiser.">
                     Brainstorm event themes
                 </button>
-                <button class="smart-start-btn" data-prompt="Draft a description for a 'Welcome Week' social event.">
+                <!-- FIX: Updated data-prompt to be more generic -->
+                <button class="smart-start-btn" data-prompt="Help me draft a description for a new event.">
                     Draft a description
                 </button>
                 <button class="smart-start-btn" data-prompt="What's the difference between a 'public' and 'private' event?">
@@ -190,6 +207,8 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/github-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/lib/common.min.js"></script>
 
 <script type="module">
     import { api } from '../js/api.js';
@@ -210,10 +229,10 @@
     const chatError = document.getElementById('chat-error');
     const smartStartContainer = document.getElementById('smart-start-container');
 
+    // --- FIX: RE-IMPLEMENTED LOGIC ---
     const MAX_HISTORY = 10;
     let chatHistory = [];
-
-    const aiSystemInstruction = `You are the EventEcho AI. Your primary goal is to assist in planning and drafting events. If the user asks you to draft an event (e.g., suggest a title, description, or location), you MUST ensure the final JSON response includes a structured 'eventDraft' object with fields: {title, description, custom_location_address, is_public}. Always provide a conversational text response alongside the draft data.`;
+    // ---------------------------------
 
     function addMessage(sender, message, eventDraft = null) {
         const messageDiv = document.createElement('div');
@@ -221,9 +240,11 @@
 
         const avatar = document.createElement('div');
         avatar.classList.add('chat-avatar');
-        avatar.innerHTML = sender === 'ai'
-            ? `<svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>`
-            : `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+        if (sender === 'ai') {
+            avatar.innerHTML = `<svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>`;
+        } else {
+            avatar.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+        }
         messageDiv.appendChild(avatar);
 
         const bubble = document.createElement('div');
@@ -231,46 +252,44 @@
 
         if (sender === 'ai') {
             bubble.innerHTML = markdownToHtml(message);
-            if (window.hljs && typeof window.hljs.highlightElement === 'function') {
+            if (window.hljs) {
                 bubble.querySelectorAll('pre code').forEach(block => window.hljs.highlightElement(block));
             }
 
-            if (eventDraft && typeof eventDraft === 'object' && eventDraft.title) {
+            // --- FIX: RE-IMPLEMENTED DRAFT LOGIC ---
+            if (eventDraft && eventDraft.title) {
                 const draftButton = document.createElement('button');
                 draftButton.className = 'ai-draft-button';
                 draftButton.innerHTML = `
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
                     Use Draft in Event Form
                 `;
+                
                 draftButton.onclick = () => {
-                    try {
-                        localStorage.setItem('aiEventDraft', JSON.stringify(eventDraft));
-                    } catch (err) {
-                        console.warn('Could not save draft:', err);
-                    }
-                    window.location.hash = '#/event-form';
+                    localStorage.setItem('aiEventDraft', JSON.stringify(eventDraft));
+                    window.location.hash = '#/event-form'; // Navigate
                     draftButton.textContent = 'Draft Used!';
                     draftButton.classList.add('draft-used');
                     draftButton.disabled = true;
                 };
                 bubble.appendChild(draftButton);
             }
+            // ---------------------------------------
+
         } else {
             bubble.textContent = message;
         }
 
         messageDiv.appendChild(bubble);
         chatWindow.appendChild(messageDiv);
-
-        setTimeout(() => { chatWindow.scrollTop = chatWindow.scrollHeight; }, 30);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
         return messageDiv;
     }
 
     function showLoading() {
         const loadingMessage = addMessage('ai', '');
-        loadingMessage.classList.add('is-loading');
-        loadingMessage.querySelector('.message-bubble').innerHTML =
-            `<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>`;
+        loadingMessage.classList.add('is-loading'); 
+        loadingMessage.querySelector('.message-bubble').innerHTML = `<span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>`;
         return loadingMessage;
     }
 
@@ -282,6 +301,7 @@
         chatError.style.display = 'none';
     }
 
+    // --- FIX: RE-IMPLEMENTED SMART START ---
     smartStartContainer.addEventListener('click', (e) => {
         const button = e.target.closest('.smart-start-btn');
         if (button) {
@@ -290,72 +310,45 @@
             chatForm.dispatchEvent(new Event('submit'));
         }
     });
-
+    
     function hideSmartStart() {
         if (smartStartContainer) smartStartContainer.style.display = 'none';
     }
+    // -------------------------------------
 
+    // --- FIX: RE-IMPLEMENTED EVENT CONTEXT ---
     async function getEventContext() {
-        try {
-            const events = await api("/events/", "GET", null, token);
-            if (!events || events.length === 0 || (events.error && events.length === 1)) {
-                return "No upcoming public events found.";
-            }
-
-            const now = new Date();
-            const oneWeekLater = new Date();
-            oneWeekLater.setDate(now.getDate() + 7);
-
-            // Filter to events this week
-            let filtered = events.filter(e => {
-                const start = new Date(e.start_time);
-                return start >= now && start <= oneWeekLater;
-            });
-
-            // Fallback: if no events this week, use the next few
-            if (filtered.length === 0) {
-                filtered = events.slice(0, 5);
-            }
-
-            let contextString = "Here are some upcoming public events:\n\n";
-
-            filtered.forEach((event, index) => {
-                const start = new Date(event.start_time).toLocaleString('en-US', {
-                    dateStyle: 'short', timeStyle: 'short'
-                });
-                const location =
-                    event.location_type === 'venue'
-                        ? (event.venue_name || 'On-campus')
-                        : (event.custom_location_address || 'Custom Location');
-
-                // Use a truncated description if long
-                const desc = event.description
-                    ? event.description.length > 200
-                        ? event.description.slice(0, 200) + "..."
-                        : event.description
-                    : "(No description provided.)";
-
-                const organizer = event.organizer_first_name
-                    ? `Organized by ${event.organizer_first_name} ${event.organizer_last_name || ''}. `
-                    : "";
-
-                contextString += `${index + 1}. **${event.title}** — ${start} at ${location}. ${organizer}${desc}\n\n`;
-            });
-
-            return contextString.trim();
-        } catch (err) {
-            console.error("Failed to fetch event context:", err);
-            return "Could not fetch event data due to a network error.";
+    try {
+        const events = await api("/events/", "GET", null, token);
+        
+        if (!events || events.length === 0 || (events.error && events.length === 1)) {
+            return "No upcoming public events found.";
         }
+        
+        let contextString = "Here are the top upcoming public events:\n";
+        events.slice(0, 10).forEach((event, index) => {
+            const title = event.title;
+            const start = new Date(event.start_time).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
+            const end = new Date(event.end_time).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
+            const location = event.location_type === 'venue' ? (event.venue_name || 'On-campus') : (event.custom_location_address || 'Custom Location');
+            
+            contextString += `${index + 1}. "${title}" from ${start} to ${end} at ${location}.\n`;
+        });
+        return contextString;
+    } catch (err) {
+        console.error("Failed to fetch event context:", err);
+        return "Could not fetch event data due to a network error.";
     }
+}
+    // -----------------------------------------
 
-
+    // --- FIX: RE-IMPLEMENTED FULL SUBMIT HANDLER ---
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const prompt = chatInput.value.trim();
         if (!prompt) return;
 
-        hideSmartStart();
+        hideSmartStart(); // Hide buttons after first message
         chatInput.value = '';
         chatInput.disabled = true;
         sendButton.disabled = true;
@@ -367,29 +360,30 @@
 
         try {
             const eventContext = await getEventContext();
-            const payload = {
-                prompt,
-                user_time: new Date().toISOString(),
+            const userTime = new Date().toISOString();
+            const payload = { 
+                prompt, 
+                user_time: userTime,
                 history: chatHistory.slice(-MAX_HISTORY),
-                event_context: eventContext,
-                system_instruction: aiSystemInstruction
+                event_context: eventContext
             };
-
+            
             const result = await api('/ai/chat', 'POST', payload, token);
 
-            if (loadingElement?.remove) loadingElement.remove();
+            loadingElement.remove();
 
             if (result && result.response) {
                 addMessage('ai', result.response, result.eventDraft);
                 chatHistory.push({ role: "ai", content: result.response });
             } else {
-                const errorMsg = result?.error || 'The AI assistant returned an empty response.';
+                const errorMsg = result.error || 'The AI assistant returned an empty response.';
                 addMessage('ai', `Sorry, I couldn't process that. ${errorMsg}`);
+                chatHistory.push({ role: "ai", content: errorMsg });
                 showError(errorMsg);
             }
         } catch (err) {
             console.error("Chat API error:", err);
-            if (loadingElement?.remove) loadingElement.remove();
+            loadingElement.remove();
             const errorMsg = 'The AI assistant is currently unavailable. Please try again later.';
             addMessage('ai', `Sorry, I ran into a connection issue.`);
             showError(errorMsg);
@@ -399,4 +393,5 @@
             chatInput.focus();
         }
     });
+    // ---------------------------------------------
 </script>
