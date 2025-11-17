@@ -1,0 +1,166 @@
+<style>
+    .profile-view-container {
+        max-width: 700px;
+        margin: 2rem auto;
+        animation: fadeIn 0.5s ease-out;
+    }
+    .profile-view-card {
+        background: var(--bg-primary);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        border: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2.5rem;
+        text-align: center;
+    }
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: var(--gradient-primary);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid white;
+        box-shadow: var(--shadow-md);
+    }
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+    }
+    .profile-email {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+    .profile-divider {
+        width: 100%;
+        height: 1px;
+        background: var(--border-color);
+        margin: 1rem 0 2rem 0;
+    }
+    .profile-info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        text-align: left;
+        width: 100%;
+    }
+    .info-item {
+        background: var(--bg-secondary);
+        padding: 1rem;
+        border-radius: var(--radius-md);
+    }
+    .info-item label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-light);
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+    }
+    .info-item p {
+        font-size: 1rem;
+        color: var(--text-primary);
+        margin: 0;
+        line-height: 1.6;
+        /* Allow long bios/hobbies to wrap */
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+    .info-item p.missing {
+        font-style: italic;
+        color: var(--text-light);
+    }
+</style>
+
+<div class="profile-view-container" id="profile-container">
+    <!-- Content will be loaded by JS -->
+    <div class="loading">Loading profile...</div>
+</div>
+
+<script type="module">
+    import { api } from '../js/api.js';
+    const token = localStorage.getItem('token');
+    const container = document.getElementById('profile-container');
+
+    async function loadProfile() {
+        const params = new URLSearchParams(window.location.hash.split('?')[1]);
+        const userId = params.get('id');
+
+        if (!userId) {
+            container.innerHTML = '<div class="error-message">No user ID provided.</div>';
+            return;
+        }
+
+        try {
+            const profile = await api(`/events/users/${userId}/profile`, "GET", null, token);
+            
+            const firstName = profile.first_name || '';
+            const lastName = profile.last_name || '';
+            const fullName = `${firstName} ${lastName}`.trim() || 'User';
+            const initial = fullName.charAt(0).toUpperCase();
+
+            container.innerHTML = `
+                <div class="profile-view-card">
+                    <div class="profile-avatar">
+                        ${profile.profile_picture
+                            ? `<img src="${profile.profile_picture}" alt="Profile picture">`
+                            : `<span>${initial}</span>`
+                        }
+                    </div>
+                    
+                    <h1 class="profile-name">${fullName}</h1>
+                    <p class="profile-email">${profile.email || 'No email provided'}</p>
+
+                    <div class="profile-divider"></div>
+
+                    <div class="profile-info-grid">
+                        <div class="info-item">
+                            <label>Major / Department</label>
+                            ${profile.major_department
+                                ? `<p>${profile.major_department}</p>`
+                                : `<p class="missing">Not specified</p>`
+                            }
+                        </div>
+                        <div class="info-item">
+                            <label>Bio</label>
+                            ${profile.bio
+                                ? `<p>${profile.bio}</p>`
+                                : `<p class="missing">Not specified</p>`
+                            }
+                        </div>
+                        <div class="info-item">
+                            <label>Hobbies</label>
+                            ${profile.hobbies
+                                ? `<p>${profile.hobbies}</p>`
+                                : `<p class="missing">Not specified</p>`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+
+        } catch (err) {
+            console.error("Failed to load profile:", err);
+            container.innerHTML = `<div class="error-message">${err.error || 'Could not load profile.'}</div>`;
+        }
+    }
+
+    loadProfile();
+</script>

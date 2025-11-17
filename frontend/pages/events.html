@@ -3,26 +3,317 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
 <style>
-    .event-hub-header {
-        text-align: center;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 1.5rem;
-        margin-bottom: 2rem;
+/* ------------------------------------------------------ */
+/* HEADER */
+/* ------------------------------------------------------ */
+.event-hub-header {
+    text-align: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1.5rem;
+    margin-bottom: 2rem;
+}
+.event-hub-header h2 {
+    font-size: 1.75rem;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+}
+.event-hub-header p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ------------------------------------------------------ */
+/* RSVP FILTER TOGGLE */
+/* ------------------------------------------------------ */
+.filter-toggle-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    padding: 0.65rem 1rem;
+    border-radius: var(--radius-md);
+    white-space: nowrap;
+}
+.filter-toggle-switch label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+.filter-toggle-switch input {
+    width: auto;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+/* ------------------------------------------------------ */
+/* RSVP BUTTON + DROPDOWN MENU */
+/* ------------------------------------------------------ */
+.rsvp-btn-container {
+    position: relative;
+    flex: 1;
+}
+.rsvp-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 100px;
+}
+
+.rsvp-btn.is-going {
+    background: var(--primary-dark);
+    color: white;
+}
+
+/* Dropdown */
+.rsvp-btn-menu {
+    display: none;
+    position: absolute;
+    bottom: 110%;
+    left: 0;
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 10;
+    overflow: hidden;
+}
+.rsvp-btn-container.open .rsvp-btn-menu {
+    display: block;
+}
+.rsvp-btn-menu button {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+.rsvp-btn-menu button:last-child {
+    border-bottom: none;
+}
+.rsvp-btn-menu button:hover {
+    background: var(--bg-tertiary);
+    color: var(--primary-color);
+}
+.rsvp-btn-menu button.clear-rsvp {
+    color: #e53e3e;
+}
+.rsvp-btn-menu button.clear-rsvp:hover {
+    background: #fff5f5;
+}
+
+/* ------------------------------------------------------ */
+/* EVENT DETAIL MODAL – ATTENDEE LIST */
+/* ------------------------------------------------------ */
+#detailAttendeeList {
+    margin-top: 1.5rem;
+}
+#detailAttendeeList h4 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+.attendee-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.attendee-item:last-child {
+    border-bottom: none;
+}
+.attendee-item a {
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+}
+.attendee-item a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+.attendee-item .rsvp-status {
+    font-size: 0.875rem;
+    color: var(--text-light);
+    text-transform: capitalize;
+}
+.attendee-item .rsvp-status.going {
+    color: #38a169;
+}
+
+/* ------------------------------------------------------ */
+/* CONTROL BAR (Search, Filters, View Buttons) */
+/* ------------------------------------------------------ */
+.event-hub-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: nowrap;
+}
+
+/* Normalize control button heights */
+.search-filter-group > input[type="date"],
+.search-filter-group > .action-btn,
+.view-toggle-buttons > .action-btn {
+    padding-top: 0.65rem;
+    padding-bottom: 0.65rem;
+    box-sizing: border-box;
+}
+
+/* Reset button icon centering */
+#resetFiltersBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ------------------------------------------------------ */
+/* LIST VIEW — LAYOUT FIX + BUTTONS */
+/* ------------------------------------------------------ */
+#eventListView .app-event-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    position: relative;      /* for absolute dropdown positioning */
+    overflow: visible;       /* important: let dropdown escape */
+}
+
+#eventListView .event-content {
+    flex: 1 1 auto;       /* content takes remaining space */
+    min-width: 0;  /* allows text to wrap/truncate without overflow */
+}
+
+/* Buttons container */
+#eventListView .event-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex-shrink: 0;           /* prevent buttons from shrinking */
+}
+
+/* Button sizing */
+#eventListView .event-actions .action-btn,
+#eventListView .rsvp-btn {
+    width: 140px;
+    height: 42px;
+    line-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 0 1rem !important;
+}
+
+/* Primary / Going states */
+#eventListView .rsvp-btn.primary {
+    background: var(--gradient-primary);
+    color: white;
+    box-shadow: var(--shadow-md);
+}
+#eventListView .rsvp-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+#eventListView .rsvp-btn.is-going {
+    background: var(--primary-dark);
+    color: white;
+    border-color: var(--primary-dark);
+}
+#eventListView .rsvp-btn.is-going:hover {
+    background: var(--primary-color);
+}
+
+/* Ensure RSVP dropdown matches button width */
+#eventListView .rsvp-btn-container {
+    width: 140px;
+    position: relative;  /* dropdown is absolute inside this */
+}
+#eventListView .rsvp-btn-menu {
+    position: absolute;
+    left: 0;
+    width: 140px;
+    min-width: 140px;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    z-index: 999;           /* ensure dropdown is above other content */
+    overflow: visible;      /* don’t clip options */
+}
+
+/* ------------------------------------------------------ */
+/* RESPONSIVE LAYOUT FIXES */
+/* ------------------------------------------------------ */
+@media (max-width: 1200px) {
+    .event-hub-controls {
+        flex-wrap: wrap;
+        gap: 0.75rem;
     }
-    .event-hub-header h2 {
-        font-size: 1.75rem;
-        background: var(--gradient-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 0.5rem;
+    .search-filter-group {
+        flex: 1 1 100%;
+        order: 1;
     }
-    .event-hub-header p {
-        font-size: 1.1rem;
-        color: var(--text-secondary);
-        max-width: 600px;
-        margin: 0 auto;
+    .view-toggle-buttons {
+        order: 2;
+        width: 100%;
+        justify-content: flex-end;
     }
+}
+
+@media (max-width: 992px) {
+    .event-hub-controls {
+        flex-wrap: wrap;
+        gap: 0;
+    }
+    .search-filter-group {
+        min-width: 100% !important;
+        order: 1;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    .search-filter-group > input[type="text"] {
+        width: 100%;
+        min-width: 0;
+        order: 1;
+    }
+    .search-filter-group > input[type="date"],
+    .search-filter-group > #resetFiltersBtn,
+    .search-filter-group > #rsvpFilterContainer {
+        flex-grow: 1;
+        order: 2;
+    }
+    #rsvpFilterContainer {
+        justify-content: center;
+        margin-left: 0;
+    }
+    .view-toggle-buttons {
+        order: 2;
+        width: 100%;
+        justify-content: flex-end;
+        margin-top: 0.5rem;
+    }
+}
+
 </style>
 
 <div class="event-hub-container page-content-wrapper page-transition-enter-active">
@@ -32,45 +323,24 @@
     </div>
 
     <div class="event-hub-controls">
-        <div class="search-filter-group">
-            <input type="text" id="eventSearchInput" placeholder="Search event titles or descriptions..." title="Search" style="flex-grow: 1;">
+        <div class="search-filter-group" style="flex-grow: 1; min-width: 250px;">
+            <input type="text" id="eventSearchInput" placeholder="Search event titles..." title="Search" style="flex-grow: 1;">
             <input type="date" id="eventDateFilter" title="Filter by date">
             <button class="action-btn secondary" id="resetFiltersBtn" title="Reset Filters">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <!-- Reset icon (e.g., a counter-clockwise arrow) -->
-                    <path d="M2.5 2v6h6M21.5 22v-6h-6"></path>
-                    <path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path>
-                </svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 2v6h6M21.5 22v-6h-6"></path><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path></svg>
             </button>
+
+            <!-- NEW: "My RSVPs" Filter Toggle -->
+            <div class="filter-toggle-switch" id="rsvpFilterContainer" style="display: none;">
+                <label for="myRsvpsFilter">My RSVPs</label>
+                <input type="checkbox" id="myRsvpsFilter" />
+            </div>
         </div>
         
         <div class="view-toggle-buttons">
-            <button class="action-btn primary active" data-view="cards" id="cardsViewBtn" title="Card View">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="3" width="7" height="7"></rect>
-                    <rect x="14" y="14" width="7" height="7"></rect>
-                    <rect x="3" y="14" width="7" height="7"></rect>
-                </svg>
-            </button>
-            <button class="action-btn secondary" data-view="list" id="listViewBtn" title="List View">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <line x1="8" y1="6" x2="21" y2="6"></line>
-                    <line x1="8" y1="12" x2="21" y2="12"></line>
-                    <line x1="8" y1="18" x2="21" y2="18"></line>
-                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
-                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
-                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
-                </svg>
-            </button>
-            <button class="action-btn secondary" data-view="calendar" id="calendarViewBtn" title="Calendar View">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-            </button>
+            <button class="action-btn primary active" data-view="cards" id="cardsViewBtn" title="Card View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
+            <button class="action-btn secondary" data-view="list" id="listViewBtn" title="List View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
+            <button class="action-btn secondary" data-view="calendar" id="calendarViewBtn" title="Calendar View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
         </div>
     </div>
     
@@ -83,13 +353,16 @@
 
     <!-- Non-alert Event Detail Modal -->
     <div id="eventDetailModal">
-        <div style="max-height: 80vh; overflow-y: auto;">
+        <div style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
             <button class="detail-close" id="closeDetailModal">&times;</button>
             <h3 id="detailTitle"></h3>
             <p><span class="detail-date" id="detailDate"></span></p>
             <p><span class="detail-location" id="detailLocation"></span></p>
             <p id="detailDescription"></p>
+            <!-- Actions (RSVP, Edit) -->
             <div id="detailActions" class="event-actions" style="margin-top: 1.5rem;"></div>
+            <!-- NEW: Attendee List -->
+            <div id="detailAttendeeList"></div>
         </div>
     </div>
 </div>
@@ -105,12 +378,20 @@ const viewButtons = document.querySelectorAll(".view-toggle-buttons .action-btn"
 const searchInput = document.getElementById("eventSearchInput");
 const dateFilter = document.getElementById("eventDateFilter");
 const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+// --- NEW: RSVP Filter Elements ---
+const rsvpFilterContainer = document.getElementById("rsvpFilterContainer");
+const rsvpFilterCheckbox = document.getElementById("myRsvpsFilter");
+
 let allEvents = [];
 let currentEvents = [];
 let currentView = "cards";
 const userRole = getRoleFromToken();
 const userId = token ? JSON.parse(atob(token.split('.')[1])).sub : null; // Use 'sub' for user_id
 
+// Show RSVP filter only if logged in
+if (userId) {
+    rsvpFilterContainer.style.display = 'flex';
+}
 
 // --- Helper Functions ---
 
@@ -128,12 +409,8 @@ function getEventLocation(event) {
         let building = event.venue_building || '';
         let room = event.venue_room || event.venue_room_number || '';
         
-        if (building && room) {
-            return `${name} (${building}, ${room})`;
-        }
-        if (building) {
-            return `${name} (${building})`;
-        }
+        if (building && room) return `${name} (${building}, ${room})`;
+        if (building) return `${name} (${building})`;
         return name;
     }
     return 'Location TBA';
@@ -155,10 +432,146 @@ function getMapLink(event) {
     return '';
 }
 
+
+// --- NEW: RSVP Component Class ---
+class RsvpBtn {
+    constructor(event, onRsvp) {
+        this.event = event;
+        this.status = event.my_rsvp_status; // 'going', 'maybe', 'canceled', or null
+        this.onRsvp = onRsvp; // Callback function
+        
+        this.container = document.createElement('div');
+        this.container.className = 'rsvp-btn-container';
+        
+        this.button = this.createButton();
+        this.menu = this.createMenu();
+        
+        this.container.appendChild(this.button);
+        this.container.appendChild(this.menu);
+        
+        this.button.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleMenu();
+        });
+        
+        // Close menu if clicking outside
+        document.addEventListener('click', (e) => {
+            if (!this.container.contains(e.target)) {
+                this.closeMenu();
+            }
+        });
+
+        return this.container;
+    }
+
+    createButton() {
+        const btn = document.createElement('button');
+        // Use the action-btn classes for styling
+        btn.className = 'action-btn primary rsvp-btn';
+        this.updateButtonState(btn, this.status);
+        return btn;
+    }
+    
+    updateButtonState(buttonEl, status) {
+        buttonEl.classList.remove('is-going', 'secondary');
+        buttonEl.classList.add('primary'); // Default to primary
+        
+        let text = 'RSVP';
+
+        if (status === 'going') {
+            text = '✓ Going';
+            buttonEl.classList.add('is-going');
+        } else if (status === 'maybe') {
+            text = '? Maybe';
+            buttonEl.classList.replace('primary', 'secondary');
+        } else if (status === 'canceled') {
+            text = '✕ Can\'t Go';
+            buttonEl.classList.replace('primary', 'secondary');
+        }
+        
+        buttonEl.innerHTML = `<span>${text}</span>`; // No icon in main button
+    }
+    
+    createMenu() {
+        const menu = document.createElement('div');
+        menu.className = 'rsvp-btn-menu';
+        
+        menu.innerHTML = `
+            <button data-status="going">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"></path></svg>
+                <span>Going</span>
+            </button>
+            <button data-status="maybe">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                <span>Maybe</span>
+            </button>
+            <button data-status="canceled">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                <span>Can't Go</span>
+            </button>
+            <button data-status="clear" class="clear-rsvp">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path></svg>
+                <span>Clear RSVP</span>
+            </button>
+        `;
+        
+        menu.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const newStatus = e.currentTarget.dataset.status === 'clear' ? null : e.currentTarget.dataset.status;
+                this.handleRsvpClick(newStatus);
+            });
+        });
+        
+        return menu;
+    }
+    
+    async handleRsvpClick(newStatus) {
+        this.button.disabled = true;
+        this.button.innerHTML = `<span>Saving...</span>`;
+        
+        try {
+            const res = await api(`/events/${this.event.event_id}/rsvp`, "POST", { status: newStatus }, token);
+            
+            if (res.status === (newStatus || "cleared")) {
+                this.status = newStatus;
+                this.event.my_rsvp_status = newStatus; // Update event object in memory
+                this.updateButtonState(this.button, newStatus);
+                
+                // If a callback was provided (like in the modal), call it
+                if (this.onRsvp) this.onRsvp();
+            }
+        } catch (err) {
+            console.error("RSVP failed", err);
+            this.updateButtonState(this.button, this.status); // Revert
+        } finally {
+            this.button.disabled = false;
+            this.closeMenu();
+        }
+    }
+    
+    toggleMenu() {
+        // Close all other menus on the page
+        document.querySelectorAll('.rsvp-btn-container.open').forEach(container => {
+            if (container !== this.container) {
+                container.classList.remove('open');
+            }
+        });
+        // Then toggle this one
+        this.container.classList.toggle('open');
+    }
+    
+    closeMenu() {
+        this.container.classList.remove('open');
+    }
+}
+// --- END: RSVP Component Class ---
+
+
 /**
  * Shows the custom event detail modal.
  */
-function showDetailModal(event) {
+async function showDetailModal(event) {
     if (!event) return;
     const modal = document.getElementById('eventDetailModal');
     document.getElementById('detailTitle').textContent = event.title;
@@ -172,27 +585,53 @@ function showDetailModal(event) {
     document.getElementById('detailDescription').textContent = event.description || 'No description provided.';
 
     const detailActions = document.getElementById('detailActions');
+    const attendeeListDiv = document.getElementById('detailAttendeeList');
     detailActions.innerHTML = '';
-    
-    // Add RSVP/Actions for Logged-In Users
-    const rsvpBtn = document.createElement('button');
-    rsvpBtn.className = 'action-btn primary';
-    rsvpBtn.textContent = 'RSVP';
-    rsvpBtn.onclick = () => {
-        const rsvpMsg = document.createElement('p');
-        rsvpMsg.textContent = 'RSVP functionality not yet implemented.';
-        rsvpMsg.style.color = 'var(--text-secondary)';
-        detailActions.appendChild(rsvpMsg);
-        rsvpBtn.disabled = true;
-    };
-    detailActions.appendChild(rsvpBtn);
+    attendeeListDiv.innerHTML = ''; // Clear previous attendee list
 
-    if (userRole === 'admin' || (userRole === 'organizer' && event.organizer_id === userId)) {
+    // Check if user is the organizer/admin
+    const isOrganizer = userRole === 'admin' || (event.organizer_id === userId) || (event.created_by === userId);
+
+    if (userId) {
+        // --- NEW: Add RSVP Dropdown Button to Modal ---
+        const rsvpContainer = new RsvpBtn(event, () => {
+            // This ensures the "My RSVPs" filter updates if changed from the modal
+            if (rsvpFilterCheckbox.checked) {
+                applyFilters();
+            }
+            // Re-color calendar events
+            if(currentView === 'calendar') {
+                renderCalendar(currentEvents);
+            }
+        });
+        detailActions.appendChild(rsvpContainer);
+    }
+    
+    if (isOrganizer) {
+        // 2. Add Edit Button
         const editBtn = document.createElement('a');
         editBtn.className = 'action-btn secondary';
         editBtn.href = `#/event-form?edit=${event.event_id}`;
         editBtn.textContent = 'Edit Event';
         detailActions.appendChild(editBtn);
+        
+        // 3. Load and display attendee list
+        attendeeListDiv.innerHTML = '<h4>Attendees</h4><div class="loading">Loading attendees...</div>';
+        try {
+            const attendees = await api(`/events/${event.event_id}/rsvps`, "GET", null, token);
+            if (attendees && attendees.length > 0) {
+                attendeeListDiv.innerHTML = '<h4>Attendees</h4>' + attendees.map(att => `
+                    <div class="attendee-item">
+                        <a href="#/profile-view?id=${att.user_id}" target="_blank">${att.first_name || ''} ${att.last_name || att.email}</a>
+                        <span class="rsvp-status ${att.rsvp_status}">${att.rsvp_status}</span>
+                    </div>
+                `).join('');
+            } else {
+                attendeeListDiv.innerHTML = '<h4>Attendees</h4><p>No one has RSVP\'d yet.</p>';
+            }
+        } catch (err) {
+            attendeeListDiv.innerHTML = `<h4>Attendees</h4><p class="error-message">Could not load attendee list.</p>`;
+        }
     }
 
     modal.style.display = 'block';
@@ -210,11 +649,9 @@ document.getElementById('closeDetailModal').addEventListener('click', () => {
  */
 function renderEvents(events, isList = false) {
     const container = isList ? listView : cardsView;
-    // Use the class defined to toggle list styles
     const listClass = isList ? 'list-card-style' : '';
     
     if (events.length === 0) {
-        // Apply empty state to both list and card containers
         const emptyStateHTML = `
             <div class="empty-state" style="grid-column: 1 / -1; ${isList ? 'max-width: 100%;' : ''}">
                 <h3>No Events Found</h3>
@@ -237,10 +674,19 @@ function renderEvents(events, isList = false) {
         const locationText = getEventLocation(event);
         const mapLinkHtml = getMapLink(event);
         
-        let actionButtons = `<button class="action-btn primary" onclick="event.stopPropagation(); alert('RSVP for ${event.title}!')">RSVP</button>`;
-        let editIconHtml = ''; // Variable for card view edit icon
+        let actionButtons = '';
+        let editIconHtml = '';
         
-        const canEdit = userRole === 'admin' || (userRole === 'organizer' && event.organizer_id === userId);
+        const canEdit = userRole === 'admin' || (event.organizer_id === userId) || (event.created_by === userId);
+
+        // --- NEW: Add RSVP button if logged in ---
+        if (userId) {
+            // We'll create a placeholder and attach the real component after
+            actionButtons += `<div class="rsvp-btn-placeholder" data-event-id="${event.event_id}"></div>`;
+        } else {
+            // Show disabled button if not logged in
+            actionButtons += `<button class="action-btn primary" disabled title="Log in to RSVP">RSVP</button>`;
+        }
 
         if (isList) {
             // For LIST VIEW, add Edit button to the main action list
@@ -263,6 +709,11 @@ function renderEvents(events, isList = false) {
 
         const eventId = event.event_id;
         
+        // --- NEW: Added visibility badge ---
+        const visibilityBadge = event.visibility === 'private' 
+            ? `<span class="status-badge" style="background: #E2E8F0; color: #4A5568;">Private</span>`
+            : `<span class="status-badge upcoming">Public</span>`;
+
         return `
             <article class="app-event-card ${listClass}" data-event-id="${eventId}">
                 ${editIconHtml} <!-- This will be empty for list view, or populated for card view -->
@@ -278,7 +729,11 @@ function renderEvents(events, isList = false) {
                                 <line x1="3" y1="10" x2="21" y2="10"></line>
                             </svg>
                             ${formattedDate} at ${formattedTime}
-                        </div>
+
+                            <!-- Public/Private tag -->
+                            <div> ${visibilityBadge}</div>
+                        </div>                        
+
                         ${event.description ? `<p class="event-description">${event.description}</p>` : ''}
                     </div>
                     
@@ -307,11 +762,32 @@ function renderEvents(events, isList = false) {
         `;
     }).join("");
 
+    // --- NEW: Attach Live RSVP Components ---
+    // After rendering, find all placeholders and replace them
+    container.querySelectorAll('.rsvp-btn-placeholder').forEach(placeholder => {
+        const eventId = placeholder.dataset.eventId;
+        const event = allEvents.find(e => e.event_id == eventId);
+        if (event) {
+            // Pass the applyFilters function as a callback
+            // so the view updates if the user filters by RSVP
+            const rsvpComponent = new RsvpBtn(event, () => {
+                if (rsvpFilterCheckbox.checked) {
+                    applyFilters();
+                }
+                // Re-color calendar events
+                if(currentView === 'calendar') {
+                    renderCalendar(currentEvents);
+                }
+            });
+            placeholder.replaceWith(rsvpComponent);
+        }
+    });
+
     // Add click listeners for modals after rendering
     container.querySelectorAll('.app-event-card').forEach(card => {
         card.addEventListener('click', (e) => {
-            // Don't open modal if a button or link was clicked
-            if (e.target.closest('.action-btn') || e.target.closest('a')) {
+            // Don't open modal if a button, link, or RSVP component was clicked
+            if (e.target.closest('.action-btn') || e.target.closest('a') || e.target.closest('.rsvp-btn-container')) {
                 return;
             }
             const eventId = e.currentTarget.dataset.eventId;
@@ -356,7 +832,10 @@ function renderCalendar(events) {
         title: e.title,
         start: normalizeDateTime(e.start_time),
         end: normalizeDateTime(e.end_time),
-        extendedProps: e
+        extendedProps: e,
+        // --- NEW: Style based on RSVP status ---
+        backgroundColor: e.my_rsvp_status === 'going' ? '#38a169' : (e.visibility === 'private' ? '#5568d3' : '#667eea'),
+        borderColor: e.my_rsvp_status === 'going' ? '#2f855a' : (e.visibility === 'private' ? '#4a5568' : '#5568d3')
     }));
 
     if (!fcCalendar) {
@@ -394,25 +873,37 @@ function renderCalendar(events) {
 function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase();
     const filterDate = dateFilter.value;
+    const showMyRsvps = rsvpFilterCheckbox.checked; // NEW
     
     currentEvents = allEvents.filter(event => {
         const titleMatch = event.title.toLowerCase().includes(searchTerm);
         const descriptionMatch = (event.description || '').toLowerCase().includes(searchTerm);
         const searchMatch = titleMatch || descriptionMatch;
-
+        let dateMatch = true;
+        
         if (filterDate) {
-            const eventStartDate = event.start_time ? String(event.start_time).split('T')[0] : null;
-            const eventEndDate = event.end_time ? String(event.end_time).split('T')[0] : null;
-            if (!eventStartDate || !eventEndDate) return false;
+            const start = new Date(event.start_time);
+            const end = new Date(event.end_time);
+                
+            // Get local date components, matching the <input type="date"> format
+            const eventStartDate = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')}`;
+            const eventEndDate = `${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`;
+
+            if (!eventStartDate || !eventEndDate) dateMatch = false;
             // Handle one-day events: check if filterDate is on that day
-            if (eventStartDate === eventEndDate) {
-                return searchMatch && filterDate === eventStartDate;
-            }
+            else if (eventStartDate === eventEndDate) dateMatch = (filterDate === eventStartDate);
             // Handle multi-day events: check if filterDate is within the range
-            return searchMatch && filterDate >= eventStartDate && filterDate <= eventEndDate;
+            else dateMatch = (filterDate >= eventStartDate && filterDate <= eventEndDate);
         }
 
-        return searchMatch;
+        // --- NEW: RSVP Filter Logic ---
+        let rsvpMatch = true;
+        if (showMyRsvps) {
+            // Show if 'going' or 'maybe'
+            rsvpMatch = event.my_rsvp_status === 'going' || event.my_rsvp_status === 'maybe';
+        }
+
+        return searchMatch && dateMatch && rsvpMatch;
     });
 
     if (currentView === 'calendar') {
@@ -468,8 +959,11 @@ function switchView(view) {
 async function loadEvents() {
     try {
         const events = await api("/events/", "GET", null, token);
-        // Sort events by start time, newest first
-        allEvents = events.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+        if (!Array.isArray(events)) {
+             throw new Error("API did not return an array of events.");
+        }
+        // Sort events by start time, ASCENDING (earliest first)
+        allEvents = events.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
         currentEvents = [...allEvents];
         // Render the default view (cards)
         switchView(currentView); 
@@ -485,9 +979,11 @@ loadEvents();
 
 searchInput.addEventListener('input', applyFilters);
 dateFilter.addEventListener('change', applyFilters);
+rsvpFilterCheckbox.addEventListener('change', applyFilters); // NEW
 resetFiltersBtn.addEventListener('click', () => {
     searchInput.value = '';
     dateFilter.value = '';
+    rsvpFilterCheckbox.checked = false; // NEW
     currentEvents = [...allEvents];
     applyFilters();
 });
@@ -497,5 +993,3 @@ viewButtons.forEach(btn => {
 });
 
 </script>
-
-
