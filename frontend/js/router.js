@@ -19,15 +19,17 @@ const routes = {
   "#/calendar": "pages/events.html", // Attendee home / Event Hub
   "#/events": "pages/events.html", // The "cards" list view
 
-  // --- EVENT CREATION FLOW ---
+  // Event Creation Flow
   "#/create-event": "pages/create-event.html",   // The choice page
   "#/event-form": "pages/event-form.html",     // The standard form
-  "#/event-wizard": "pages/event-wizard.html", // NEW WIZARD ROUTE
+  "#/event-wizard": "pages/event-wizard.html",  // The wizard form
 
   "#/planning": "pages/planning.html", // Kanban board placeholder
   "#/ai-chat": "pages/ai-chat.html",
   "#/profile": "pages/profile.html",
-  "#/discover": "pages/discover.html"
+  "#/discover": "pages/discover.html",
+
+  "#/profile-view": "pages/profile-view.html" // Read-only view of other users
 };
 
 const landingPages = [
@@ -48,7 +50,14 @@ const adminOnlyPages = [
 ];
 
 async function router() {
-  let path = window.location.hash || "#/landing";
+  let hash = window.location.hash || "#/landing"; // <-- NEW
+  let path = hash.split('?')[0]; // NEW (e.g., #/profile-view)
+
+  // Handle 404
+  if (!routes[path]) { // This check now uses the base path
+    path = "#/landing"; // Default to landing page
+    window.location.hash = path;
+  }
   
   // Handle 404
   if (!routes[path]) {
@@ -141,20 +150,22 @@ window.addEventListener('resize', () => {
 
 function updateActiveNav(path) {
   const navItems = document.querySelectorAll('.nav-item');
+  const basePath = path.split('?')[0];
+
   navItems.forEach(item => {
     item.classList.remove('active');
-    
+
     // Special handling for merged "Events & Calendar" tab
-    if (path === '#/calendar' || path === '#/events') {
+    if (basePath === '#/calendar' || basePath === '#/events') { // Use basePath
         if (item.getAttribute('href') === '#/calendar') {
             item.classList.add('active');
         }
     // Special handling for new Create flow
-    } else if (path === '#/event-form' || path === '#/event-wizard') {
+    } else if (basePath === '#/event-form' || basePath === '#/event-wizard') { // Use basePath
         if (item.getAttribute('href') === '#/create-event') {
             item.classList.add('active');
         }
-    } else if (item.getAttribute('href') === path) {
+    } else if (item.getAttribute('href') === basePath) { // Use basePath
       item.classList.add('active');
     }
   });
@@ -165,13 +176,13 @@ function updateActiveNav(path) {
   });
 
   let activeLandingNav = null;
-  if (path === '#/landing' || path === '#/') {
+  if (basePath === '#/landing' || basePath === '#/') { // Use basePath
     activeLandingNav = 'landing';
-  } else if (path === '#/landing-events') {
+  } else if (basePath === '#/landing-events') { // Use basePath
     activeLandingNav = 'events';
-  } else if (path === '#/landing-calendar') {
+  } else if (basePath === '#/landing-calendar') { // Use basePath
     activeLandingNav = 'calendar';
-  } else if (path === '#/landing-about') {
+  } else if (basePath === '#/landing-about') { // Use basePath
     activeLandingNav = 'about';
   }
   
