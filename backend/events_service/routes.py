@@ -27,6 +27,8 @@ def parse_dt(val):
         return datetime.fromisoformat(val)
     except (ValueError, TypeError):
         return None
+    
+
 
 @events_bp.route("/", methods=["GET"])
 def list_events():
@@ -84,8 +86,233 @@ def list_events():
         
     return jsonify(rows), 200
 
-# ... [create_event, update_event, delete_event functions remain the same] ...
-# (Assuming they exist from the previous file content)
+
+
+@events_bp.route("/", methods=["POST"])
+def create_event():
+    """
+    Create an event.
+    - Any authenticated user can create a 'private' event.
+    - Only 'organizer' or 'admin' can create a 'public' event.
+    """
+    # 1. Verify any authenticated user
+    user_id, role, err, code = verify_token_from_request()
+    if err:
+        return err, code
+
+    data = request.get_json() or {}
+    
+    # --- Data Validation ---
+    title = data.get("title")
+    start_str = data.get("start_time")
+    end_str = data.get("end_time")
+    
+    if not title or not start_str or not end_str:
+        return jsonify({"error": "title, start_time, and end_time are required"}), 400
+
+    start_dt = parse_dt(start_str)
+    end_dt = parse_dt(end_str)
+    
+    if not start_dt or not end_dt:
+        return jsonify({"error": "Invalid datetime format. Use ISO-8601."}), 400
+        
+    if start_dt >= end_dt:
+        return jsonify({"error": "start_time must be before end_time"}), 400
+
+    # --- Location Handling ---
+    location_type = data.get("location_type", "custom") # Default to custom
+    venue_id = data.get("venue_id")
+    custom_location = data.get("custom_location_address")
+    
+    if location_type == 'venue' and not venue_id:
+        return jsonify({"error": "venue_id is required for location_type 'venue'"}), 400
+    if location_type == 'custom' and not custom_location:
+        return jsonify({"error": "custom_location_address is required for location_type 'custom'"}), 400
+
+    # --- Optional Fields & Visibility ---
+    description = data.get("description")
+    google_maps_link = data.get("google_maps_link")
+    visibility = data.get("visibility", "public")
+    
+    if visibility not in ['public', 'private']:
+        visibility = 'public'
+
+    # 2. Permission Checks
+    if visibility == 'public' and role not in ['organizer', 'admin']:
+        return jsonify({
+            "error": "Permission denied. Only organizers and admins can create public events."
+        }), 403
+        # (If an attendee submits 'private', this check passes)
+
+    # --- Conflict Check (Simple) ---
+    if location_type == 'venue':
+        conflict_sql = """
+            SELECT event_id FROM events
+            WHERE venue_id = %s
+            AND status = 'upcoming'
+            AND (start_time, end_time) OVERLAPS (%s, %s);
+        """
+        try:
+            with get_db() as conn:
+                with conn.cursor() as cur:
+                    cur.execute(conflict_sql, (venue_id, start_dt, end_dt))
+                    conflict = cur.fetchone()
+                    if conflict:
+                        return jsonify({"error": "Scheduling conflict detected at this venue"}), 409
+        except Exception as e:
+            print(f"Database error during conflict check: {e}")
+            return jsonify({"error": "Failed to check for conflicts"}), 500
+
+    # --- Insert Event ---
+    sql = """
+        INSERT INTO events (
+            title, description, start_time, end_time, 
+            location_type, venue_id, custom_location_address, google_maps_link,
+            visibility, organizer_id, created_by, status
+        ) VALUES (
+            %s, %s, %s, %s,
+            %s, %s, %s, %s,
+            %s, %s, %s, 'upcoming'
+        )
+        RETURNING event_id;
+    """
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, (
+                    title, description, start_dt, end_dt,
+                    location_type, 
+                    venue_id if location_type == 'venue' else None,
+                    custom_location if location_type == 'custom' else None,
+                    google_maps_link,
+                    visibility, user_id, user_id
+                ))
+                new_event = cur.fetchone()
+                conn.commit()
+                event_id = new_event["event_id"]
+    except Exception as e:
+        print(f"Database error creating event: {e}")
+        return jsonify({"error": "Failed to create event"}), 500
+
+    return jsonify({"event_id": event_id}), 201
+
+
+
+@events_bp.route("/<int:event_id>", methods=["PUT"])
+def update_event(event_id):
+    """
+    Update an event if the caller is the organizer or admin.
+    Allows partial updates.
+    """
+    user_id, role, err, code = verify_token_from_request() # Get user first
+    if err:
+        return err, code
+
+    data = request.get_json() or {}
+    if not data:
+        return jsonify({"error": "No update data provided"}), 400
+
+    conn = get_db()
+    try:
+        # First, verify ownership or admin status
+        with conn.cursor() as cur:
+            cur.execute("SELECT organizer_id, created_by FROM events WHERE event_id = %s;", (event_id,))
+            ev = cur.fetchone()
+            if not ev:
+                conn.close()
+                return jsonify({"error": "Event not found"}), 404
+
+            # Allow update if user is Admin, Organizer, or *created* the event
+            if role not in ['admin', 'organizer'] and ev["created_by"] != user_id:
+                conn.close()
+                return jsonify({"error": "Permission denied"}), 403
+            
+            # Role-based check for visibility
+            if 'visibility' in data and data['visibility'] == 'public':
+                if role not in ['admin', 'organizer']:
+                    conn.close()
+                    return jsonify({"error": "Only organizers/admins can make events public"}), 403
+
+        # --- Build partial update query ---
+        fields = []
+        values = []
+        
+        allowed_fields = [
+            "title", "description", "start_time", "end_time", 
+            "location_type", "venue_id", "custom_location_address", 
+            "google_maps_link", "visibility", "status"
+        ]
+        
+        for key in allowed_fields:
+            if key in data:
+                fields.append(f"{key} = %s")
+                if key in ("start_time", "end_time"):
+                    values.append(parse_dt(data[key]))
+                else:
+                    values.append(data[key])
+        
+        if "updated_at" not in fields:
+             fields.append("updated_at = CURRENT_TIMESTAMP")
+
+        if fields:
+            values.append(event_id)
+            sql = f"UPDATE events SET {', '.join(fields)} WHERE event_id = %s;"
+            
+            with conn.cursor() as cur:
+                cur.execute(sql, values)
+                conn.commit()
+        else:
+            return jsonify({"error": "No valid fields to update"}), 400
+
+    except Exception as e:
+        conn.rollback()
+        print(f"Database error updating event {event_id}: {e}")
+        return jsonify({"error": "Failed to update event"}), 500
+    finally:
+        if conn:
+            conn.close()
+
+    return jsonify({"status": "updated"}), 200
+
+
+
+@events_bp.route("/<int:event_id>", methods=["DELETE"])
+def delete_event(event_id):
+    """
+    Delete an event if the caller is the organizer, admin, or creator.
+    """
+    user_id, role, err, code = verify_token_from_request()
+    if err:
+        return err, code
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                # Verify ownership before deleting
+                cur.execute("SELECT organizer_id, created_by FROM events WHERE event_id = %s;", (event_id,))
+                ev = cur.fetchone()
+                if not ev:
+                    return jsonify({"error": "Event not found"}), 404
+
+                # Allow delete if user is Admin, Organizer, or created the event
+                if role not in ['admin', 'organizer'] and ev["created_by"] != user_id:
+                    return jsonify({"error": "Permission denied"}), 403
+
+                # Perform the delete
+                cur.execute("DELETE FROM events WHERE event_id = %s;", (event_id,))
+                conn.commit()
+                
+                if cur.rowcount == 0:
+                    return jsonify({"error": "Event not found or already deleted"}), 404
+                    
+    except Exception as e:
+        print(f"Database error deleting event {event_id}: {e}")
+        return jsonify({"error": "Failed to delete event"}), 500
+
+    return jsonify({"status": "deleted"}), 200
+
+
 
 @events_bp.route("/<int:event_id>/rsvp", methods=["POST"])
 def rsvp(event_id):
