@@ -1096,8 +1096,13 @@ async function showDetailModal(event) {
 
     if (userId) {
         const rsvpContainer = new RsvpBtn(event, () => {
-            if (rsvpFilterCheckbox.checked) applyFilters();
-            if(currentView === 'calendar') renderCalendar(currentEvents);
+            // If filtering by RSVPs, re-apply filters to possibly remove/add event from view
+            if (rsvpFilterCheckbox.checked) {
+                applyFilters();
+            } else {
+                // Otherwise, just refresh the view to show the new button state on the card
+                switchView(currentView);
+            }
         });
         detailActions.appendChild(rsvpContainer);
     }
