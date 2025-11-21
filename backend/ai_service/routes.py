@@ -156,7 +156,7 @@ def handle_chat():
         return jsonify({"error": "No prompt provided."}), 400
 
     try:
-        # --- FIX: Prioritize OpenAI as requested ---
+        # --- Prioritize OpenAI ---
         if ACTIVE_AI_SERVICE == "openai":
             messages = [{"role": "system", "content": MAIN_SYSTEM_PROMPT}]
             
@@ -222,7 +222,6 @@ def handle_chat():
 
 
 # --- Wizard Helper Chatbot ---
-# --- FIX: Updated prompt to be a brainstormer, not a guardrail ---
 WIZARD_SYSTEM_PROMPT = """
 You are an AI brainstorming partner for an event creation wizard.
 Your role is to provide creative, concise, and helpful suggestions.
@@ -251,7 +250,7 @@ def handle_wizard_helper():
 
     try:
         ai_response = ""
-        # --- FIX: Prioritize OpenAI ---
+        # --- Prioritize OpenAI ---
         if ACTIVE_AI_SERVICE == "openai":
             response = openai_client.chat.completions.create(
                 model="gpt-4o-mini",

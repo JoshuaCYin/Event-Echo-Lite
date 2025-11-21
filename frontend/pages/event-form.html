@@ -149,14 +149,6 @@
         color: white;
         flex: 2;
     }
-    #deleteBtn {
-        background: #fff5f5;
-        color: #c53030;
-        border: 1px solid #fc8181;
-        flex: 1;
-        display: none; /* Hidden by default */
-    }
-    #deleteBtn:hover { background: #fed7d7; }
 </style>
 
 <div class="create-event-form page-transition-enter-active">
@@ -249,7 +241,6 @@
         
         <!-- Actions -->
         <div class="form-actions">
-            <button type="button" id="deleteBtn">Delete Event</button>
             <button type="submit" id="saveBtn">Create Event</button>
         </div>
     </form>
@@ -266,7 +257,6 @@ const form = document.getElementById("eventForm");
 const messageDiv = document.getElementById("formMessage");
 const topErrorDiv = document.getElementById("topErrorMessage");
 const saveBtn = document.getElementById("saveBtn");
-const deleteBtn = document.getElementById("deleteBtn");
 const token = localStorage.getItem("token");
 const userRole = getRoleFromToken();
 
@@ -320,7 +310,6 @@ async function init() {
 function setupCreateMode() {
     document.getElementById("pageTitle").textContent = "New Event Details";
     saveBtn.textContent = "Create Event";
-    deleteBtn.style.display = "none";
     
     // Apply AI Draft if available
     applyAIDraft();
@@ -329,7 +318,6 @@ function setupCreateMode() {
 async function setupEditMode() {
     document.getElementById("pageTitle").textContent = "Edit Event";
     saveBtn.textContent = "Update Event";
-    deleteBtn.style.display = "block";
     
     // Update back link to just go to calendar/list, not the "Create Options" page
     const backLink = document.getElementById("backLink");
@@ -531,30 +519,6 @@ form.addEventListener("submit", async (e) => {
         saveBtn.textContent = isEditMode ? "Update Event" : "Create Event";
     } finally {
         messageDiv.style.display = "block";
-    }
-});
-
-// --- Delete Handler ---
-
-deleteBtn.addEventListener("click", async () => {
-    if (!confirm("Are you sure you want to delete this event? This cannot be undone.")) return;
-
-    deleteBtn.disabled = true;
-    deleteBtn.textContent = "Deleting...";
-    
-    try {
-        const res = await api(`/events/${eventId}`, "DELETE", null, token);
-        if (res.error) {
-            alert("Failed to delete: " + res.error);
-            deleteBtn.disabled = false;
-            deleteBtn.textContent = "Delete Event";
-        } else {
-            window.location.hash = "#/calendar";
-        }
-    } catch (err) {
-        alert("Network error deleting event.");
-        deleteBtn.disabled = false;
-        deleteBtn.textContent = "Delete Event";
     }
 });
 

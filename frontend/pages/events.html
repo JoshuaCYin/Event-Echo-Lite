@@ -283,7 +283,7 @@
 
 
 /* ------------------------------------------------------ */
-/* LIST VIEW — LAYOUT FIX + BUTTONS (FROM YOUR SNIPPET) */
+/* LIST VIEW */
 /* ------------------------------------------------------ */
 #eventListView .app-event-card {
     display: flex;
@@ -292,7 +292,7 @@
     gap: 1rem;
     position: relative;      /* for absolute dropdown positioning */
     overflow: visible;      /* important: let dropdown escape */
-    margin-bottom: 1.5rem;   /* Added spacing between cards */
+    margin-bottom: 0.7rem;   /* Added spacing between cards */
 }
 
 #eventListView .app-event-card:has(.dropdown-menu.open) {
@@ -367,6 +367,40 @@
 /* (NEW) Ensure options button container is positioned correctly in list */
 #eventListView .options-btn-container {
     position: relative; 
+}
+
+/* ------------------------------------------------------ */
+/* GRID VIEW - CARD LAYOUT FIX */
+/* ------------------------------------------------------ */
+#eventCardsView .app-event-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Ensure card takes full height of grid cell */
+}
+
+#eventCardsView .event-content {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allow content to expand */
+}
+
+#eventCardsView .event-info-wrapper {
+    flex-grow: 0; /* Don't let this section expand */
+}
+
+#eventCardsView .event-meta-wrapper {
+    flex-grow: 0; /* Don't let this section expand */
+}
+
+#eventCardsView .event-actions-wrapper {
+    margin-top: auto; /* Push to bottom */
+    padding-top: 1rem; /* Add some spacing */
+}
+
+#eventCardsView .event-actions {
+    display: flex;
+    gap: 0.75rem;
+    width: 100%;
 }
 
 /* ------------------------------------------------------ */
@@ -1123,7 +1157,7 @@ function switchView(viewName) {
         cardsView.style.display = "grid";
         renderEvents(currentEvents, false);
     } else if (viewName === "list") {
-        listView.style.display = "block"; /* <-- FIX: Was 'flex', causing horizontal row */
+        listView.style.display = "block";
         renderEvents(currentEvents, true);
     } else if (viewName === "calendar") {
         calendarView.style.display = "block";
