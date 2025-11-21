@@ -11,7 +11,6 @@ CREATE TABLE users (
     role VARCHAR(50) DEFAULT 'attendee',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    -- New profile fields
     major_department VARCHAR(100),
     phone_number VARCHAR(20),
     hobbies TEXT,
@@ -25,7 +24,6 @@ CREATE TABLE venues (
     name VARCHAR(100),
     building VARCHAR(100),
     room_number VARCHAR(50),
-    -- A link for Google Maps
     google_maps_link TEXT
 );
 
@@ -53,13 +51,13 @@ CREATE TABLE events (
     visibility VARCHAR(20) DEFAULT 'public', -- 'public' or 'private'
     
     -- Links and status
-    organizer_id INT REFERENCES users(user_id) ON DELETE SET NULL,
+    organizer_id INT REFERENCES users(user_id) ON DELETE CASCADE,
     status VARCHAR(50) DEFAULT 'upcoming', -- e.g., upcoming, cancelled
     
     -- Timestamps
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INT REFERENCES users(user_id) ON DELETE SET NULL
+    created_by INT REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- Stores who is going to what event
