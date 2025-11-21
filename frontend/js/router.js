@@ -44,14 +44,13 @@ const authPages = ["#/login", "#/register"];
 // --- Role-protected Pages ---
 const adminOnlyPages = [
     "#/dashboard",
-    // "/create-event" is now open to all
     "#/planning"
     // "/event-form" is open to all, but backend/form logic handles permissions
 ];
 
 async function router() {
-  let hash = window.location.hash || "#/landing"; // <-- NEW
-  let path = hash.split('?')[0]; // NEW (e.g., #/profile-view)
+  let hash = window.location.hash || "#/landing";
+  let path = hash.split('?')[0]; // (e.g., #/profile-view)
 
   // Handle 404
   if (!routes[path]) { // This check now uses the base path

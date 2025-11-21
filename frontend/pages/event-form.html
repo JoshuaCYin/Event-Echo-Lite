@@ -4,6 +4,12 @@
         max-width: 700px;
         margin: 0 auto;
     }
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
     .form-section {
         margin-bottom: 1.5rem;
         padding-bottom: 1.5rem;
@@ -52,7 +58,7 @@
         border: 1px solid var(--border-color, #ccc);
         border-radius: var(--radius-md, 8px);
         background-color: var(--bg-secondary, #f9f9f9);
-        box-sizing: border-box; /* Important for padding */
+        box-sizing: border-box; 
     }
     input:focus, textarea:focus, select:focus {
         outline: 2px solid var(--primary-color, #007bff);
@@ -101,13 +107,8 @@
         border-color: var(--primary-color, #007bff);
     }
     
-    /* Hidden Containers */
-    /* Only hide the Venue selector by default, Custom Address is visible by default */
-    #venueSelectContainer {
-        display: none;
-    }
+    #venueSelectContainer { display: none; }
     
-    /* Links within forms */
     .form-section a {
         font-size: 0.875rem;
         color: var(--primary-color, #007bff);
@@ -115,11 +116,8 @@
         display: inline-block;
         margin-top: 0.5rem;
     }
-    .form-section a:hover {
-        text-decoration: underline;
-    }
+    .form-section a:hover { text-decoration: underline; }
     
-    /* AI Draft notification */
     .ai-draft-applied {
         padding: 1rem;
         background: #e6f3ff;
@@ -131,46 +129,52 @@
         align-items: center;
         gap: 0.75rem;
     }
+
+    /* Action Buttons */
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        margin-top: 1.5rem;
+    }
+    .form-actions button {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-md, 8px);
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+    }
+    #saveBtn {
+        background: var(--primary-color, #007bff);
+        color: white;
+        flex: 2;
+    }
 </style>
 
-<!-- 
-  Create Event Form
-  This HTML file provides the structure for creating a new event.
-  It includes fields for title, description, time, location, and settings.
-  JavaScript is used to handle form submission, location type toggling,
-  and pre-filling the form with an AI-generated draft.
--->
 <div class="create-event-form page-transition-enter-active">
     
     <!-- Back Navigation -->
-    <a href="#/create-event" class="back-link">
+    <a href="#/create-event" class="back-link" id="backLink">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        Back to options
+        <span>Back to options</span>
     </a>
     
-    <h2>New Event Details</h2>
+    <div class="form-header">
+        <h2 id="pageTitle">New Event Details</h2>
+    </div>
     
-    <!-- Notification Area for AI Draft -->
     <div id="aiDraftMessage" style="display: none;"></div>
+    <div id="topErrorMessage" class="error-message" style="display: none; margin-bottom: 1rem;"></div>
     
-    <form id="createEventForm">
+    <form id="eventForm">
         
         <!-- Basic Info Section -->
         <div class="form-section">
             <label for="evTitle">Event Title*</label>
-            <input 
-                id="evTitle" 
-                type="text" 
-                placeholder="e.g. Spring Hackathon" 
-                required
-            >
+            <input id="evTitle" type="text" placeholder="e.g. Spring Hackathon" required>
             
             <label for="evDescription">Description</label>
-            <textarea 
-                id="evDescription" 
-                placeholder="Tell attendees about your event..."
-                rows="5"
-            ></textarea>
+            <textarea id="evDescription" placeholder="Tell attendees about your event..." rows="5"></textarea>
         </div>
         
         <!-- Date & Time Section -->
@@ -188,7 +192,7 @@
             </div>
         </div>
         
-        <!-- Location Section (No longer required) -->
+        <!-- Location Section -->
         <div class="form-section">
             <h3>Location</h3>
             <div class="radio-group">
@@ -202,17 +206,11 @@
                 </label>
             </div>
             
-            <!-- Custom Location Fields (Now visible by default via CSS/HTML structure) -->
             <div id="customLocationContainer">
                 <label for="evCustomLocation">Custom Address</label>
-                <input 
-                    id="evCustomLocation" 
-                    type="text" 
-                    placeholder="e.g. 123 Main St, Marion, IN"
-                >
+                <input id="evCustomLocation" type="text" placeholder="e.g. 123 Main St, Marion, IN">
             </div>
             
-            <!-- On-Campus Venue Fields (Hidden by CSS by default) -->
             <div id="venueSelectContainer">
                 <label for="evVenue">Select a Venue</label>
                 <select id="evVenue">
@@ -221,16 +219,11 @@
                 <a href="#/dashboard" id="manageVenuesLink" style="display: none;">Manage Venues</a>
             </div>
             
-            <!-- Google Maps Link (Optional) -->
             <label for="evMapsLink">Google Maps Link (Optional)</label>
-            <input 
-                id="evMapsLink" 
-                type="url" 
-                placeholder="https://maps.app.goo.gl/..."
-            >
+            <input id="evMapsLink" type="url" placeholder="https://maps.app.goo.gl/...">
         </div>
         
-        <!-- Settings Section (Visibility) -->
+        <!-- Settings Section -->
         <div class="form-section" id="visibilityContainer" style="display: none;">
             <h3>Settings</h3>
             <label>Visibility*</label>
@@ -246,27 +239,28 @@
             </div>
         </div>
         
-        <!-- Submit Button -->
-        <button type="submit" id="createBtn">Create Event</button>
+        <!-- Actions -->
+        <div class="form-actions">
+            <button type="submit" id="saveBtn">Create Event</button>
+        </div>
     </form>
     
-    <!-- Form submission message area -->
-    <div id="createMessage" style="display: none; margin-top: 1rem;"></div>
+    <div id="formMessage" style="display: none; margin-top: 1rem;"></div>
 </div>
 
 <script type="module">
-// Assuming api.js and app.js are in a '../js/' directory
 import { api } from "../js/api.js";
 import { getRoleFromToken } from "../js/app.js";
 
-// --- Global Elements ---
-const form = document.getElementById("createEventForm");
-const messageDiv = document.getElementById("createMessage");
-const createBtn = document.getElementById("createBtn");
+// --- State & elements ---
+const form = document.getElementById("eventForm");
+const messageDiv = document.getElementById("formMessage");
+const topErrorDiv = document.getElementById("topErrorMessage");
+const saveBtn = document.getElementById("saveBtn");
 const token = localStorage.getItem("token");
 const userRole = getRoleFromToken();
 
-// --- Form Elements ---
+// Fields
 const evTitle = document.getElementById("evTitle");
 const evDescription = document.getElementById("evDescription");
 const evStart = document.getElementById("evStart");
@@ -274,53 +268,137 @@ const evEnd = document.getElementById("evEnd");
 const evCustomLocation = document.getElementById("evCustomLocation");
 const evMapsLink = document.getElementById("evMapsLink");
 const venueSelect = document.getElementById("evVenue");
-const aiDraftMessage = document.getElementById("aiDraftMessage");
-
-// --- Location Elements ---
 const venueSelectContainer = document.getElementById("venueSelectContainer");
 const customLocationContainer = document.getElementById("customLocationContainer");
 const locationTypeRadios = document.querySelectorAll('input[name="location_type"]');
-
-// --- Settings Elements ---
 const visibilityContainer = document.getElementById("visibilityContainer");
 const manageVenuesLink = document.getElementById("manageVenuesLink");
 
-// --- 1. Role-Based UI ---
-// Show visibility settings and 'Manage Venues' link only for admins/organizers
-if (userRole === 'admin' || userRole === 'organizer') {
-    visibilityContainer.style.display = 'block';
-    manageVenuesLink.style.display = 'block';
-} else {
-    visibilityContainer.style.display = 'none';
-    manageVenuesLink.style.display = 'none';
-}
+// Detect Edit Mode
+const hashParts = window.location.hash.split('?');
+const params = new URLSearchParams(hashParts[1]);
+const eventId = params.get('id');
+const isEditMode = !!eventId;
 
-// --- 2. Location Toggle Logic (Robust Version) ---
-/**
- * Reads the checked location_type radio and shows/hides the
- * corresponding form fields.
- * This function is now "context-agnostic" (doesn't use `this`)
- * and sets both location fields to be NOT required, per user request.
- */
-function handleLocationTypeChange() {
-    const type = document.querySelector('input[name="location_type"]:checked').value;
-    
-    if (type === 'venue') {
-        venueSelectContainer.style.display = 'block';
-        customLocationContainer.style.display = 'none';
-    } else { // 'custom'
-        venueSelectContainer.style.display = 'none';
-        customLocationContainer.style.display = 'block';
+// --- Initialization Logic ---
+
+async function init() {
+    // Role UI setup
+    if (userRole === 'admin' || userRole === 'organizer') {
+        visibilityContainer.style.display = 'block';
+        manageVenuesLink.style.display = 'block';
+    } else {
+        visibilityContainer.style.display = 'none';
     }
-    
-    // Per request: location is no longer required.
-    venueSelect.required = false;
-    evCustomLocation.required = false;
-}
-// Add listener to all radio buttons
-locationTypeRadios.forEach(radio => radio.addEventListener('change', handleLocationTypeChange));
 
-// --- 3. Load Venues into Dropdown ---
+    // Load venues first
+    await loadVenues();
+
+    // Setup Logic based on Mode
+    if (isEditMode) {
+        setupEditMode();
+    } else {
+        setupCreateMode();
+    }
+
+    // Initialize Location Logic
+    handleLocationTypeChange();
+}
+
+// --- Create vs Edit Setup ---
+
+function setupCreateMode() {
+    document.getElementById("pageTitle").textContent = "New Event Details";
+    saveBtn.textContent = "Create Event";
+    
+    // Apply AI Draft if available
+    applyAIDraft();
+}
+
+async function setupEditMode() {
+    document.getElementById("pageTitle").textContent = "Edit Event";
+    saveBtn.textContent = "Update Event";
+    
+    // Update back link to just go to calendar/list, not the "Create Options" page
+    const backLink = document.getElementById("backLink");
+    backLink.href = "#/calendar";
+    backLink.querySelector("span").textContent = "Back to Calendar";
+
+    // Fetch Data
+    try {
+        const event = await api(`/events/${eventId}`, "GET", null, token);
+        
+        if (event.error) {
+            showTopError(event.error);
+            return;
+        }
+
+        // Populate Fields
+        evTitle.value = event.title || "";
+        evDescription.value = event.description || "";
+        evStart.value = formatDateTimeForInput(event.start_time);
+        evEnd.value = formatDateTimeForInput(event.end_time);
+        evMapsLink.value = event.google_maps_link || "";
+        
+        // Location Logic
+        if (event.location_type === 'venue') {
+            document.querySelector(`input[name="location_type"][value="venue"]`).checked = true;
+            // Wait for venues to load, then select
+            if (venueSelect.options.length > 1) {
+                venueSelect.value = event.venue_id;
+            }
+        } else {
+            document.querySelector(`input[name="location_type"][value="custom"]`).checked = true;
+            evCustomLocation.value = event.custom_location_address || "";
+        }
+        
+        // Visibility Logic
+        if (event.visibility) {
+            const visRadio = document.querySelector(`input[name="visibility"][value="${event.visibility}"]`);
+            if (visRadio) visRadio.checked = true;
+        }
+
+        // Trigger UI update for location
+        handleLocationTypeChange();
+
+    } catch (err) {
+        console.error(err);
+        showTopError("Failed to load event details.");
+    }
+}
+
+// --- Helper Functions ---
+
+function showTopError(msg) {
+    topErrorDiv.textContent = msg;
+    topErrorDiv.style.display = 'block';
+    form.style.opacity = '0.5';
+    form.style.pointerEvents = 'none';
+}
+
+function formatDateTimeForInput(isoString) {
+    if (!isoString) return "";
+    try {
+        // Create a Date object from the ISO string
+        const date = new Date(isoString);
+        
+        // Check if valid date
+        if (isNaN(date.getTime())) return "";
+        
+        // Format to YYYY-MM-DDTHH:MM (local time)
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    } catch (e) {
+        console.error("Error formatting date:", e);
+        return "";
+    }
+}
+
 async function loadVenues() {
     try {
         const venues = await api("/venues/", "GET", null, token);
@@ -329,7 +407,6 @@ async function loadVenues() {
             venues.forEach(venue => {
                 const option = document.createElement('option');
                 option.value = venue.venue_id;
-                // e.g., "Main Auditorium (Taylor Hall, 101)" or "Student Center (Student Center)"
                 option.textContent = `${venue.name} ${venue.building ? `(${venue.building}${venue.room_number ? `, ${venue.room_number}` : ''})` : ''}`;
                 venueSelect.appendChild(option);
             });
@@ -338,154 +415,114 @@ async function loadVenues() {
         }
     } catch (error) {
         console.error("Failed to load venues:", error);
-        venueSelect.innerHTML = '<option value="">Error loading venues</option>';
     }
 }
 
-// --- 4. AI DRAFT PRE-FILL (Corrected Version) ---
-/**
- * Checks localStorage for an 'aiEventDraft' and pre-fills
- * the form. This includes logic to correctly set and display
- * the custom location field if one is provided in the draft.
- */
+function handleLocationTypeChange() {
+    const type = document.querySelector('input[name="location_type"]:checked').value;
+    if (type === 'venue') {
+        venueSelectContainer.style.display = 'block';
+        customLocationContainer.style.display = 'none';
+    } else {
+        venueSelectContainer.style.display = 'none';
+        customLocationContainer.style.display = 'block';
+    }
+    venueSelect.required = false;
+    evCustomLocation.required = false;
+}
+
+locationTypeRadios.forEach(radio => radio.addEventListener('change', handleLocationTypeChange));
+
 function applyAIDraft() {
     const draftString = localStorage.getItem('aiEventDraft');
-    if (!draftString) {
-        return; // No draft found
-    }
-    
+    if (!draftString) return;
     try {
         const draft = JSON.parse(draftString);
-        
-        // Apply draft values
         if (draft.title) evTitle.value = draft.title;
         if (draft.description) evDescription.value = draft.description;
-        
-        // Logic to handle location draft
         if (draft.location) {
             evCustomLocation.value = draft.location;
-            
-            // 1. Force the "Custom Address" radio button to be checked
             document.querySelector('input[name="location_type"][value="custom"]').checked = true;
-            
-            // 2. Manually call the change handler to show/hide the correct fields
             handleLocationTypeChange();
         }
+        // NEW: Handle date/time fields
+        if (draft.start_time) {
+            evStart.value = formatDateTimeForInput(draft.start_time);
+        }
+        if (draft.end_time) {
+            evEnd.value = formatDateTimeForInput(draft.end_time);
+        }
         
-        // Show a confirmation message
-        aiDraftMessage.innerHTML = `
-            <div class="ai-draft-applied">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>
-                <span>AI Draft applied! Please review and add dates.</span>
-            </div>
-        `;
+        const aiDraftMessage = document.getElementById("aiDraftMessage");
+        aiDraftMessage.innerHTML = `<div class="ai-draft-applied"><span>✨ AI Draft applied!</span></div>`;
         aiDraftMessage.style.display = 'block';
-        
-    } catch (e) {
-        console.error("Failed to parse AI draft:", e);
-    } finally {
-        // Clear the draft from localStorage so it's only used once
-        localStorage.removeItem('aiEventDraft');
-    }
+    } catch (e) { console.error(e); }
+    localStorage.removeItem('aiEventDraft');
 }
 
-// --- 5. Initial Page Load (Corrected Order) ---
-// Now that Custom Address is the default visible HTML element,
-// we still run this to ensure the correct state if an AI Draft
-// for a venue was applied, or if the user clicks Venue initially.
-handleLocationTypeChange(); 
-loadVenues();
-applyAIDraft(); 
+// --- Submit Handler (Create & Update) ---
 
-// --- 6. Form Submission ---
 form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
     messageDiv.style.display = "none";
-    messageDiv.className = ""; // Clear old classes
+    messageDiv.className = "";
     
-    // --- Get Values ---
     const title = evTitle.value;
-    const description = evDescription.value;
     const start = evStart.value;
     const end = evEnd.value;
-    
     const location_type = document.querySelector('input[name="location_type"]:checked').value;
-    const venue_id = venueSelect.value;
-    const custom_location_address = evCustomLocation.value;
-    const google_maps_link = evMapsLink.value;
     
-    let visibility = 'private'; // Default for non-admins
-    if (userRole === 'admin' || userRole === 'organizer') {
-        visibility = document.querySelector('input[name="visibility"]:checked').value;
-    }
-    
-    // --- Validation ---
     if (new Date(start) >= new Date(end)) {
         messageDiv.className = "error-message";
         messageDiv.textContent = "End time must be after start time";
         messageDiv.style.display = "block";
         return;
     }
-    
-    // Validate Google Maps link if one is entered
-    const mapRegex = /^(https?:\/\/)?(www\.)?(google\.com\/maps|maps\.app\.goo\.gl)/;
-    if (google_maps_link && !mapRegex.test(google_maps_link)) {
-        messageDiv.className = "error-message";
-        messageDiv.textContent = "Please enter a valid Google Maps link (e.g., google.com/maps/...).";
-        messageDiv.style.display = "block";
-        return;
-    }
-    
-    // --- Build Payload ---
-    // The logic here correctly sends null for the unused location type
-    // or null if the user leaves a non-required location field blank.
+
     const payload = {
         title,
-        description,
-        start_time: start, 
-        end_time: end,     
+        description: evDescription.value,
+        start_time: start,
+        end_time: end,
         location_type,
-        // Send null if link is empty, otherwise send the value
-        google_maps_link: google_maps_link || null,
-        visibility,
-        // Send venue_id only if type is 'venue' AND value exists, otherwise null
-        venue_id: (location_type === 'venue' && venue_id) ? venue_id : null,
-        // Send address only if type is 'custom' AND value exists, otherwise null
-        custom_location_address: (location_type === 'custom' && custom_location_address) ? custom_location_address : null,
+        google_maps_link: evMapsLink.value || null,
+        visibility: (userRole === 'admin' || userRole === 'organizer') 
+            ? document.querySelector('input[name="visibility"]:checked').value 
+            : 'private',
+        venue_id: (location_type === 'venue' && venueSelect.value) ? venueSelect.value : null,
+        custom_location_address: (location_type === 'custom' && evCustomLocation.value) ? evCustomLocation.value : null,
     };
-    
-    createBtn.disabled = true;
-    createBtn.textContent = "Creating...";
-    
-    // --- API Call ---
+
+    saveBtn.disabled = true;
+    saveBtn.textContent = isEditMode ? "Updating..." : "Creating...";
+
     try {
-        const res = await api("/events/", "POST", payload, token);
+        let res;
+        if (isEditMode) {
+            res = await api(`/events/${eventId}`, "PUT", payload, token);
+        } else {
+            res = await api("/events/", "POST", payload, token);
+        }
         
         if (res.error) {
-            messageDiv.className = "error-message";
-            messageDiv.textContent = res.error || "Failed to create event";
+            throw new Error(res.error);
         } else {
             messageDiv.className = "success-message";
-            messageDiv.textContent = "Event created successfully! Redirecting...";
-            
-            // Redirect to calendar after a short delay
-            setTimeout(() => {
-                window.location.hash = "#/calendar";
-            }, 1500);
+            messageDiv.textContent = isEditMode ? "Event updated! Redirecting..." : "Event created! Redirecting...";
+            setTimeout(() => { window.location.hash = "#/calendar"; }, 1500);
         }
-        
     } catch (error) {
-        console.error("Form submission error:", error);
+        console.error("Submit error:", error);
         messageDiv.className = "error-message";
-        messageDiv.textContent = "A network error occurred. Please try again.";
+        messageDiv.textContent = error.message || "A network error occurred.";
+        saveBtn.disabled = false;
+        saveBtn.textContent = isEditMode ? "Update Event" : "Create Event";
     } finally {
-        // Re-enable button only if not redirecting
-        if (messageDiv.className.includes("error-message")) {
-            createBtn.disabled = false;
-            createBtn.textContent = "Create Event";
-        }
         messageDiv.style.display = "block";
     }
 });
+
+// Start
+init();
+
 </script>

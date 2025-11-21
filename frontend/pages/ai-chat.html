@@ -62,27 +62,38 @@
 
     /* --- SMART START & DRAFT BUTTON --- */
     .smart-start-container { 
-        padding: 0.5rem 0.5rem 0 0.5rem; 
+        padding: 0.75rem 0.5rem; 
         flex-shrink: 0;
     }
-    .smart-start-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-    
-    /* --- FIX: Compact button style --- */
+    .smart-start-grid { 
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    /* --- FIX: Compact pill-style buttons --- */
     .smart-start-btn {
-        padding: 0.75rem 1rem;
+        padding: 0.5rem 1rem;
         font-size: 0.875rem; 
         font-weight: 500;
         color: var(--text-primary); 
         background: var(--bg-tertiary);
         border: 1px solid var(--border-color); 
-        border-radius: var(--radius-md);
-        text-align: left; 
+        border-radius: 20px; /* More rounded */
+        text-align: center; 
         transition: var(--transition); 
         cursor: pointer;
-        line-height: 1.4; /* Ensure text doesn't feel cramped */
+        line-height: 1.4;
+        white-space: nowrap; /* Prevent wrapping */
+        flex-shrink: 0; /* Prevent shrinking */
     }
-    .smart-start-btn:hover { background: var(--bg-primary); border-color: var(--primary-color); }
-    .smart-start-btn strong { /* This is no longer used, but good to keep */
+    .smart-start-btn:hover { 
+        background: var(--bg-primary); 
+        border-color: var(--primary-color);
+        box-shadow: var(--shadow-sm);
+    }
+    .smart-start-btn strong { 
         color: var(--primary-color); 
         display: block; 
         font-size: 0.9rem; 
