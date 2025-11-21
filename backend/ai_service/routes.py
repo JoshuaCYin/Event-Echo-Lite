@@ -41,7 +41,9 @@ EVENT_DRAFT_SCHEMA = {
     "properties": {
         "title": {"type": "string", "description": "A creative and descriptive event title."},
         "description": {"type": "string", "description": "A 1-2 paragraph event description, formatted with markdown (e.g., line breaks)."},
-        "location": {"type": "string", "description": "A suggested physical location, building name, or address. (e.g., 'Chapel Auditorium' or '123 Main St')"}
+        "location": {"type": "string", "description": "A suggested physical location, building name, or address. (e.g., 'Chapel Auditorium' or '123 Main St')"},
+        "start_time": {"type": "string", "description": "Suggested start date and time in ISO 8601 format (e.g., '2025-11-25T14:00:00'). If user doesn't specify, suggest a reasonable future date/time."},
+        "end_time": {"type": "string", "description": "Suggested end date and time in ISO 8601 format (e.g., '2025-11-25T16:00:00'). Should be after start_time."}
     },
     "required": ["title", "description"]
 }
@@ -86,6 +88,8 @@ if ACTIVE_AI_SERVICE is None and GEMINI_API_KEY:
                         'title': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['title']['description']),
                         'description': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['description']['description']),
                         'location': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['location']['description']),
+                        'start_time': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['start_time']['description']),
+                        'end_time': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['end_time']['description']),
                     },
                     nullable=True
                 )
@@ -111,11 +115,12 @@ if ACTIVE_AI_SERVICE is None:
 
 
 # --- System Prompt (Main Chatbot) ---
-# --- FIX: Overhauled prompt to fix contradictions and improve drafting logic ---
 MAIN_SYSTEM_PROMPT = f"""
 You are an AI assistant for the "EventEcho" campus event planning app.
 Your identity: You are the "EventEcho AI Assistant". You are powered by {ACTIVE_AI_SERVICE}.
 *** CRITICAL: You MUST reply in the specified JSON format. ***
+
+**CURRENT DATE/TIME:** The current date and time is provided in the user's message.
 
 **CONTEXT:**
 You will be given a list of "Upcoming Public Events" and the user's "Conversation History".
@@ -129,9 +134,11 @@ This event list is the *only* source of truth.
 1.  **CONVERSATION:** Answer user questions about event planning or the provided event data.
 2.  **EVENT DRAFTING:** If the user's *latest prompt* asks to create, draft, or "make an event" (e.g., "draft a description for a workshop", "make an event for a fundraiser"), you MUST populate the `eventDraft` object.
 
-**RULES:**
+**EVENT DRAFT RULES:**
 * For a simple chat or question (e.g., "what events are happening?"), `eventDraft` MUST be `null`.
-* For an event creation request, `eventDraft` MUST be populated.
+* For an event creation request, `eventDraft` MUST be populated with ALL fields.
+* If the user specifies dates/times, use those. Otherwise, suggest reasonable future dates (e.g., next week, appropriate time of day).
+* **CRITICAL:** start_time and end_time MUST be in ISO 8601 format: 'YYYY-MM-DDTHH:MM:SS'
 * Always provide a friendly, conversational `response` in markdown.
 """
 
