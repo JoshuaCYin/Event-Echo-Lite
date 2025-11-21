@@ -147,6 +147,8 @@
     justify-content: center;
     transition: all 0.2s;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    width: 36px; /* Fixed width for alignment calculation */
+    height: 36px;
 }
 .options-toggle-btn:hover {
     background: var(--bg-primary);
@@ -158,6 +160,12 @@
     top: 110%;
     right: 0; /* Align right edge */
     left: auto;
+}
+/* Spacer for alignment when options button is missing in list view */
+.options-spacer {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
 }
 
 /* ------------------------------------------------------ */
@@ -281,6 +289,136 @@
     background: #fff5f5;
 }
 
+/* ------------------------------------------------------ */
+/* EVENT DETAIL MODAL - Using same structure as delete modal */
+/* ------------------------------------------------------ */
+#eventDetailModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 3000;
+    align-items: center;
+    justify-content: center;
+}
+
+#eventDetailModal.open {
+    display: flex;
+}
+
+.event-detail-box {
+    background: var(--bg-primary);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: var(--shadow-xl);
+    position: relative;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        /* transform: translateY(-20px) scale(0.95); */
+    }
+    to {
+        opacity: 1;
+        /* transform: translateY(0) scale(1); */
+    }
+}
+
+.detail-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    z-index: 10;
+    line-height: 1;
+    padding: 0;
+}
+
+.detail-close:hover {
+    background: var(--bg-primary);
+    color: var(--primary-color);
+    transform: rotate(90deg);
+}
+
+.event-detail-box h3 {
+    font-size: 1.75rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+    padding-right: 2rem;
+}
+
+.modal-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 1rem;
+}
+
+.modal-meta-row svg {
+    flex-shrink: 0;
+    color: var(--primary-color);
+}
+
+.modal-meta-row .map-link {
+    margin-left: 0.5rem;
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.modal-meta-row .map-link:hover {
+    text-decoration: underline;
+}
+
+#detailDescription {
+    margin: 1.5rem 0;
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-size: 1rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+#detailActions {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .event-detail-box {
+        max-width: 95%;
+        max-height: 90vh;
+        padding: 1.5rem;
+    }
+    
+    .event-detail-box h3 {
+        font-size: 1.5rem;
+    }
+}
 
 /* ------------------------------------------------------ */
 /* LIST VIEW */
@@ -362,6 +500,11 @@
     box-shadow: var(--shadow-lg);
     z-index: 999;          /* ensure dropdown is above other content */
     overflow: visible;     /* don’t clip options */
+}
+/* Fix RSVP dropdown to match button width in list view */
+#eventListView .rsvp-btn-container .dropdown-menu {
+    width: 140px;
+    min-width: 140px;
 }
 
 /* (NEW) Ensure options button container is positioned correctly in list */
@@ -452,6 +595,30 @@
     }
 }
 
+/* FORCE MODAL POSITIONING - Add at the very end of styles */
+#eventDetailModal.modal-overlay.open,
+#deleteConfirmModal.modal-overlay.open {
+    display: flex !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    align-items: center !important;
+    justify-content: center !important;
+    z-index: 9999 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.event-detail-box,
+.confirm-box {
+    position: relative !important;
+    margin: auto !important;
+}
+
 </style>
 
 <div class="event-hub-container page-content-wrapper page-transition-enter-active">
@@ -491,39 +658,92 @@
     <div id="eventCalendarView" class="calendar-view-wrapper" style="display: none; background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
         <div id="calendar"></div>
     </div>
-
-    <div id="eventDetailModal">
-        <div style="max-height: 80vh; overflow-y: auto; padding: 1rem;">
-            <button class="detail-close" id="closeDetailModal">×</button>
-            <h3 id="detailTitle"></h3>
-            <p><span class="detail-date" id="detailDate"></span></p>
-            <p><span class="detail-location" id="detailLocation"></span></p>
-            <p id="detailDescription"></p>
-            <div id="detailActions" class="event-actions" style="margin-top: 1.5rem;"></div>
-            <div id="detailAttendeeList"></div>
-        </div>
-    </div>
-
-    <!-- 
-      FIX 1: Moved deleteConfirmModal from inside .event-hub-container
-      to be outside of it, fixing the position: fixed issue.
-    -->
-</div>
-
-<div id="deleteConfirmModal" class="modal-overlay">
-    <div class="confirm-box">
-        <h3>Delete Event?</h3>
-        <p>Are you sure you want to delete this event? This action cannot be undone.</p>
-        <div class="confirm-actions">
-            <button id="cancelDeleteBtn" class="btn-cancel">Cancel</button>
-            <button id="confirmDeleteBtn" class="btn-delete">Delete</button>
-        </div>
-    </div>
 </div>
 
 <script type="module">
 import { api } from "../js/api.js";
 import { getRoleFromToken, token } from "../js/app.js";
+
+// --- CREATE AND INJECT MODALS INTO BODY ---
+function createModals() {
+    // Remove existing modals if any (Handles re-entry)
+    const existingDetail = document.getElementById('eventDetailModal');
+    const existingDelete = document.getElementById('deleteConfirmModal');
+    if (existingDetail) existingDetail.remove();
+    if (existingDelete) existingDelete.remove();
+
+    // Event Detail Modal
+    const detailModal = document.createElement('div');
+    detailModal.id = 'eventDetailModal';
+    detailModal.className = 'modal-overlay';
+    detailModal.style.display = 'none'; 
+    detailModal.innerHTML = `
+        <div class="event-detail-box">
+            <button class="detail-close" id="closeDetailModal">×</button>
+            <h3 id="detailTitle"></h3>
+            <div class="modal-meta-row">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+                <span id="detailDate"></span>
+            </div>
+            <div class="modal-meta-row">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span id="detailLocation"></span>
+                <span id="detailMapLink"></span>
+            </div>
+            <p id="detailDescription"></p>
+            <div id="detailActions" class="event-actions"></div>
+            <div id="detailAttendeeList"></div>
+        </div>
+    `;
+    document.body.appendChild(detailModal);
+
+    // Delete Confirmation Modal
+    const deleteModal = document.createElement('div');
+    deleteModal.id = 'deleteConfirmModal';
+    deleteModal.className = 'modal-overlay';
+    deleteModal.style.display = 'none';
+    deleteModal.innerHTML = `
+        <div class="confirm-box">
+            <h3>Delete Event?</h3>
+            <p>Are you sure you want to delete this event? This action cannot be undone.</p>
+            <div class="confirm-actions">
+                <button id="cancelDeleteBtn" class="btn-cancel">Cancel</button>
+                <button id="confirmDeleteBtn" class="btn-delete">Delete</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(deleteModal);
+}
+
+// Create modals immediately
+createModals();
+
+// --- CLEANUP LOGIC (FIX for lingering modals) ---
+// Detect when the "Event Hub" view is removed from the DOM and remove the body-attached modals.
+const eventHubContainer = document.querySelector('.event-hub-container');
+if (eventHubContainer) {
+    const observer = new MutationObserver((mutations) => {
+        if (!document.body.contains(eventHubContainer)) {
+            // The container is gone, so we must remove the global modals we created
+            const dModal = document.getElementById('eventDetailModal');
+            const delModal = document.getElementById('deleteConfirmModal');
+            if (dModal) dModal.remove();
+            if (delModal) delModal.remove();
+            observer.disconnect(); // Stop watching
+        }
+    });
+    
+    // Watch the body for structural changes (e.g. page navigation/swapping)
+    observer.observe(document.body, { childList: true, subtree: true });
+}
 
 const cardsView = document.getElementById("eventCardsView");
 const listView = document.getElementById("eventListView");
@@ -538,12 +758,49 @@ const rsvpFilterContainer = document.getElementById("rsvpFilterContainer");
 const rsvpFilterCheckbox = document.getElementById("myRsvpsFilter");
 const privateFilterCheckbox = document.getElementById("privateEventsFilter");
 
-// Delete Modal
-const deleteModal = document.getElementById("deleteConfirmModal");
-const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
-const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+// Delete Modal - Get references after creation
+let deleteModal, cancelDeleteBtn, confirmDeleteBtn;
 let eventIdToDelete = null;
 
+function initializeModalReferences() {
+    deleteModal = document.getElementById("deleteConfirmModal");
+    cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+    confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+    
+    if (deleteModal && cancelDeleteBtn) {
+        // Attach event listeners
+        cancelDeleteBtn.addEventListener('click', () => {
+            deleteModal.classList.remove('open');
+            // Also hide via inline style to match creation logic
+            deleteModal.style.display = 'none';
+            eventIdToDelete = null;
+        });
+
+        confirmDeleteBtn.addEventListener('click', async () => {
+            if(!eventIdToDelete) return;
+            
+            confirmDeleteBtn.textContent = "Deleting...";
+            confirmDeleteBtn.disabled = true;
+
+            try {
+                await api(`/events/${eventIdToDelete}`, "DELETE", null, token);
+                deleteModal.classList.remove('open');
+                deleteModal.style.display = 'none';
+                closeDetailModal();
+                loadEvents();
+            } catch (err) {
+                console.error("Delete failed", err);
+            } finally {
+                confirmDeleteBtn.textContent = "Delete";
+                confirmDeleteBtn.disabled = false;
+                eventIdToDelete = null;
+            }
+        });
+    }
+}
+
+// Initialize after modals are created
+initializeModalReferences();
 
 let allEvents = [];
 let currentEvents = [];
@@ -782,38 +1039,8 @@ class EventOptionsBtn {
 function openDeleteModal(id) {
     eventIdToDelete = id;
     deleteModal.classList.add('open');
+    deleteModal.style.display = 'flex';
 }
-
-cancelDeleteBtn.addEventListener('click', () => {
-    deleteModal.classList.remove('open');
-    eventIdToDelete = null;
-});
-
-confirmDeleteBtn.addEventListener('click', async () => {
-    if(!eventIdToDelete) return;
-    
-    // Disable button
-    confirmDeleteBtn.textContent = "Deleting...";
-    confirmDeleteBtn.disabled = true;
-
-    try {
-        await api(`/events/${eventIdToDelete}`, "DELETE", null, token);
-        // Success
-        deleteModal.classList.remove('open');
-        document.getElementById('eventDetailModal').style.display = 'none'; // Close detail if open
-        // Reload events
-        loadEvents();
-    } catch (err) {
-        console.error("Delete failed", err);
-        // Use a non-blocking notification if possible, but alert is a fallback
-        console.error("Failed to delete event."); 
-    } finally {
-        confirmDeleteBtn.textContent = "Delete";
-        confirmDeleteBtn.disabled = false;
-        eventIdToDelete = null;
-    }
-});
-
 
 /**
  * Shows the custom event detail modal.
@@ -821,14 +1048,42 @@ confirmDeleteBtn.addEventListener('click', async () => {
 async function showDetailModal(event) {
     if (!event) return;
     const modal = document.getElementById('eventDetailModal');
+    modal.classList.add('open');
+    modal.style.display = 'flex';
+    
     document.getElementById('detailTitle').textContent = event.title;
     
-    const formattedDate = new Date(event.start_time).toLocaleString('en-US', { 
-        weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' 
-    });
+    // --- TIME FORMATTING ---
+    const start = new Date(event.start_time);
+    const end = event.end_time ? new Date(event.end_time) : null;
     
-    document.getElementById('detailDate').textContent = `📅 ${formattedDate}`;
-    document.getElementById('detailLocation').textContent = `📍 ${getEventLocation(event)}`;
+    const dateStr = start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+    const startTimeStr = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    
+    let timeDisplay = `${dateStr} at ${startTimeStr}`;
+    
+    if (end) {
+        const endDateStr = end.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        const endTimeStr = end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        
+        if (dateStr === endDateStr) {
+            // Same day: "Friday, January 1, 2024, 10:00 AM – 12:00 PM"
+            timeDisplay = `${dateStr}, ${startTimeStr} – ${endTimeStr}`;
+        } else {
+            // Different day: "Friday... 10:00 AM – Saturday... 10:00 AM"
+            timeDisplay = `${dateStr}, ${startTimeStr} – ${endDateStr}, ${endTimeStr}`;
+        }
+    }
+    document.getElementById('detailDate').textContent = timeDisplay;
+    // ---------------------------------------------
+
+    document.getElementById('detailLocation').textContent = getEventLocation(event);
+    
+    // Add map link
+    const mapLinkContainer = document.getElementById('detailMapLink');
+    const mapLink = getMapLink(event);
+    mapLinkContainer.innerHTML = mapLink;
+    
     document.getElementById('detailDescription').textContent = event.description || 'No description provided.';
 
     const detailActions = document.getElementById('detailActions');
@@ -871,13 +1126,38 @@ async function showDetailModal(event) {
             attendeeListDiv.innerHTML = `<h4>Attendees</h4><p class="error-message">Could not load attendee list.</p>`;
         }
     }
-
-    modal.style.display = 'block';
 }
 
-document.getElementById('closeDetailModal').addEventListener('click', () => {
-    document.getElementById('eventDetailModal').style.display = 'none';
+function closeDetailModal() {
+    const modal = document.getElementById('eventDetailModal');
+    modal.classList.remove('open');
+    modal.style.display = 'none';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const closeBtn = document.getElementById('closeDetailModal');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeDetailModal);
+    }
 });
+
+// Also add listener after modal is created
+setTimeout(() => {
+    const closeBtn = document.getElementById('closeDetailModal');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeDetailModal);
+    }
+    
+    // Close modal when clicking outside
+    const modal = document.getElementById('eventDetailModal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target.id === 'eventDetailModal') {
+                closeDetailModal();
+            }
+        });
+    }
+}, 100);
 
 // --- Event Rendering ---
 
@@ -923,6 +1203,9 @@ function renderEvents(events, isList = false) {
         // 2. Options Button (all views)
         if (canEdit) {
             optionsPlaceholder = `<div class="options-btn-placeholder" data-event-id="${event.event_id}"></div>`;
+        } else if (isList) {
+            // Empty placeholder spacer to maintain alignment in List View
+            optionsPlaceholder = `<div class="options-spacer"></div>`;
         }
 
         const eventId = event.event_id;

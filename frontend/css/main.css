@@ -1791,44 +1791,6 @@ input.is-invalid {
     gap: 1rem; /* Smaller gap for lists */
 }
 
-#eventDetailModal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--bg-primary);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    z-index: 1000;
-    padding: 2rem;
-    max-width: 400px;
-    width: 90%;
-    display: none;
-    border: 2px solid var(--primary-color);
-}
-#eventDetailModal .detail-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--text-secondary);
-}
-#eventDetailModal h3 {
-    margin-top: 0;
-    font-size: 1.5rem;
-}
-#eventDetailModal p {
-    margin-bottom: 0.5rem;
-    color: var(--text-secondary);
-}
-#eventDetailModal .detail-date, #eventDetailModal .detail-location {
-    font-weight: 600;
-    color: var(--primary-color);
-}
-
 /* --- 5e. Calendar Page --- */
 #calendar {
     background: var(--bg-primary);
