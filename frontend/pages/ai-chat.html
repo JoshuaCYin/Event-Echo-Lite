@@ -197,8 +197,8 @@
                     Brainstorm event themes
                 </button>
                 <!-- FIX: Updated data-prompt to be more generic -->
-                <button class="smart-start-btn" data-prompt="Help me draft a description for a new event.">
-                    Draft a description
+                <button class="smart-start-btn" data-prompt="Help me draft a new event.">
+                    Draft an event
                 </button>
                 <button class="smart-start-btn" data-prompt="What's the difference between a 'public' and 'private' event?">
                     Ask about event types
@@ -329,28 +329,40 @@
 
     // --- FIX: RE-IMPLEMENTED EVENT CONTEXT ---
     async function getEventContext() {
-    try {
-        const events = await api("/events/", "GET", null, token);
-        
-        if (!events || events.length === 0 || (events.error && events.length === 1)) {
-            return "No upcoming public events found.";
-        }
-        
-        let contextString = "Here are the top upcoming public events:\n";
-        events.slice(0, 10).forEach((event, index) => {
-            const title = event.title;
-            const start = new Date(event.start_time).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
-            const end = new Date(event.end_time).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
-            const location = event.location_type === 'venue' ? (event.venue_name || 'On-campus') : (event.custom_location_address || 'Custom Location');
+        try {
+            const events = await api("/events/", "GET", null, token);
             
-            contextString += `${index + 1}. "${title}" from ${start} to ${end} at ${location}.\n`;
-        });
-        return contextString;
-    } catch (err) {
-        console.error("Failed to fetch event context:", err);
-        return "Could not fetch event data due to a network error.";
+            if (!events || events.length === 0 || (events.error && events.length === 1)) {
+                return "No upcoming public events found.";
+            }
+            
+            // UPDATE: Filter to include ONLY FUTURE events
+            const now = new Date();
+            const upcomingEvents = events.filter(e => new Date(e.start_time) >= now);
+
+            if (upcomingEvents.length === 0) {
+                return "No upcoming public events found.";
+            }
+
+            // SORT ASCENDING (Soonest -> Furthest) to give AI the most relevant context
+            upcomingEvents.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+
+            let contextString = "Here are the top upcoming public events:\n";
+            // Take only top 10
+            upcomingEvents.slice(0, 10).forEach((event, index) => {
+                const title = event.title;
+                const start = new Date(event.start_time).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
+                const end = new Date(event.end_time).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
+                const location = event.location_type === 'venue' ? (event.venue_name || 'On-campus') : (event.custom_location_address || 'Custom Location');
+                
+                contextString += `${index + 1}. "${title}" from ${start} to ${end} at ${location}.\n`;
+            });
+            return contextString;
+        } catch (err) {
+            console.error("Failed to fetch event context:", err);
+            return "Could not fetch event data due to a network error.";
+        }
     }
-}
     // -----------------------------------------
 
     // --- FIX: RE-IMPLEMENTED FULL SUBMIT HANDLER ---

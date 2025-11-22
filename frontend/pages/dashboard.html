@@ -1,3 +1,98 @@
+<style>
+    /* --- Upcoming Events List Styling Overhaul --- */
+    .upcoming-events-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    .mini-event-card {
+        display: flex;
+        flex-direction: row;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        text-decoration: none;
+        color: inherit;
+    }
+    .mini-event-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-color);
+    }
+
+    .mini-card-date {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 80px;
+        background: var(--bg-tertiary);
+        border-right: 1px solid var(--border-color);
+        padding: 1rem 0.5rem;
+        text-align: center;
+    }
+    .mini-card-month {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        font-weight: 700;
+        color: var(--primary-color);
+        letter-spacing: 0.5px;
+    }
+    .mini-card-day {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1;
+        margin: 0.25rem 0;
+    }
+    .mini-card-time {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .mini-card-content {
+        flex: 1;
+        padding: 1rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 0; /* Text truncation fix */
+    }
+    .mini-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 0.35rem 0;
+        color: var(--text-primary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .mini-card-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+    }
+    .mini-card-meta svg {
+        flex-shrink: 0;
+        color: var(--text-light);
+    }
+    
+    .empty-dashboard-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem 1rem;
+        background: var(--bg-secondary);
+        border-radius: var(--radius-lg);
+        color: var(--text-secondary);
+    }
+</style>
+
 <div class="page-transition-enter-active">
     <!-- Stats Cards -->
     <section class="stats-grid">
@@ -28,7 +123,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">Total Attendees</div>
-                <div class="stat-value">-</div>
+                <div class="stat-value" id="totalAttendees">-</div>
                 <div class="stat-change neutral">Across all events</div>
             </div>
         </div>
@@ -55,7 +150,7 @@
             </div>
             <div class="stat-content">
                 <div class="stat-label">Upcoming</div>
-                <div class="stat-value" id="upcomingEvents">0</div>
+                <div class="stat-value" id="upcomingEventsCount">0</div>
                 <div class="stat-change positive">Next 7 days</div>
             </div>
         </div>
@@ -88,13 +183,29 @@
                 </svg>
                 Start With AI
             </a>
+
+            <a href="#/planning" class="action-btn secondary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="9" y1="15" x2="15" y2="15"></line>
+                </svg>
+                Plan Tasks for Events
+            </a>
         </div>
     </section>
 
     <!-- Upcoming Events -->
     <section class="events-section">
-        <div class="events-grid" id="upcomingEventsList">
-            <p style="color: var(--text-light); text-align: center; padding: 2rem;">Loading events...</p>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 0.5rem;">
+            <h2 style="margin:0;">Upcoming This Week</h2>
+            <a href="#/calendar" style="font-size:0.9rem; color:var(--primary-color); text-decoration:none; font-weight:500;">View All &rarr;</a>
+        </div>
+        <div class="upcoming-events-container" id="upcomingEventsList">
+            <div class="empty-dashboard-state">
+                <div class="loading-spinner"></div>
+                <p>Loading events...</p>
+            </div>
         </div>
     </section>
 </div>
@@ -133,10 +244,19 @@ async function loadDashboard() {
         const token = localStorage.getItem("token");
         const events = await api("/events/", "GET", null, token);
         
-        // Update stats
+        // 1. Update Total Events
         document.getElementById("totalEvents").textContent = events.length;
         
+        // 2. Update Total Attendees (Sum up attendee_count from backend)
+        // Ensure we handle null/undefined counts safely
+        const totalAttendees = events.reduce((sum, event) => {
+            return sum + (parseInt(event.attendee_count) || 0);
+        }, 0);
+        document.getElementById("totalAttendees").textContent = totalAttendees;
+
         const now = new Date();
+        
+        // 3. Active Events
         const activeEvents = events.filter(e => {
             const start = new Date(e.start_time);
             const end = new Date(e.end_time);
@@ -144,20 +264,26 @@ async function loadDashboard() {
         });
         document.getElementById("activeEvents").textContent = activeEvents.length;
         
+        // 4. Upcoming Events (Next 7 Days)
         const sevenDaysFromNow = new Date();
         sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+        
         const upcomingEvents = events.filter(e => {
             const start = new Date(e.start_time);
             return start > now && start <= sevenDaysFromNow;
         });
-        document.getElementById("upcomingEvents").textContent = upcomingEvents.length;
+        document.getElementById("upcomingEventsCount").textContent = upcomingEvents.length;
         
-        // Display upcoming events (limit to 3 for dashboard)
-        displayUpcomingEvents(upcomingEvents.slice(0, 3));
+        // 5. Display Upcoming Events
+        // Note: Even if the main list is Newest->Oldest, for a "What's Next" dashboard,
+        // it is best practice to show "Soonest" first.
+        const sortedUpcoming = upcomingEvents.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+        
+        displayUpcomingEvents(sortedUpcoming.slice(0, 4)); // Show up to 4
         
     } catch (error) {
         console.error("Failed to load dashboard:", error);
-        // ... (error handling) ...
+        document.getElementById("upcomingEventsList").innerHTML = '<div class="empty-dashboard-state">Failed to load info.</div>';
     }
 }
 
@@ -165,57 +291,51 @@ function displayUpcomingEvents(events) {
     const container = document.getElementById("upcomingEventsList");
     
     if (!events || events.length === 0) {
-        container.innerHTML = '<p style="color: var(--text-light); text-align: center; padding: 2rem;">No upcoming events in the next 7 days.</p>';
+        container.innerHTML = `
+            <div class="empty-dashboard-state">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color:var(--text-light); margin-bottom:1rem;">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <p>No upcoming events in the next 7 days.</p>
+                <a href="#/calendar" style="color:var(--primary-color); text-decoration:none; font-size:0.9rem; margin-top:0.5rem; display:inline-block;">View Calendar</a>
+            </div>
+        `;
         return;
     }
     
     container.innerHTML = events.map(event => {
         const startDate = new Date(event.start_time);
-        const formattedDate = startDate.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric', 
-            year: 'numeric' 
-        });
-        const formattedTime = startDate.toLocaleTimeString('en-US', { 
-            hour: 'numeric', 
-            minute: '2-digit',
-            hour12: true 
-        });
         
-        // Use helper for location
+        // Format date parts
+        const month = startDate.toLocaleDateString('en-US', { month: 'short' });
+        const day = startDate.getDate();
+        const time = startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        
         const location = getEventLocation(event);
         
+        // Truncate location if too long
+        const displayLocation = location.length > 25 ? location.substring(0, 22) + '...' : location;
+
         return `
-            <article class="event-card">
-                <div class="event-content">
-                    <div class="event-date">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
+            <a href="#/event-form?id=${event.event_id}" class="mini-event-card" onclick="event.preventDefault(); window.location.hash='#/calendar';">
+                <div class="mini-card-date">
+                    <span class="mini-card-month">${month}</span>
+                    <span class="mini-card-day">${day}</span>
+                    <span class="mini-card-time">${time}</span>
+                </div>
+                <div class="mini-card-content">
+                    <h4 class="mini-card-title" title="${event.title}">${event.title}</h4>
+                    <div class="mini-card-meta">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
                         </svg>
-                        ${formattedDate} • ${formattedTime}
-                    </div>
-                    <h3>${event.title}</h3>
-                    <p class="event-description">${event.description || 'No description available'}</p>
-                    <div class="event-meta">
-                        ${location ? `
-                            <span class="location">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                    <circle cx="12" cy="10" r="3"></circle>
-                                </svg>
-                                ${location}
-                            </span>
-                        ` : ''}
-                        <span class="status-badge upcoming">Upcoming</span>
-                    </div>
-                    <div class="event-actions">
-                        <button class="btn-primary" onclick="window.location.hash='#/calendar'">View Details</button>
+                        ${displayLocation}
                     </div>
                 </div>
-            </article>
+            </a>
         `;
     }).join('');
 }

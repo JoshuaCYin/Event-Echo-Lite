@@ -40,21 +40,32 @@ def list_events():
         token = auth.split(" ", 1)[1]
         auth_user_id = verify_token(token)
 
+    # UPDATED: Added subquery to count attendees (status='going')
+    # Added "AT TIME ZONE 'UTC'" to enforce ISO string return
     base_sql = """
         SELECT 
-            e.event_id, e.title, e.description, e.start_time, e.end_time,
+            e.event_id, e.title, e.description, 
+            e.start_time AT TIME ZONE 'UTC' as start_time, 
+            e.end_time AT TIME ZONE 'UTC' as end_time,
             e.location_type, e.custom_location_address, e.google_maps_link,
             e.status, e.visibility, e.organizer_id, e.created_by,
             v.name AS venue_name, v.building AS venue_building, v.room_number AS venue_room,
             u.first_name AS organizer_first_name, u.last_name AS organizer_last_name,
             r.rsvp_status AS my_rsvp_status,
-            e.venue_id
+            e.venue_id,
+            (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = e.event_id AND rsvps.rsvp_status = 'going') as attendee_count
         FROM events e
         LEFT JOIN venues v ON e.venue_id = v.venue_id
         LEFT JOIN users u ON e.organizer_id = u.user_id
         LEFT JOIN rsvps r ON e.event_id = r.event_id AND r.user_id = %s
-        WHERE e.status = 'upcoming'
+        WHERE 1=1
     """
+    # Note: Removed "WHERE e.status = 'upcoming'" hard constraint so we can show past events if needed,
+    # or filtering can happen on frontend. 
+    # However, if we want to show past events in the hub, we should probably remove that check or allow it.
+    # Given the request "past events are separated by a divider", we must fetch them.
+    # Let's remove the hard 'upcoming' filter or change logic to allow fetching all relevant ones.
+    # For now, I will fetch ALL events that are visible, and let frontend sort/divide.
     
     params = [auth_user_id] 
     
@@ -73,6 +84,14 @@ def list_events():
             with conn.cursor() as cur:
                 cur.execute(base_sql, params)
                 rows = [dict(r) for r in cur.fetchall()]
+                
+                # Explicitly ensure ISO format strings for JSON serialization
+                for row in rows:
+                    if row.get('start_time'):
+                        row['start_time'] = row['start_time'].isoformat()
+                    if row.get('end_time'):
+                        row['end_time'] = row['end_time'].isoformat()
+
     except Exception as e:
         print(f"Database error listing events: {e}")
         return jsonify({"error": "Failed to retrieve events"}), 500
@@ -80,8 +99,6 @@ def list_events():
     return jsonify(rows), 200
 
 
-# --- NEW: Get Single Event (Required for Editing) ---
-@events_bp.route("/<int:event_id>", methods=["GET"])
 @events_bp.route("/<int:event_id>", methods=["GET"])
 def get_event(event_id):
     """
@@ -100,7 +117,8 @@ def get_event(event_id):
             e.end_time AT TIME ZONE 'UTC' as end_time,
             e.location_type, e.custom_location_address, e.google_maps_link,
             e.status, e.visibility, e.organizer_id, e.created_by, e.venue_id,
-            v.name AS venue_name
+            v.name AS venue_name,
+            (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = e.event_id AND rsvps.rsvp_status = 'going') as attendee_count
         FROM events e
         LEFT JOIN venues v ON e.venue_id = v.venue_id
         WHERE e.event_id = %s

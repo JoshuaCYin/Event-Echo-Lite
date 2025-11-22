@@ -376,7 +376,8 @@
             </div>
             <form class="ai-helper-form" id="ai-helper-form">
                 <div class="ai-helper-input-wrapper">
-                    <input type="text" id="ai-helper-input" placeholder="e.g. 'Suggest 3 titles'">
+                    <!-- ACCESSIBILITY FIX: Added aria-label -->
+                    <input type="text" id="ai-helper-input" placeholder="e.g. 'Suggest 3 titles'" aria-label="AI Assistant Input">
                     <button type="submit" id="ai-helper-send" aria-label="Send">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 3L22 12L2 21L5 13L15 12L5 11L2 3Z"/></svg>
                     </button>
@@ -641,11 +642,16 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
 
+        // --- TIMEZONE FIX ---
+        // Convert the local time string gathered in Step 2 into a strict ISO 8601 UTC string.
+        const startISO = wizardData.start_time ? new Date(wizardData.start_time).toISOString() : null;
+        const endISO = wizardData.end_time ? new Date(wizardData.end_time).toISOString() : null;
+
         const payload = {
             title: wizardData.title,
             description: wizardData.description,
-            start_time: wizardData.start_time,
-            end_time: wizardData.end_time,
+            start_time: startISO, // Use the ISO string
+            end_time: endISO,     // Use the ISO string
             location_type: wizardData.location_type,
             google_maps_link: wizardData.google_maps_link || null,
             visibility: wizardData.visibility,
