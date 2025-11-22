@@ -336,9 +336,20 @@ async function setupEditMode() {
         // Populate Fields
         evTitle.value = event.title || "";
         evDescription.value = event.description || "";
-        evStart.value = formatDateTimeForInput(event.start_time);
-        evEnd.value = formatDateTimeForInput(event.end_time);
         evMapsLink.value = event.google_maps_link || "";
+
+        // --- TIMEZONE FIX FOR EDITING ---
+        // If the backend sends a naive UTC string (missing Z or +00:00), append Z.
+        // This forces the browser to treat it as UTC and convert it to local time correctly.
+        let startStr = event.start_time;
+        let endStr = event.end_time;
+        
+        if (startStr && !startStr.includes('Z') && !startStr.includes('+')) startStr += 'Z';
+        if (endStr && !endStr.includes('Z') && !endStr.includes('+')) endStr += 'Z';
+
+        evStart.value = formatDateTimeForInput(startStr);
+        evEnd.value = formatDateTimeForInput(endStr);
+        // --------------------------------
         
         // Location Logic
         if (event.location_type === 'venue') {
@@ -468,22 +479,28 @@ form.addEventListener("submit", async (e) => {
     messageDiv.className = "";
     
     const title = evTitle.value;
-    const start = evStart.value;
-    const end = evEnd.value;
+    const startLocal = evStart.value; // "YYYY-MM-DDTHH:MM"
+    const endLocal = evEnd.value;
     const location_type = document.querySelector('input[name="location_type"]:checked').value;
     
-    if (new Date(start) >= new Date(end)) {
+    if (new Date(startLocal) >= new Date(endLocal)) {
         messageDiv.className = "error-message";
         messageDiv.textContent = "End time must be after start time";
         messageDiv.style.display = "block";
         return;
     }
 
+    // --- TIMEZONE FIX FOR SUBMITTING ---
+    // Convert the local "YYYY-MM-DDTHH:MM" strings to ISO 8601 UTC strings (e.g., "...T15:00:00.000Z")
+    // This ensures the backend receives the exact instant you selected, regardless of server timezone.
+    const startISO = startLocal ? new Date(startLocal).toISOString() : null;
+    const endISO = endLocal ? new Date(endLocal).toISOString() : null;
+
     const payload = {
         title,
         description: evDescription.value,
-        start_time: start,
-        end_time: end,
+        start_time: startISO,
+        end_time: endISO,
         location_type,
         google_maps_link: evMapsLink.value || null,
         visibility: (userRole === 'admin' || userRole === 'organizer') 
