@@ -1,0 +1,2 @@
+# In the existing setup, routes are registered with the main gateway (backend/gateway/server.py).
+# If this app is changed to use a microservice structure later, add Flask app setup, app.run(), and related necessary additions here.

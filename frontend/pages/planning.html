@@ -1,47 +1,812 @@
+<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+
 <style>
-    .planning-container {
-        background: var(--bg-primary);
-        border-radius: var(--radius-lg);
-        padding: 2rem;
-        box-shadow: var(--shadow-sm);
-        max-width: 900px;
-        margin: 0 auto;
+    /* --- Scoped Layout --- */
+    .planning-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 60px);
+        overflow: hidden;
+        background: var(--bg-secondary);
+        font-family: inherit; /* Inherit global font */
     }
+
+    /* --- Header Overhaul --- */
     .planning-header {
-        text-align: center;
+        background: var(--bg-primary);
+        padding: 1rem 1.5rem;
         border-bottom: 1px solid var(--border-color);
-        padding-bottom: 1.5rem;
-        margin-bottom: 2rem;
+        display: flex;
+        flex-wrap: wrap; /* Critical for responsiveness */
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: center;
+        flex-shrink: 0;
     }
-    .planning-header h2 {
-        font-size: 1.75rem;
+
+    .header-title-group {
+        min-width: 200px;
+        flex: 1 1 auto;
+    }
+    
+    .header-title-group h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0;
         background: var(--gradient-primary);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin-bottom: 0.5rem;
+        line-height: 1.2;
     }
-    .planning-header p {
-        font-size: 1.1rem;
+    
+    .header-title-group p {
         color: var(--text-secondary);
-        max-width: 600px;
-        margin: 0 auto;
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+        margin-bottom: 0;
+    }
+
+    /* --- Controls Area --- */
+    .planning-controls {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+        flex: 0 1 auto;
+    }
+
+    /* Custom Dropdown (No default appearance) */
+    .custom-select {
+        appearance: none;
+        -webkit-appearance: none;
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 0.5rem 2rem 0.5rem 1rem;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+        cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1em;
+        min-width: 160px;
+    }
+
+    /* --- Toggle Switch Overhaul --- */
+    /* We use ID selectors or specific classes to override main.css generic buttons */
+    .toggle-capsule {
+        position: relative;
+        display: inline-flex;
+        background: var(--bg-tertiary);
+        padding: 4px;
+        border-radius: 8px; /* Slightly rounder */
+        border: 1px solid var(--border-color);
+        height: 40px;
+        box-sizing: border-box;
+        min-width: 180px;
+        isolation: isolate;
+    }
+
+    .toggle-btn {
+        flex: 1;
+        border: none;
+        background: transparent !important; /* Force override */
+        box-shadow: none !important;        /* Force override */
+        padding: 0;
+        margin: 0;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        z-index: 2;
+        transition: color 0.2s ease;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .toggle-btn.active {
+        color: var(--primary-color);
+    }
+
+    .toggle-glider {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        bottom: 4px;
+        width: calc(50% - 4px); /* Perfect 50% split */
+        background: var(--bg-primary);
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        z-index: 1;
+        transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+
+    /* --- Add Button --- */
+    .btn-new-task {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-md);
+        font-weight: 600;
+        font-size: 0.95rem;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        height: 40px;
+    }
+    .btn-new-task:hover { opacity: 0.9; }
+
+    /* --- Board Layout --- */
+    .board-container {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1.5rem;
+        overflow-x: auto;
+        height: 100%;
+        scroll-behavior: smooth;
+    }
+
+    .board-column {
+        flex: 1;
+        min-width: 300px;
+        max-width: 400px;
+        background: var(--bg-tertiary); /* Subtle column bg */
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border-color);
+    }
+    
+    .board-column.drag-over {
+        background: var(--bg-secondary);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px var(--primary-color) inset;
+    }
+
+    .column-header {
+        padding: 1rem;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        /* --- EDITED: Fix rounded corner clipping --- */
+        border-top-left-radius: 11px; /* Match parent radius (12px) minus border (1px) */
+        border-top-right-radius: 11px;
+    }
+    /* Colored accent lines */
+    .column-header.todo { border-top: 4px solid #ed8936; }
+    .column-header.in_progress { border-top: 4px solid #4299e1; }
+    .column-header.done { border-top: 4px solid #48bb78; }
+
+    .column-count {
+        background: rgba(0,0,0,0.05);
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .task-list {
+        padding: 0.75rem;
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        /* --- EDITED: Reduced space between cards --- */
+        gap: 0.65rem; 
+    }
+
+    /* --- New Card Design --- */
+    .card {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        /* --- EDITED: Reduced padding within card --- */
+        padding: 0.875rem; 
+        cursor: grab;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border-color: var(--primary-light);
+    }
+    
+    .card:active { cursor: grabbing; }
+    .card.dragging { opacity: 0.4; }
+
+    /* Header Row: Priority & Event Tag */
+    .card-header-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center; /* Critical for alignment */
+        margin-bottom: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    /* Badge Base Style - Shared for perfect match */
+    .badge-base {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 22px; /* Explicit height */
+        padding: 0 0.5rem;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+    }
+
+    /* Priority Variants */
+    .badge-priority.high { background: #fed7d7; color: #9b2c2c; }
+    .badge-priority.medium { background: #feebc8; color: #9c4221; }
+    .badge-priority.low { background: #c6f6d5; color: #276749; }
+
+    /* Event Tag Variant */
+    .badge-event {
+        background: #f3f4f6; /* Neutral gray */
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+        max-width: 140px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block; /* Helps text-overflow work inside flex item if width constrained */
+        line-height: 20px; /* Adjust for border */
+    }
+    
+    /* Dark mode adjustments if needed */
+    @media (prefers-color-scheme: dark) {
+        /* --- EDITED: Less contrasty event badge for dark mode --- */
+        .badge-event { background: #374151; border-color: #4b5563; color: #cbd5e0; }
+    }
+
+    .card-title {
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+
+    .card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.75rem;
+        /* --- EDITED: Removed border/padding from footer --- */
+        /* padding-top: 0.75rem; */
+        /* border-top: 1px solid rgba(0,0,0,0.05); */
+        color: var(--text-secondary);
+        /* --- EDITED: Made footer text smaller --- */
+        font-size: 0.75rem;
+    }
+
+    .card-date {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .user-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+
+    /* --- Calendar --- */
+    .calendar-wrapper {
+        display: none;
+        padding: 1.5rem;
+        overflow-y: auto;
+        height: 100%;
+    }
+    
+    #planningCalendar {
+        background: var(--bg-primary);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+    }
+
+    /* --- Modal --- */
+    .modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        place-items: center;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    .modal-backdrop.open {
+        display: grid;
+        opacity: 1;
+    }
+    
+    .modal-window {
+        background: var(--bg-primary);
+        width: 90%;
+        max-width: 500px;
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Mobile Tweaks */
+    @media (max-width: 768px) {
+        .planning-header { flex-direction: column; align-items: stretch; gap: 1rem; }
+        .planning-controls { justify-content: space-between; }
+        .custom-select { order: 1; width: 100%; max-width: none; }
+        .toggle-capsule { order: 2; flex: 1; }
+        .btn-new-task { order: 3; }
+        .board-container { flex-direction: column; padding: 1rem; }
+        .board-column { min-width: 0; }
     }
 </style>
 
-<div class="planning-container page-transition-enter-active">
-    <div class="planning-header">
-        <h2>Planning Dashboard</h2>
-        <p>Your space to organize tasks, manage budgets, and collaborate on events.</p>
+<div class="planning-wrapper">
+    
+    <!-- Header -->
+    <header class="planning-header">
+        <div class="header-title-group">
+            <h2>Planning Board</h2>
+            <p>Manage event tasks and deadlines</p>
+        </div>
+
+        <div class="planning-controls">
+            <!-- Event Filter -->
+            <select id="contextFilter" class="custom-select">
+                <option value="all">All Tasks</option>
+                <option value="global">Global (General)</option>
+                <optgroup label="Events" id="eventSelectGroup"></optgroup>
+            </select>
+
+            <!-- View Toggle -->
+            <div class="toggle-capsule">
+                <div class="toggle-glider" id="toggleGlider"></div>
+                <button class="toggle-btn active" data-view="board">Board</button>
+                <button class="toggle-btn" data-view="calendar">Calendar</button>
+            </div>
+
+            <!-- New Task Button -->
+            <button class="btn-new-task" id="addTaskBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                New Task
+            </button>
+        </div>
+    </header>
+
+    <!-- Board View -->
+    <div id="boardView" class="board-container">
+        <!-- To Do -->
+        <div class="board-column" data-status="todo">
+            <div class="column-header todo">
+                <span>To Do</span>
+                <span class="column-count" id="count-todo">0</span>
+            </div>
+            <div class="task-list" id="list-todo"></div>
+        </div>
+
+        <!-- In Progress -->
+        <div class="board-column" data-status="in_progress">
+            <div class="column-header in_progress">
+                <span>In Progress</span>
+                <span class="column-count" id="count-in_progress">0</span>
+            </div>
+            <div class="task-list" id="list-in_progress"></div>
+        </div>
+
+        <!-- Done -->
+        <div class="board-column" data-status="done">
+            <div class="column-header done">
+                <span>Done</span>
+                <span class="column-count" id="count-done">0</span>
+            </div>
+            <div class="task-list" id="list-done"></div>
+        </div>
     </div>
 
-    <div class="empty-state">
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <line x1="3" y1="9" x2="21" y2="9"></line>
-            <line x1="9" y1="21" x2="9" y2="9"></line>
-        </svg>
-        <h3>Kanban Board & More Coming Soon</h3>
-        <p>This area will soon feature powerful planning tools to help you manage your events from start to finish.</p>
+    <!-- Calendar View -->
+    <div id="calendarView" class="calendar-wrapper">
+        <div id="planningCalendar"></div>
+    </div>
+
+</div>
+
+<!-- Modal -->
+<div class="modal-backdrop" id="taskModal">
+    <div class="modal-window">
+        <h3 id="modalTitle" style="font-size:1.25rem; font-weight:700; margin-bottom:1.5rem;">New Task</h3>
+        <form id="taskForm">
+            <input type="hidden" id="taskId">
+            
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.875rem; color:var(--text-secondary); margin-bottom:0.5rem;">Title</label>
+                <input type="text" id="taskTitle" required class="custom-select" style="width:100%; cursor:text; padding-right:1rem; background-image:none;" placeholder="Task name">
+            </div>
+
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.875rem; color:var(--text-secondary); margin-bottom:0.5rem;">Assigned Event</label>
+                <select id="taskEventId" class="custom-select" style="width:100%;">
+                    <option value="">Global (None)</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:1rem; margin-bottom:1rem;">
+                <div style="flex:1;">
+                    <label style="display:block; font-size:0.875rem; color:var(--text-secondary); margin-bottom:0.5rem;">Status</label>
+                    <select id="taskStatus" class="custom-select" style="width:100%;">
+                        <option value="todo">To Do</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="done">Done</option>
+                    </select>
+                </div>
+                <div style="flex:1;">
+                    <label style="display:block; font-size:0.875rem; color:var(--text-secondary); margin-bottom:0.5rem;">Priority</label>
+                    <select id="taskPriority" class="custom-select" style="width:100%;">
+                        <option value="low">Low</option>
+                        <option value="medium" selected>Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.875rem; color:var(--text-secondary); margin-bottom:0.5rem;">Due Date</label>
+                <input type="datetime-local" id="taskDueDate" class="custom-select" style="width:100%; cursor:text; background-image:none;">
+            </div>
+
+            <div style="margin-bottom:1.5rem;">
+                <label style="display:block; font-size:0.875rem; color:var(--text-secondary); margin-bottom:0.5rem;">Description</label>
+                <textarea id="taskDescription" rows="3" class="custom-select" style="width:100%; cursor:text; background-image:none; height:auto;"></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+                <button type="button" id="closeModalBtn" style="background:transparent; border:1px solid var(--border-color); padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">Cancel</button>
+                <button type="button" id="deleteTaskBtn" style="display:none; background:#fee2e2; color:#991b1b; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">Delete</button>
+                <button type="submit" style="background:var(--primary-color); color:white; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer; font-weight:600;">Save</button>
+            </div>
+        </form>
     </div>
 </div>
+
+<script type="module">
+import { api } from "../js/api.js";
+import { token } from "../js/app.js";
+
+let allTasks = [];
+let eventsList = [];
+let planningCalendar = null;
+let currentContext = 'all';
+
+const taskModal = document.getElementById('taskModal');
+const taskForm = document.getElementById('taskForm');
+const contextFilter = document.getElementById('contextFilter');
+const toggleGlider = document.getElementById('toggleGlider');
+let draggedTask = null;
+
+// --- Init ---
+async function init() {
+    try {
+        eventsList = await api("/events/", "GET", null, token);
+        populateEventDropdowns();
+    } catch (e) { console.error(e); }
+
+    await fetchTasks();
+    initCalendar();
+    initDragAndDrop();
+}
+
+function populateEventDropdowns() {
+    const selectGroup = document.getElementById('eventSelectGroup');
+    const formSelect = document.getElementById('taskEventId');
+    selectGroup.innerHTML = '';
+    formSelect.innerHTML = '<option value="">Global (General)</option>';
+
+    eventsList.forEach(ev => {
+        const opt1 = document.createElement('option');
+        opt1.value = ev.event_id;
+        opt1.textContent = ev.title;
+        selectGroup.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = ev.event_id;
+        opt2.textContent = ev.title;
+        formSelect.appendChild(opt2);
+    });
+}
+
+async function fetchTasks() {
+    let url = "/planning/tasks";
+    if (currentContext !== 'all') url += `?event_id=${currentContext}`;
+    
+    try {
+        allTasks = await api(url, "GET", null, token);
+        renderBoard();
+        updateCalendarEvents();
+    } catch (e) { console.error(e); }
+}
+
+// --- Render Board ---
+function renderBoard() {
+    ['todo', 'in_progress', 'done'].forEach(s => {
+        document.getElementById(`list-${s}`).innerHTML = '';
+        document.getElementById(`count-${s}`).textContent = '0';
+    });
+
+    const counts = { todo: 0, in_progress: 0, done: 0 };
+    // Sort by position
+    const sorted = [...allTasks].sort((a,b) => (a.position || 0) - (b.position || 0));
+
+    sorted.forEach(task => {
+        const status = task.status || 'todo';
+        counts[status]++;
+        
+        const col = document.getElementById(`list-${status}`);
+        const card = createCardElement(task);
+        col.appendChild(card);
+    });
+
+    Object.keys(counts).forEach(k => document.getElementById(`count-${k}`).textContent = counts[k]);
+}
+
+function createCardElement(task) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.draggable = true;
+    card.dataset.id = task.task_id;
+    card.dataset.pos = task.position || 0;
+
+    // Drag events
+    card.addEventListener('dragstart', (e) => {
+        draggedTask = task;
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', task.task_id);
+    });
+    card.addEventListener('dragend', () => {
+        card.classList.remove('dragging');
+        draggedTask = null;
+    });
+    card.addEventListener('click', () => {
+        if(!card.classList.contains('dragging')) openModal(task);
+    });
+
+    // Content
+    const prioClass = `badge-priority ${task.priority || 'medium'}`;
+    
+    let dateStr = '';
+    if (task.due_date) {
+        const d = new Date(task.due_date);
+        dateStr = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+
+    let assigneeInitials = '';
+    if (task.assignee_name) {
+        assigneeInitials = (task.assignee_name[0] + (task.assignee_last ? task.assignee_last[0] : '')).toUpperCase();
+    }
+
+    // Event Badge Logic
+    let eventBadge = '';
+    if (currentContext === 'all' && task.event_title) {
+        eventBadge = `<span class="badge-base badge-event" title="${task.event_title}">${task.event_title}</span>`;
+    }
+
+    card.innerHTML = `
+        <div class="card-header-row">
+            <span class="badge-base ${prioClass}">${task.priority}</span>
+            ${eventBadge}
+        </div>
+        <div class="card-title">${task.title}</div>
+        <div class="card-footer">
+            <div class="card-date">
+                ${dateStr ? `<span style="font-weight: 500; margin-right: 0.25rem;">Due:</span> ${dateStr}` : ''}
+            </div>
+            ${assigneeInitials ? `<div class="user-avatar" title="${task.assignee_name}">${assigneeInitials}</div>` : ''}
+        </div>
+    `;
+    return card;
+}
+
+// --- Drag & Drop ---
+function initDragAndDrop() {
+    document.querySelectorAll('.board-column').forEach(col => {
+        col.addEventListener('dragover', e => {
+            e.preventDefault();
+            col.classList.add('drag-over');
+            
+            const afterElement = getDragAfterElement(col, e.clientY);
+            const dragging = document.querySelector('.dragging');
+            const list = col.querySelector('.task-list');
+            
+            if (dragging) {
+                if (!afterElement) list.appendChild(dragging);
+                else list.insertBefore(dragging, afterElement);
+            }
+        });
+
+        col.addEventListener('dragleave', () => col.classList.remove('drag-over'));
+        
+        col.addEventListener('drop', async e => {
+            e.preventDefault();
+            col.classList.remove('drag-over');
+            if(!draggedTask) return;
+
+            const newStatus = col.dataset.status;
+            const list = col.querySelector('.task-list');
+            const cards = [...list.querySelectorAll('.card')];
+            const idx = cards.indexOf(document.querySelector('.dragging'));
+            
+            // Calculate new position
+            const prev = cards[idx - 1];
+            const next = cards[idx + 1];
+            const prevPos = prev ? parseFloat(prev.dataset.pos) : 0;
+            const nextPos = next ? parseFloat(next.dataset.pos) : (prevPos + 2000);
+            
+            let newPos = (!prev && !next) ? 1000 : (!prev ? nextPos/2 : (!next ? prevPos+1000 : (prevPos+nextPos)/2));
+            
+            draggedTask.status = newStatus;
+            draggedTask.position = newPos;
+
+            // API Update
+            try {
+                await api(`/planning/tasks/${draggedTask.task_id}`, "PUT", { status: newStatus, position: newPos }, token);
+            } catch(err) {
+                console.error(err);
+                fetchTasks(); // Revert
+            }
+            
+            draggedTask = null;
+        });
+    });
+}
+
+function getDragAfterElement(col, y) {
+    const cards = [...col.querySelectorAll('.card:not(.dragging)')];
+    return cards.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
+        else return closest;
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+// --- Calendar ---
+function initCalendar() {
+    const el = document.getElementById('planningCalendar');
+    planningCalendar = new FullCalendar.Calendar(el, {
+        initialView: 'dayGridMonth',
+        headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listWeek' },
+        height: 'auto',
+        eventClick: (info) => openModal(info.event.extendedProps.originalTask)
+    });
+    planningCalendar.render();
+    updateCalendarEvents();
+}
+
+function updateCalendarEvents() {
+    if (!planningCalendar) return;
+    const events = allTasks.filter(t => t.due_date).map(t => ({
+        title: t.title,
+        start: t.due_date,
+        backgroundColor: t.status === 'done' ? '#48bb78' : (t.priority === 'high' ? '#f56565' : '#4299e1'),
+        borderColor: 'transparent',
+        extendedProps: { originalTask: t }
+    }));
+    planningCalendar.removeAllEvents();
+    planningCalendar.addEventSource(events);
+}
+
+// --- Modal ---
+function openModal(task = null) {
+    const isEdit = !!task;
+    document.getElementById('modalTitle').textContent = isEdit ? 'Edit Task' : 'New Task';
+    document.getElementById('deleteTaskBtn').style.display = isEdit ? 'block' : 'none';
+
+    if (isEdit) {
+        document.getElementById('taskId').value = task.task_id;
+        document.getElementById('taskTitle').value = task.title;
+        document.getElementById('taskDescription').value = task.description || '';
+        document.getElementById('taskStatus').value = task.status || 'todo';
+        document.getElementById('taskPriority').value = task.priority || 'medium';
+        document.getElementById('taskEventId').value = task.event_id || '';
+        if (task.due_date) {
+            const d = new Date(task.due_date);
+            const localIso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+            document.getElementById('taskDueDate').value = localIso;
+        } else {
+            document.getElementById('taskDueDate').value = '';
+        }
+    } else {
+        taskForm.reset();
+        document.getElementById('taskId').value = '';
+        if(currentContext !== 'all') document.getElementById('taskEventId').value = currentContext;
+    }
+    taskModal.classList.add('open');
+}
+function closeModal() { taskModal.classList.remove('open'); }
+
+// --- Event Listeners ---
+taskForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('taskId').value;
+    const data = {
+        title: document.getElementById('taskTitle').value,
+        description: document.getElementById('taskDescription').value,
+        status: document.getElementById('taskStatus').value,
+        priority: document.getElementById('taskPriority').value,
+        due_date: document.getElementById('taskDueDate').value,
+        event_id: document.getElementById('taskEventId').value || null
+    };
+
+    try {
+        if (id) await api(`/planning/tasks/${id}`, "PUT", data, token);
+        else await api("/planning/tasks", "POST", data, token);
+        closeModal();
+        fetchTasks();
+    } catch (err) { alert("Error saving task"); }
+});
+
+document.getElementById('deleteTaskBtn').addEventListener('click', async () => {
+    if (!confirm("Delete this task?")) return;
+    try {
+        await api(`/planning/tasks/${document.getElementById('taskId').value}`, "DELETE", null, token);
+        closeModal();
+        fetchTasks();
+    } catch (err) { alert("Error deleting task"); }
+});
+
+document.getElementById('addTaskBtn').addEventListener('click', () => openModal());
+document.getElementById('closeModalBtn').addEventListener('click', closeModal);
+taskModal.addEventListener('click', e => { if (e.target === taskModal) closeModal(); });
+
+contextFilter.addEventListener('change', e => {
+    currentContext = e.target.value;
+    fetchTasks();
+});
+
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const view = btn.dataset.view;
+        
+        if (view === 'board') {
+            toggleGlider.style.transform = 'translateX(0)';
+            document.getElementById('boardView').style.display = 'flex';
+            document.getElementById('calendarView').style.display = 'none';
+        } else {
+            toggleGlider.style.transform = 'translateX(100%)';
+            document.getElementById('boardView').style.display = 'none';
+            document.getElementById('calendarView').style.display = 'block';
+            if(planningCalendar) planningCalendar.updateSize();
+        }
+    });
+});
+
+init();
+</script>
