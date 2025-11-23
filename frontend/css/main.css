@@ -1204,7 +1204,6 @@ input.is-invalid {
 .main-content.landing-layout {
     /* margin-left: 0 !important; Override sidebar margin */
     padding: 0; /* NO padding, so the hero page is full-width */
-    background: linear-gradient(135deg, rgba(185, 198, 255, 0.55), rgba(201, 146, 255, 0.75));
 }
 
 .landing-navbar {

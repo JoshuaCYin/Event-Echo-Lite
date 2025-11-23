@@ -34,7 +34,7 @@ export function checkAuthAndRedirect() {
     "#/", 
     "#/landing", 
     "#/landing-events", 
-    "#/landing-calendar", 
+    "#/landing-features", 
     "#/landing-about"
   ];
   

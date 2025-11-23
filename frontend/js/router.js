@@ -7,7 +7,7 @@ const routes = {
   "#/": "landing/home.html",
   "#/landing": "landing/home.html",
   "#/landing-events": "landing/events.html",
-  "#/landing-calendar": "landing/calendar.html",
+  "#/landing-features": "landing/features.html",
   "#/landing-about": "landing/about.html",
 
   // Auth Routes
@@ -16,15 +16,15 @@ const routes = {
   
   // App/Protected Routes
   "#/dashboard": "pages/dashboard.html", // Admin/Org home
-  "#/calendar": "pages/events.html", // Attendee home / Event Hub
-  "#/events": "pages/events.html", // The "cards" list view
+  "#/calendar": "pages/events.html", // Attendee home / Event Hub DEPRECATED
+  "#/events": "pages/events.html",  // Event Hub
 
   // Event Creation Flow
   "#/create-event": "pages/create-event.html",   // The choice page
   "#/event-form": "pages/event-form.html",     // The standard form
   "#/event-wizard": "pages/event-wizard.html",  // The wizard form
 
-  "#/planning": "pages/planning.html", // Kanban board placeholder
+  "#/planning": "pages/planning.html",
   "#/ai-chat": "pages/ai-chat.html",
   "#/profile": "pages/profile.html",
   "#/discover": "pages/discover.html",
@@ -36,7 +36,7 @@ const landingPages = [
   "#/", 
   "#/landing", 
   "#/landing-events", 
-  "#/landing-calendar", 
+  "#/landing-features",
   "#/landing-about"
 ];
 const authPages = ["#/login", "#/register"];
@@ -149,46 +149,43 @@ window.addEventListener('resize', () => {
 });
 
 function updateActiveNav(path) {
-  const navItems = document.querySelectorAll('.nav-item');
   const basePath = path.split('?')[0];
-
+  
+  // Update sidebar nav items
+  const navItems = document.querySelectorAll('.nav-item');
   navItems.forEach(item => {
     item.classList.remove('active');
-
     // Special handling for merged "Events & Calendar" tab
-    if (basePath === '#/calendar' || basePath === '#/events') { // Use basePath
+    if (basePath === '#/calendar' || basePath === '#/events') {
         if (item.getAttribute('href') === '#/calendar') {
             item.classList.add('active');
         }
     // Special handling for new Create flow
-    } else if (basePath === '#/event-form' || basePath === '#/event-wizard') { // Use basePath
+    } else if (basePath === '#/event-form' || basePath === '#/event-wizard') {
         if (item.getAttribute('href') === '#/create-event') {
             item.classList.add('active');
         }
-    } else if (item.getAttribute('href') === basePath) { // Use basePath
+    } else if (item.getAttribute('href') === basePath) {
       item.classList.add('active');
     }
   });
   
-  const landingNavLinks = document.querySelectorAll('#landingNavbar [data-nav]');
+  // Update landing navbar links (both desktop and mobile)
+  const landingNavLinks = document.querySelectorAll('.navbar-links a, .navbar-mobile-menu a');
   landingNavLinks.forEach(link => {
     link.classList.remove('active');
+    const navPage = link.getAttribute('data-nav');
+    
+    if ((basePath === '#/landing' || basePath === '#/') && navPage === 'landing') {
+      link.classList.add('active');
+    } else if (basePath === '#/landing-events' && navPage === 'events') {
+      link.classList.add('active');
+    } else if (basePath === '#/landing-features' && navPage === 'features') {
+      link.classList.add('active');
+    } else if (basePath === '#/landing-about' && navPage === 'about') {
+      link.classList.add('active');
+    }
   });
-
-  let activeLandingNav = null;
-  if (basePath === '#/landing' || basePath === '#/') { // Use basePath
-    activeLandingNav = 'landing';
-  } else if (basePath === '#/landing-events') { // Use basePath
-    activeLandingNav = 'events';
-  } else if (basePath === '#/landing-calendar') { // Use basePath
-    activeLandingNav = 'calendar';
-  } else if (basePath === '#/landing-about') { // Use basePath
-    activeLandingNav = 'about';
-  }
-  
-  if (activeLandingNav) {
-    document.querySelectorAll(`[data-nav="${activeLandingNav}"]`).forEach(el => el.classList.add('active'));
-  }
 }
 
 function initializeLandingNavToggle() {
