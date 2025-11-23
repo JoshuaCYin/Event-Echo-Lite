@@ -40,8 +40,7 @@ def list_events():
         token = auth.split(" ", 1)[1]
         auth_user_id = verify_token(token)
 
-    # UPDATED: Added subquery to count attendees (status='going')
-    # Added "AT TIME ZONE 'UTC'" to enforce ISO string return
+    # --- MODIFIED: Added avg_rating and review_count subqueries ---
     base_sql = """
         SELECT 
             e.event_id, e.title, e.description, 
@@ -53,19 +52,19 @@ def list_events():
             u.first_name AS organizer_first_name, u.last_name AS organizer_last_name,
             r.rsvp_status AS my_rsvp_status,
             e.venue_id,
-            (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = e.event_id AND rsvps.rsvp_status = 'going') as attendee_count
+            (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = e.event_id AND rsvps.rsvp_status = 'going') as attendee_count,
+            
+            -- NEW --
+            (SELECT AVG(rating) FROM event_reviews WHERE event_reviews.event_id = e.event_id) as avg_rating,
+            (SELECT COUNT(*) FROM event_reviews WHERE event_reviews.event_id = e.event_id) as review_count
+            -- END NEW --
+
         FROM events e
         LEFT JOIN venues v ON e.venue_id = v.venue_id
         LEFT JOIN users u ON e.organizer_id = u.user_id
         LEFT JOIN rsvps r ON e.event_id = r.event_id AND r.user_id = %s
         WHERE 1=1
     """
-    # Note: Removed "WHERE e.status = 'upcoming'" hard constraint so we can show past events if needed,
-    # or filtering can happen on frontend. 
-    # However, if we want to show past events in the hub, we should probably remove that check or allow it.
-    # Given the request "past events are separated by a divider", we must fetch them.
-    # Let's remove the hard 'upcoming' filter or change logic to allow fetching all relevant ones.
-    # For now, I will fetch ALL events that are visible, and let frontend sort/divide.
     
     params = [auth_user_id] 
     
@@ -91,6 +90,9 @@ def list_events():
                         row['start_time'] = row['start_time'].isoformat()
                     if row.get('end_time'):
                         row['end_time'] = row['end_time'].isoformat()
+                    # --- NEW: Convert decimal rating to float ---
+                    if row.get('avg_rating'):
+                        row['avg_rating'] = float(row['avg_rating'])
 
     except Exception as e:
         print(f"Database error listing events: {e}")
@@ -110,6 +112,7 @@ def get_event(event_id):
         token = auth.split(" ", 1)[1]
         auth_user_id = verify_token(token)
 
+    # --- MODIFIED: Added avg_rating and review_count subqueries ---
     sql = """
         SELECT 
             e.event_id, e.title, e.description, 
@@ -118,7 +121,13 @@ def get_event(event_id):
             e.location_type, e.custom_location_address, e.google_maps_link,
             e.status, e.visibility, e.organizer_id, e.created_by, e.venue_id,
             v.name AS venue_name,
-            (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = e.event_id AND rsvps.rsvp_status = 'going') as attendee_count
+            (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = e.event_id AND rsvps.rsvp_status = 'going') as attendee_count,
+            
+            -- NEW --
+            (SELECT AVG(rating) FROM event_reviews WHERE event_reviews.event_id = e.event_id) as avg_rating,
+            (SELECT COUNT(*) FROM event_reviews WHERE event_reviews.event_id = e.event_id) as review_count
+            -- END NEW --
+
         FROM events e
         LEFT JOIN venues v ON e.venue_id = v.venue_id
         WHERE e.event_id = %s
@@ -146,12 +155,14 @@ def get_event(event_id):
                     event_dict['start_time'] = event_dict['start_time'].isoformat()
                 if event_dict.get('end_time'):
                     event_dict['end_time'] = event_dict['end_time'].isoformat()
+                # --- NEW: Convert decimal rating to float ---
+                if event_dict.get('avg_rating'):
+                    event_dict['avg_rating'] = float(event_dict['avg_rating'])
 
                 return jsonify(event_dict), 200
     except Exception as e:
         print(f"Database error getting event: {e}")
         return jsonify({"error": "Failed to retrieve event"}), 500
-
 
 @events_bp.route("/", methods=["POST"])
 def create_event():
@@ -466,3 +477,87 @@ def get_user_profile(user_id):
     except Exception as e:
         print(f"Database error getting profile: {e}")
         return jsonify({"error": "Failed to retrieve profile"}), 500
+    
+# ------------------------------------------------------
+# --- NEW: REVIEWS ENDPOINTS ---
+# ------------------------------------------------------
+
+@events_bp.route("/<int:event_id>/reviews", methods=["GET"])
+def get_event_reviews(event_id):
+    """
+    Get all reviews for a specific event.
+    """
+    # Anyone can read reviews, so auth is not strictly required
+    # but you could add it if you want.
+    
+    sql = """
+        SELECT 
+            r.review_id, r.user_id, r.rating, r.review_text, r.created_at,
+            u.first_name, u.last_name
+        FROM event_reviews r
+        JOIN users u ON r.user_id = u.user_id
+        WHERE r.event_id = %s
+        ORDER BY r.created_at DESC;
+    """
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, (event_id,))
+                reviews = [dict(row) for row in cur.fetchall()]
+                
+                # Ensure ISO format for datetimes
+                for review in reviews:
+                    if review.get('created_at'):
+                        review['created_at'] = review['created_at'].isoformat()
+                        
+                return jsonify(reviews), 200
+    except Exception as e:
+        print(f"Database error getting reviews: {e}")
+        return jsonify({"error": "Failed to retrieve reviews"}), 500
+
+
+@events_bp.route("/<int:event_id>/review", methods=["POST"])
+def post_event_review(event_id):
+    """
+    Create or update a review for an event.
+    """
+    user_id, _, err, code = verify_token_from_request()
+    if err:
+        return err, code
+
+    data = request.get_json() or {}
+    rating = data.get("rating")
+    review_text = data.get("review_text")
+
+    if not rating or not isinstance(rating, int) or not (1 <= rating <= 5):
+        return jsonify({"error": "A rating between 1 and 5 is required"}), 400
+
+    # Optional: Check if the event is in the past before allowing a review
+    # (Skipped for simplicity, but you could add this)
+
+    sql = """
+        INSERT INTO event_reviews (event_id, user_id, rating, review_text)
+        VALUES (%s, %s, %s, %s)
+        ON CONFLICT (user_id, event_id)
+        DO UPDATE SET
+            rating = EXCLUDED.rating,
+            review_text = EXCLUDED.review_text,
+            created_at = CURRENT_TIMESTAMP
+        RETURNING *;
+    """
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, (event_id, user_id, rating, review_text))
+                new_review = dict(cur.fetchone())
+                conn.commit()
+                
+                if new_review.get('created_at'):
+                    new_review['created_at'] = new_review['created_at'].isoformat()
+
+                return jsonify(new_review), 201
+    except Exception as e:
+        print(f"Database error posting review: {e}")
+        return jsonify({"error": "Failed to post review"}), 500

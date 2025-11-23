@@ -27,30 +27,6 @@
 }
 
 /* ------------------------------------------------------ */
-/* FILTERS */
-/* ------------------------------------------------------ */
-.filter-toggle-switch {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    padding: 0.65rem 1rem;
-    border-radius: var(--radius-md);
-    white-space: nowrap;
-}
-.filter-toggle-switch label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-}
-.filter-toggle-switch input {
-    width: auto;
-    accent-color: var(--primary-color);
-    cursor: pointer;
-}
-
-/* ------------------------------------------------------ */
 /* RSVP BUTTON + DROPDOWN MENU */
 /* ------------------------------------------------------ */
 .rsvp-btn-container {
@@ -244,13 +220,45 @@
     flex-wrap: nowrap;
 }
 
+/* New Dropdown Styling */
+#eventFilterSelect {
+    padding: 0.65rem 2.5rem 0.65rem 1rem; /* Increased right padding for custom arrow */
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    cursor: pointer;
+    outline: none;
+    min-width: 140px;
+    height: 100%;
+    
+    /* Custom Arrow Implementation */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    /* Chevron Down SVG encoded with a neutral gray stroke */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    /* Position: right edge is 1rem from container right, vertically centered */
+    background-position: right 0.75rem center;
+    background-size: 1em;
+}
+#eventFilterSelect:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+}
+
 /* Normalize control button heights */
 .search-filter-group > input[type="date"],
+.search-filter-group > input[type="text"],
+.search-filter-group > select,
 .search-filter-group > .action-btn,
 .view-toggle-buttons > .action-btn {
     padding-top: 0.65rem;
     padding-bottom: 0.65rem;
     box-sizing: border-box;
+    height: 42px; /* Enforce consistent height */
 }
 
 /* Reset button icon centering */
@@ -349,11 +357,9 @@
 @keyframes modalSlideIn {
     from {
         opacity: 0;
-        /* transform: translateY(-20px) scale(0.95); */
     }
     to {
         opacity: 1;
-        /* transform: translateY(0) scale(1); */
     }
 }
 
@@ -398,6 +404,7 @@
     margin-bottom: 0.75rem;
     color: var(--text-secondary);
     font-size: 1rem;
+    letter-spacing: 0.3px;
 }
 
 .modal-meta-row svg {
@@ -423,12 +430,26 @@
     font-size: 1rem;
     word-wrap: break-word;
     overflow-wrap: break-word;
+    letter-spacing: 0.4px;
 }
 
 #detailActions {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
+    display: flex;
+    width: 100%; /* Ensure it spans the modal width */
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: nowrap; /* Prevent wrapping to new line */
+}
+
+/* Make the RSVP container fill all available space */
+#detailActions .rsvp-btn-container {
+    flex: 1 1 auto; /* Take up remaining space */
+    min-width: 0; /* Allow shrinking if needed */
+}
+
+/* Make the options button '...' not grow or shrink */
+#detailActions .options-btn-container {
+    flex: 0 0 auto; /* Fixed size, no grow/shrink */
 }
 
 /* Mobile responsiveness */
@@ -442,6 +463,20 @@
     .event-detail-box h3 {
         font-size: 1.5rem;
     }
+}
+
+/* Modal button layout - applies to all screen sizes */
+#detailActions .rsvp-btn-container {
+    flex: 1 1 0;
+}
+
+#detailActions .options-btn-container {
+    flex: 0 0 36px;
+    width: 36px;
+}
+
+#detailActions .rsvp-btn {
+    width: 100%;
 }
 
 /* ------------------------------------------------------ */
@@ -561,7 +596,6 @@
 
 #eventCardsView .event-actions-wrapper {
     margin-top: auto; /* Push to bottom */
-    padding-top: 1rem; /* Add some spacing */
 }
 
 #eventCardsView .event-actions {
@@ -571,9 +605,171 @@
 }
 
 /* ------------------------------------------------------ */
+/* (NEW) RATINGS / REVIEWS STYLES */
+/* ------------------------------------------------------ */
+.event-rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+.event-rating .star {
+    color: #F59E0B; /* Amber/Gold */
+}
+.event-rating .count {
+    font-size: 0.8rem;
+    color: var(--text-light);
+}
+
+/* Modal Review List */
+#detailReviewList {
+    margin-top: 1.5rem;
+}
+#detailReviewList h4 {
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+.review-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-color);
+}
+.review-item:last-child {
+    border-bottom: none;
+}
+.review-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+.review-author {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+.review-date {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+.review-rating .star {
+    color: #F59E0B;
+}
+.review-text {
+    color: var(--text-primary);
+    line-height: 1.6;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Modal Review Form */
+#detailReviewForm {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+#detailReviewForm h4 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+}
+
+/* --- STAR RATING HOVER (Hollow Stars) --- */
+.star-rating-input {
+    display: flex;
+    flex-direction: row-reverse; /* To make :hover work correctly */
+    justify-content: flex-end;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+.star-rating-input input[type="radio"] {
+    display: none;
+}
+.star-rating-input label {
+    font-size: 2rem;
+    color: #CBD5E0; /* Default: Gray */
+    cursor: pointer;
+    transition: color 0.2s, -webkit-text-stroke 0.2s;
+}
+
+/* 1. Checked state: Solid Gold */
+.star-rating-input input:checked ~ label {
+    color: #F59E0B;
+    -webkit-text-stroke: 0;
+}
+
+/* 2. Hover state: Hollow Gold (applies to unchecked stars) */
+.star-rating-input label:hover,
+.star-rating-input label:hover ~ label {
+    color: transparent;
+    -webkit-text-stroke: 1.5px #F59E0B;
+}
+
+/* 3. NEW: Hover over checked stars also shows outline */
+.star-rating-input input:checked ~ label:hover,
+.star-rating-input label:hover ~ input:checked ~ label {
+    color: transparent !important;
+    -webkit-text-stroke: 1.5px #F59E0B !important;
+}
+/* --- ================================ --- */
+
+#reviewFormTextarea {
+    width: 100%;
+    min-height: 100px;
+    padding: 0.75rem; 
+    box-sizing: border-box; /* Include padding in width calculation */
+}
+#reviewFormTextarea::placeholder {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-style: italic;
+    color: var(--text-secondary);
+}
+#submitReviewBtn {
+    background: var(--gradient-primary);
+    color: white;
+}
+
+.modal-collapsible-section {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+.modal-collapsible-section[open] summary h4 {
+    color: var(--primary-color);
+}
+.modal-collapsible-section summary {
+    cursor: pointer;
+    list-style: none; /* Remove default triangle */
+}
+.modal-collapsible-section summary::-webkit-details-marker {
+    display: none; /* Remove default triangle (Safari) */
+}
+.modal-collapsible-section summary h4 {
+    display: inline-block; /* Allows for icon alignment */
+    margin: 0;
+    font-size: 1.25rem;
+}
+/* Add our own triangle/arrow */
+.modal-collapsible-section summary h4::before {
+    content: '►';
+    font-size: 0.8em;
+    margin-right: 0.75rem;
+    color: var(--text-secondary);
+    display: inline-block;
+    transition: transform 0.2s;
+}
+.modal-collapsible-section[open] summary h4::before {
+    transform: rotate(90deg);
+}
+.modal-collapsible-content {
+    padding-top: 1rem;
+}
+
+/* ------------------------------------------------------ */
 /* RESPONSIVE LAYOUT FIXES */
 /* ------------------------------------------------------ */
-@media (max-width: 1200px) {
+@media (max-width: 1175px) {
     .event-hub-controls {
         flex-wrap: wrap;
         gap: 0.75rem;
@@ -607,7 +803,7 @@
     }
     .search-filter-group > input[type="date"],
     .search-filter-group > #resetFiltersBtn,
-    .search-filter-group > .filter-toggle-switch {
+    .search-filter-group > select {
         flex-grow: 1;
         order: 2;
     }
@@ -643,6 +839,63 @@
     margin: auto !important;
 }
 
+/* ------------------------------------------------------ */
+/* FORCE MODAL BUTTON LAYOUT (ALL SCREENS) */
+/* ------------------------------------------------------ */
+#detailActions {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    gap: 0.75rem !important;
+}
+
+#detailActions .rsvp-btn-container {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+}
+
+#detailActions .options-btn-container {
+    flex: 0 0 36px !important;
+    width: 36px !important;
+}
+
+#detailActions .rsvp-btn {
+    width: 100% !important;
+}
+
+/* ------------------------------------------------------ */
+/* NEW: RESPONSIVE REVIEW SUBMIT WRAPPER */
+/* ------------------------------------------------------ */
+.review-submit-wrapper {
+    display: flex;
+    flex-direction: column; /* Mobile: Stack vertically */
+    gap: 0.75rem; /* Slightly more gap for stacking */
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+.review-status-message {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text-primary); /* Ensure visibility */
+    min-height: 0; /* Robustness */
+}
+
+/* Desktop/Tablet: Side-by-side */
+@media (min-width: 600px) {
+    .review-submit-wrapper {
+        flex-direction: row; 
+        align-items: center; 
+        gap: 1rem;
+        width: auto;
+        margin-top: 0;
+    }
+    
+    .review-status-message {
+        white-space: nowrap;
+    }
+}
 </style>
 
 <div class="event-hub-container page-content-wrapper page-transition-enter-active">
@@ -653,22 +906,19 @@
 
     <div class="event-hub-controls">
         <div class="search-filter-group" style="flex-grow: 1; min-width: 250px;">
-            <!-- Accessibility fix: added aria-label -->
             <input type="text" id="eventSearchInput" placeholder="Search event titles..." aria-label="Search events by title" style="flex-grow: 1;">
             <input type="date" id="eventDateFilter" aria-label="Filter events by date">
+            
+            <select id="eventFilterSelect" aria-label="Filter events by type">
+                <option value="all">All Events</option>
+                <!-- My RSVPs option inserted here dynamically if logged in -->
+                <option value="public">Public Only</option>
+                <option value="private">Private Only</option>
+            </select>
+
             <button class="action-btn secondary" id="resetFiltersBtn" aria-label="Reset Filters" title="Reset Filters">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 2v6h6M21.5 22v-6h-6"></path><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path></svg>
             </button>
-
-            <div class="filter-toggle-switch" id="rsvpFilterContainer" style="display: none;">
-                <label for="myRsvpsFilter">My RSVPs</label>
-                <input type="checkbox" id="myRsvpsFilter" />
-            </div>
-
-            <div class="filter-toggle-switch" id="privateFilterContainer">
-                <label for="privateEventsFilter">Private Only</label>
-                <input type="checkbox" id="privateEventsFilter" />
-            </div>
         </div>
         
         <div class="view-toggle-buttons">
@@ -689,7 +939,7 @@
 import { api } from "../js/api.js";
 import { getRoleFromToken, token } from "../js/app.js";
 
-// --- CREATE AND INJECT MODALS INTO BODY ---
+/// --- CREATE AND INJECT MODALS INTO BODY ---
 function createModals() {
     // Remove existing modals if any (Handles re-entry)
     const existingDetail = document.getElementById('eventDetailModal');
@@ -706,26 +956,71 @@ function createModals() {
         <div class="event-detail-box">
             <button class="detail-close" id="closeDetailModal">×</button>
             <h3 id="detailTitle"></h3>
+            
+            <div id="detailRating" class="event-rating" style="font-size: 1.1rem; margin-bottom: 1rem;"></div>
+
             <div class="modal-meta-row">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
                 <span id="detailDate"></span>
             </div>
             <div class="modal-meta-row">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                    <circle cx="12" cy="10" r="3"></circle>
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>
                 </svg>
                 <span id="detailLocation"></span>
                 <span id="detailMapLink"></span>
             </div>
+            
             <p id="detailDescription"></p>
+            
             <div id="detailActions" class="event-actions"></div>
-            <div id="detailAttendeeList"></div>
+            
+            <details id="reviewFormDetails" class="modal-collapsible-section" style="display: none;">
+                <summary>
+                    <h4>Leave a Review</h4>
+                </summary>
+                <div id="detailReviewForm" class="modal-collapsible-content">
+                    <form id="eventReviewForm">
+                        <div class="star-rating-input">
+                            <input type="radio" id="star5" name="rating" value="5" /><label for="star5" title="5 stars">★</label>
+                            <input type="radio" id="star4" name="rating" value="4" /><label for="star4" title="4 stars">★</label>
+                            <input type="radio" id="star3" name="rating" value="3" /><label for="star3" title="3 stars">★</label>
+                            <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">★</label>
+                            <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">★</label>
+                        </div>
+                        <textarea id="reviewFormTextarea" class="form-control" placeholder="Share your experience... (optional)"></textarea>
+                        
+                        <!-- NEW RESPONSIVE WRAPPER -->
+                        <div class="review-submit-wrapper">
+                            <button type="submit" id="submitReviewBtn" class="action-btn primary">Submit Review</button>
+                            
+                            <div class="review-status-message">
+                                <span id="reviewFormSuccess" class="success-message" style="display: none;"></span>
+                                <span id="reviewFormError" class="error-message" style="display: none;"></span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </details>
+
+            <details id="attendeeDetails" class="modal-collapsible-section" style="display: none;">
+                <summary>
+                    <h4>Attendees</h4>
+                </summary>
+                <div id="detailAttendeeList" class="modal-collapsible-content">
+                    </div>
+            </details>
+
+            <details id="reviewDetails" class="modal-collapsible-section"> 
+                <summary>
+                    <h4>Reviews</h4>
+                </summary>
+                <div id="detailReviewList" class="modal-collapsible-content">
+                    </div>
+            </details>
+
         </div>
     `;
     document.body.appendChild(detailModal);
@@ -778,10 +1073,8 @@ const searchInput = document.getElementById("eventSearchInput");
 const dateFilter = document.getElementById("eventDateFilter");
 const resetFiltersBtn = document.getElementById("resetFiltersBtn");
 
-// Filters
-const rsvpFilterContainer = document.getElementById("rsvpFilterContainer");
-const rsvpFilterCheckbox = document.getElementById("myRsvpsFilter");
-const privateFilterCheckbox = document.getElementById("privateEventsFilter");
+// NEW: Select Filter
+const eventFilterSelect = document.getElementById("eventFilterSelect");
 
 // Delete Modal - Get references after creation
 let deleteModal, cancelDeleteBtn, confirmDeleteBtn;
@@ -833,9 +1126,13 @@ let currentView = "cards";
 const userRole = getRoleFromToken();
 const userId = token ? JSON.parse(atob(token.split('.')[1])).sub : null; 
 
-// Show RSVP filter only if logged in
+// Show "My RSVPs" option only if logged in
 if (userId) {
-    rsvpFilterContainer.style.display = 'flex';
+    // Insert "My RSVPs" after "All Events"
+    const myRsvpsOption = document.createElement('option');
+    myRsvpsOption.value = 'my_rsvps';
+    myRsvpsOption.textContent = 'My RSVPs';
+    eventFilterSelect.options.add(myRsvpsOption, 1);
 }
 
 // --- Helper Functions ---
@@ -1103,6 +1400,19 @@ async function showDetailModal(event) {
     document.getElementById('detailDate').textContent = timeDisplay;
     // ---------------------------------------------
 
+    // --- NEW: RATING DISPLAY (in modal) ---
+    const detailRatingDiv = document.getElementById('detailRating');
+    if (event.avg_rating) {
+        detailRatingDiv.innerHTML = `
+            <span class="star">★</span>
+            <strong>${Number(event.avg_rating).toFixed(1)}</strong>
+            <span class="count">(${event.review_count} ${event.review_count === 1 ? 'review' : 'reviews'})</span>
+        `;
+    } else {
+        detailRatingDiv.innerHTML = `<span class="count">No reviews yet</span>`;
+    }
+    // ---------------------------------------------
+
     document.getElementById('detailLocation').textContent = getEventLocation(event);
     
     // Add map link
@@ -1113,9 +1423,26 @@ async function showDetailModal(event) {
     document.getElementById('detailDescription').textContent = event.description || 'No description provided.';
 
     const detailActions = document.getElementById('detailActions');
+    // NEW: Get references to the *content* divs and the *parent* <details> tags
     const attendeeListDiv = document.getElementById('detailAttendeeList');
+    const attendeeDetails = document.getElementById('attendeeDetails');
+    
+    const reviewListDiv = document.getElementById('detailReviewList');
+    const reviewDetails = document.getElementById('reviewDetails');
+    
+    const reviewFormDiv = document.getElementById('detailReviewForm');
+    const reviewFormDetails = document.getElementById('reviewFormDetails');
+    
+    // Clear old content
     detailActions.innerHTML = '';
     attendeeListDiv.innerHTML = ''; 
+    reviewListDiv.innerHTML = '';
+    
+    // Hide sections by default
+    attendeeDetails.style.display = 'none';
+    reviewFormDetails.style.display = 'none';
+    // We can keep reviewDetails visible as it's the default
+    reviewDetails.style.display = 'block';
 
     // Check permissions
     const isOrganizer = userRole === 'admin' || (event.organizer_id === userId) || (event.created_by === userId);
@@ -1123,7 +1450,7 @@ async function showDetailModal(event) {
     if (userId) {
         const rsvpContainer = new RsvpBtn(event, () => {
             // If filtering by RSVPs, re-apply filters to possibly remove/add event from view
-            if (rsvpFilterCheckbox.checked) {
+            if (eventFilterSelect.value === 'my_rsvps') {
                 applyFilters();
             } else {
                 // Otherwise, just refresh the view to show the new button state on the card
@@ -1139,24 +1466,163 @@ async function showDetailModal(event) {
         // Style tweaks for modal placement if needed
         detailActions.appendChild(optionsComponent);
         
-        // Load attendees
-        attendeeListDiv.innerHTML = '<h4>Attendees</h4><div class="loading">Loading attendees...</div>';
+        // NEW: Show the <details> tag
+        attendeeDetails.style.display = 'block';
+        attendeeListDiv.innerHTML = '<div class="loading">Loading attendees...</div>';
         try {
             const attendees = await api(`/events/${event.event_id}/rsvps`, "GET", null, token);
             if (attendees && attendees.length > 0) {
-                attendeeListDiv.innerHTML = '<h4>Attendees</h4>' + attendees.map(att => `
+                // We're now filling the *inner* div
+                attendeeListDiv.innerHTML = attendees.map(att => `
                     <div class="attendee-item">
                         <a href="#/profile-view?id=${att.user_id}" target="_blank">${att.first_name || ''} ${att.last_name || att.email}</a>
                         <span class="rsvp-status ${att.rsvp_status}">${att.rsvp_status}</span>
                     </div>
                 `).join('');
             } else {
-                attendeeListDiv.innerHTML = '<h4>Attendees</h4><p>No one has RSVP\'d yet.</p>';
+                attendeeListDiv.innerHTML = '<p>No one has RSVP\'d yet.</p>';
             }
         } catch (err) {
-            attendeeListDiv.innerHTML = `<h4>Attendees</h4><p class="error-message">Could not load attendee list.</p>`;
+            attendeeListDiv.innerHTML = `<p class="error-message">Could not load attendee list.</p>`;
         }
     }
+
+    // --- NEW: LOAD REVIEWS ---
+    reviewListDiv.innerHTML = '<div class="loading">Loading reviews...</div>';
+    let myReview = null;
+    try {
+        const reviews = await api(`/events/${event.event_id}/reviews`, "GET", null, token);
+        if (reviews && reviews.length > 0) {
+            // We're now filling the *inner* div
+            reviewListDiv.innerHTML = reviews.map(rev => {
+                // Check if this review is by the current user
+                if (rev.user_id === userId) {
+                    myReview = rev;
+                }
+                const reviewDate = new Date(rev.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                return `
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div>
+                                <span class="review-author">${rev.first_name || ''} ${rev.last_name || 'User'}</span>
+                                <span class="review-rating">
+                                    ${'★'.repeat(rev.rating)}${'☆'.repeat(5 - rev.rating)}
+                                </span>
+                            </div>
+                            <span class="review-date">${reviewDate}</span>
+                        </div>
+                        <p class="review-text">${rev.review_text || '<i>No comment provided.</i>'}</p>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            reviewListDiv.innerHTML = '<p>No reviews yet.</p>';
+        }
+    } catch (err) {
+        reviewListDiv.innerHTML = `<p class="error-message">Could not load reviews.</p>`;
+    }
+    // ---------------------------------------------
+
+    // --- NEW: REVIEW FORM LOGIC ---
+    const isPastEvent = new Date(event.start_time) < new Date();
+    if (userId && isPastEvent) {
+        // NEW: Show the <details> tag for the form
+        reviewFormDetails.style.display = 'block';
+        
+        const reviewForm = document.getElementById('eventReviewForm');
+        // Get the button reference from the document (not a clone yet) to update text initially
+        const submitBtnInitial = document.getElementById('submitReviewBtn');
+        const successMsgInitial = document.getElementById('reviewFormSuccess');
+
+        // Reset success/error messages when opening modal
+        if (successMsgInitial) successMsgInitial.style.display = 'none';
+        
+        // Pre-fill form if user already left a review
+        if (myReview) {
+            reviewForm.elements.rating.value = myReview.rating;
+            reviewForm.elements.reviewFormTextarea.value = myReview.review_text;
+            if(submitBtnInitial) submitBtnInitial.textContent = "Update Review";
+        } else {
+            // Reset form
+            reviewForm.reset();
+            if(submitBtnInitial) submitBtnInitial.textContent = "Submit Review";
+        }
+
+        // Remove old listener to prevent duplicates
+        const newReviewForm = reviewForm.cloneNode(true);
+        reviewForm.parentNode.replaceChild(newReviewForm, reviewForm);
+        
+        newReviewForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // --- JAVASCRIPT BUG FIX ---
+            // Re-query for the elements *inside* the listener
+            // to get the correct references from the cloned form.
+            const submitBtn = document.getElementById('submitReviewBtn');
+            const errorSpan = document.getElementById('reviewFormError');
+            const successSpan = document.getElementById('reviewFormSuccess');
+            const rating = newReviewForm.elements.rating.value;
+            const review_text = newReviewForm.elements.reviewFormTextarea.value;
+
+            if (!rating) {
+                errorSpan.textContent = "Please select a star rating.";
+                errorSpan.style.display = 'inline';
+                if(successSpan) successSpan.style.display = 'none';
+                return;
+            }
+            // --- END FIX ---
+
+            errorSpan.style.display = 'none';
+            if(successSpan) successSpan.style.display = 'none';
+            
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            try {
+                // Submit the review
+                await api(`/events/${event.event_id}/review`, "POST", { 
+                    rating: parseInt(rating), 
+                    review_text: review_text 
+                }, token);
+                
+                // --- SUCCESS HANDLING ---
+                if (successSpan) {
+                    successSpan.textContent = myReview ? "Review updated successfully!" : "Review submitted successfully!";
+                    successSpan.style.display = 'inline';
+                }
+                submitBtn.textContent = myReview ? "Update Review" : "Submit Review";
+
+                // Wait briefly so user sees the success message before reload
+                setTimeout(async () => {
+                    if (successSpan) successSpan.style.display = 'none';
+                    
+                    // 1. Re-load all events to get new avg_rating
+                    await loadEvents(); 
+                    
+                    // 2. Find the *updated* event object from the master list
+                    const updatedEvent = allEvents.find(e => e.event_id == event.event_id);
+                    
+                    // 3. Close and re-open the modal with the *new* event data
+                    closeDetailModal();
+                    if (updatedEvent) {
+                        showDetailModal(updatedEvent);
+                    } else {
+                        // Fallback just in case (e.g., event was deleted)
+                        console.warn("Could not find updated event data.");
+                    }
+                }, 1500);
+                
+            } catch (err) {
+                errorSpan.textContent = "Failed to submit review.";
+                errorSpan.style.display = 'inline';
+                submitBtn.textContent = originalBtnText;
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    }
+    // ---------------------------------------------
 }
 
 function closeDetailModal() {
@@ -1191,7 +1657,6 @@ setTimeout(() => {
 }, 100);
 
 // --- Event Rendering ---
-
 function renderEvents(events, isList = false) {
     const container = isList ? listView : cardsView;
     const listClass = isList ? 'list-card-style' : '';
@@ -1232,6 +1697,19 @@ function renderEvents(events, isList = false) {
         
         let actionButtons = '';        // For RSVP
         let optionsPlaceholder = ''; // For '...' button in BOTH views
+        
+        // --- NEW: Rating display for card ---
+        let ratingHtml = '';
+        if (event.avg_rating) {
+            ratingHtml = `
+                <div class="event-rating">
+                    <span class="star">★</span>
+                    <strong>${Number(event.avg_rating).toFixed(1)}</strong>
+                    <span class="count">(${event.review_count})</span>
+                </div>
+            `;
+        }
+        // -------------------------------------
         
         const canEdit = userRole === 'admin' || (event.organizer_id === userId) || (event.created_by === userId);
 
@@ -1287,6 +1765,9 @@ function renderEvents(events, isList = false) {
                                 ${mapLinkHtml}
                             </div>
                         </div>
+
+                        ${ratingHtml}
+
                     </div>
 
                     <div class="event-actions-wrapper">
@@ -1305,7 +1786,7 @@ function renderEvents(events, isList = false) {
     if (upcoming.length > 0) {
         html += upcoming.map(renderCard).join("");
     } else {
-        html += `<p style="grid-column:1/-1; padding:1rem; color:var(--text-secondary);">No upcoming events found matching your filters.</p>`;
+        html += `<p style="grid-column:1/-1; padding:1rem; color:var(--text-secondary);">No upcoming events found matching your filters. You may also want to check past events below.</p>`;
     }
 
     if (past.length > 0) {
@@ -1329,7 +1810,7 @@ function renderEvents(events, isList = false) {
         const event = allEvents.find(e => e.event_id == eventId);
         if (event) {
             const rsvpComponent = new RsvpBtn(event, () => {
-                if (rsvpFilterCheckbox.checked) applyFilters();
+                if (eventFilterSelect.value === 'my_rsvps') applyFilters();
                 if(currentView === 'calendar') renderCalendar(currentEvents);
             });
             placeholder.replaceWith(rsvpComponent);
@@ -1441,8 +1922,7 @@ async function loadEvents() {
 function applyFilters() {
     const searchTerm = searchInput.value.toLowerCase();
     const filterDate = dateFilter.value; // YYYY-MM-DD
-    const showMyRsvps = rsvpFilterCheckbox.checked;
-    const showPrivateOnly = privateFilterCheckbox.checked;
+    const filterType = eventFilterSelect.value; // 'all', 'my_rsvps', 'public', 'private'
 
     currentEvents = allEvents.filter(event => {
         // 1. Text Match
@@ -1456,7 +1936,6 @@ function applyFilters() {
             // Create Date from ISO string (browser converts to Local)
             const localDate = new Date(event.start_time);
             // Format as YYYY-MM-DD in local time to match input value
-            // Note: toLocaleDateString can be tricky with formats; manually composing is safer or using CA locale (YYYY-MM-DD)
             const year = localDate.getFullYear();
             const month = String(localDate.getMonth() + 1).padStart(2, '0');
             const day = String(localDate.getDate()).padStart(2, '0');
@@ -1465,19 +1944,17 @@ function applyFilters() {
             matchesDate = localDateString === filterDate;
         }
         
-        // 3. RSVP Filter
-        let matchesRsvp = true;
-        if (showMyRsvps) {
-            matchesRsvp = (event.my_rsvp_status === 'going' || event.my_rsvp_status === 'maybe');
+        // 3. Type Filter
+        let matchesType = true;
+        if (filterType === 'my_rsvps') {
+            matchesType = (event.my_rsvp_status === 'going' || event.my_rsvp_status === 'maybe');
+        } else if (filterType === 'private') {
+            matchesType = (event.visibility === 'private');
+        } else if (filterType === 'public') {
+            matchesType = (event.visibility !== 'private'); 
         }
 
-        // 4. Private Filter
-        let matchesPrivate = true;
-        if (showPrivateOnly) {
-            matchesPrivate = (event.visibility === 'private');
-        }
-
-        return matchesText && matchesDate && matchesRsvp && matchesPrivate;
+        return matchesText && matchesDate && matchesType;
     });
 
     switchView(currentView);
@@ -1521,14 +1998,12 @@ function switchView(viewName) {
 
 searchInput.addEventListener('input', applyFilters);
 dateFilter.addEventListener('change', applyFilters);
-rsvpFilterCheckbox.addEventListener('change', applyFilters);
-privateFilterCheckbox.addEventListener('change', applyFilters);
+eventFilterSelect.addEventListener('change', applyFilters); // Changed to select change
 
 resetFiltersBtn.addEventListener('click', () => {
     searchInput.value = '';
     dateFilter.value = '';
-    rsvpFilterCheckbox.checked = false;
-    privateFilterCheckbox.checked = false;
+    eventFilterSelect.value = 'all'; // Reset select
     currentEvents = [...allEvents];
     applyFilters();
 });
