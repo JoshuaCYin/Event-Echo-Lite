@@ -664,40 +664,6 @@
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
-/* ------------------------------------------------------ */
-/* NEW: RESPONSIVE REVIEW SUBMIT WRAPPER */
-/* ------------------------------------------------------ */
-.review-submit-wrapper {
-    position: relative;
-    display: flex;
-    flex-direction: column; /* Default to mobile stack */
-    gap: 0.5rem;
-    width: 100%;
-}
-
-.review-status-message {
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-/* Desktop/Tablet: Position to the right */
-@media (min-width: 600px) {
-    .review-submit-wrapper {
-        display: inline-block;
-        width: auto;
-    }
-    
-    .review-status-message {
-        position: absolute;
-        left: 100%;
-        top: 50%;
-        transform: translateY(-50%); /* Perfectly centered vertically */
-        padding-left: 1rem;
-        white-space: nowrap;          /* Keep on one line on desktop */
-        width: max-content;           /* Ensure it doesn't wrap weirdly */
-    }
-}
-
 /* Modal Review Form */
 #detailReviewForm {
     margin-top: 1.5rem;
@@ -709,7 +675,7 @@
     margin-bottom: 1rem;
 }
 
-/* --- STAR RATING HOVER FIX (Hollow Stars) --- */
+/* --- STAR RATING HOVER (Hollow Stars) --- */
 .star-rating-input {
     display: flex;
     flex-direction: row-reverse; /* To make :hover work correctly */
@@ -746,12 +712,11 @@
     color: transparent !important;
     -webkit-text-stroke: 1.5px #F59E0B !important;
 }
-/* --- END OF STAR RATING FIX --- */
+/* --- ================================ --- */
 
 #reviewFormTextarea {
     width: 100%;
     min-height: 100px;
-    margin-bottom: 1rem;
     padding: 0.75rem; 
     box-sizing: border-box; /* Include padding in width calculation */
 }
@@ -899,8 +864,38 @@
     width: 100% !important;
 }
 
+/* ------------------------------------------------------ */
+/* NEW: RESPONSIVE REVIEW SUBMIT WRAPPER */
+/* ------------------------------------------------------ */
+.review-submit-wrapper {
+    display: flex;
+    flex-direction: column; /* Mobile: Stack vertically */
+    gap: 0.75rem; /* Slightly more gap for stacking */
+    width: 100%;
+    margin-top: 0.5rem;
+}
 
+.review-status-message {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: var(--text-primary); /* Ensure visibility */
+    min-height: 0; /* Robustness */
+}
 
+/* Desktop/Tablet: Side-by-side */
+@media (min-width: 600px) {
+    .review-submit-wrapper {
+        flex-direction: row; 
+        align-items: center; 
+        gap: 1rem;
+        width: auto;
+        margin-top: 0;
+    }
+    
+    .review-status-message {
+        white-space: nowrap;
+    }
+}
 </style>
 
 <div class="event-hub-container page-content-wrapper page-transition-enter-active">
