@@ -1356,7 +1356,8 @@ input.is-invalid {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #0a0a0a;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(3.5px) saturate(180%); /* Light blur and saturation */
   padding: 2rem;
   flex-direction: column;
   gap: 1.5rem;
