@@ -4,21 +4,19 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 
 <style>
-  /* ------------------------------------------------------ */
+/* ------------------------------------------------------ */
 /* HEADER */
 /* ------------------------------------------------------ */
-.event-hub-container { /* Overrides main.css version */
-    max-width: 1400px;
+.landing-event-hub-container { /* Overrides main.css version */
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 90px 2rem 2rem 2rem;
+    padding: 90px 2rem 4rem 2rem;
 }
 .event-hub-header {
     text-align: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 5rem;
 }
-.event-hub-header h2 {
+.event-hub-header h1 {
     font-size: 2.5rem;
     background: var(--gradient-primary);
     -webkit-background-clip: text;
@@ -31,7 +29,7 @@
     font-size: 1.25rem;
     max-width: 700px;
     margin: 0 auto;
-    line-height: 1.8;
+    line-height: 1.6;
 }
 
 /* ------------------------------------------------------ */
@@ -441,6 +439,19 @@
     }
 }
 
+@media (max-width: 968px) {
+    .landing-event-hub-container {
+      padding: 90px 1rem 2rem 1rem; /* Reduce horizontal padding */
+    }
+    .event-hub-header {
+      padding: 0 0.5rem; /* NEW: Extra padding constraint */
+    }
+    
+    .event-hub-header h1 {
+      font-size: 2rem;
+    }
+}
+
 /* FORCE MODAL POSITIONING - Add at the very end of styles */
 #eventDetailModal.modal-overlay.open,
 #deleteConfirmModal.modal-overlay.open {
@@ -466,36 +477,35 @@
 }
 </style>
 
-<div class="landing-events-container">
-    <div class="event-hub-container page-transition-enter-active">
-        <div class="event-hub-header">
-            <h2>Discover Events</h2>
-            <p>Explore all public events happening on campus. Log in to RSVP and get recommendations.</p>
-        </div>
+<div class="landing-event-hub-container page-transition-enter-active">
+    <div class="event-hub-header">
+        <h1>Discover Events</h1>
+        <p>Explore all public events happening on campus. Log in to RSVP and get recommendations.</p>
+    </div>
 
-        <div class="event-hub-controls">
-            <div class="search-filter-group">
-                <input type="text" id="eventSearchInput" placeholder="Search event titles..." aria-label="Search events by title">
-                <input type="date" id="eventDateFilter" aria-label="Filter events by date">
-                <button class="action-btn secondary" id="resetFiltersBtn" aria-label="Reset Filters" title="Reset Filters">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 2v6h6M21.5 22v-6h-6"></path><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path></svg>
-                </button>
-            </div>
-            
-            <div class="view-toggle-buttons">
-                <button class="action-btn primary active" data-view="cards" id="cardsViewBtn" aria-label="Card View" title="Card View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
-                <button class="action-btn secondary" data-view="list" id="listViewBtn" aria-label="List View" title="List View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
-                <button class="action-btn secondary" data-view="calendar" id="calendarViewBtn" aria-label="Calendar View" title="Calendar View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
-            </div>
+    <div class="event-hub-controls">
+        <div class="search-filter-group">
+            <input type="text" id="eventSearchInput" placeholder="Search event titles..." aria-label="Search events by title">
+            <input type="date" id="eventDateFilter" aria-label="Filter events by date">
+            <button class="action-btn secondary" id="resetFiltersBtn" aria-label="Reset Filters" title="Reset Filters">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 2v6h6M21.5 22v-6h-6"></path><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path></svg>
+            </button>
         </div>
         
-        <div id="eventCardsView" class="app-events-grid"></div>
-        <div id="eventListView" class="app-events-list" style="display: none;"></div>
-        <div id="eventCalendarView" class="calendar-view-wrapper" style="display: none; background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
-            <div id="calendar"></div>
+        <div class="view-toggle-buttons">
+            <button class="action-btn primary active" data-view="cards" id="cardsViewBtn" aria-label="Card View" title="Card View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
+            <button class="action-btn secondary" data-view="list" id="listViewBtn" aria-label="List View" title="List View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg></button>
+            <button class="action-btn secondary" data-view="calendar" id="calendarViewBtn" aria-label="Calendar View" title="Calendar View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
         </div>
     </div>
+    
+    <div id="eventCardsView" class="app-events-grid"></div>
+    <div id="eventListView" class="app-events-list" style="display: none;"></div>
+    <div id="eventCalendarView" class="calendar-view-wrapper" style="display: none; background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+        <div id="calendar"></div>
+    </div>
 </div>
+
 
 <script type="module">
 import { api } from "../js/api.js";
