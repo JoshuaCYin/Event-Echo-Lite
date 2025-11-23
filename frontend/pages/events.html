@@ -613,7 +613,7 @@
     gap: 0.5rem;
     color: var(--text-secondary);
     font-size: 0.9rem;
-    margin-top: 0.5rem;
+    margin-top: 0.3rem;
 }
 .event-rating .star {
     color: #F59E0B; /* Amber/Gold */
@@ -666,8 +666,7 @@
 
 /* Modal Review Form */
 #detailReviewForm {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
+    margin-top: 1.0rem;
     border-top: 1px solid var(--border-color);
 }
 #detailReviewForm h4 {
@@ -681,7 +680,8 @@
     flex-direction: row-reverse; /* To make :hover work correctly */
     justify-content: flex-end;
     gap: 0.25rem;
-    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 .star-rating-input input[type="radio"] {
     display: none;
@@ -763,7 +763,6 @@
     transform: rotate(90deg);
 }
 .modal-collapsible-content {
-    padding-top: 1rem;
 }
 
 /* ------------------------------------------------------ */
@@ -990,7 +989,8 @@ function createModals() {
                             <input type="radio" id="star2" name="rating" value="2" /><label for="star2" title="2 stars">★</label>
                             <input type="radio" id="star1" name="rating" value="1" /><label for="star1" title="1 star">★</label>
                         </div>
-                        <textarea id="reviewFormTextarea" class="form-control" placeholder="Share your experience... (optional)"></textarea>
+                        <textarea id="reviewFormTextarea" class="form-control" maxlength="500" placeholder="Share your experience... (optional)"></textarea>
+                        <div id="reviewCharCount" style="text-align: right; font-size: 0.8rem; color: #718096;">0 / 500</div>
                         
                         <!-- NEW RESPONSIVE WRAPPER -->
                         <div class="review-submit-wrapper">
@@ -1622,6 +1622,21 @@ async function showDetailModal(event) {
             }
         });
     }
+
+    const reviewTextarea = document.getElementById('reviewFormTextarea');
+        const charCountDisplay = document.getElementById('reviewCharCount');
+
+        // Function to update the counter text
+        const updateCharCount = () => {
+            const currentLength = reviewTextarea.value.length;
+            charCountDisplay.textContent = `${currentLength} / 500`; // max length of reviews is 500
+        };
+
+        // Add listener for typing
+        reviewTextarea.addEventListener('input', updateCharCount);
+
+        // Initialize counter immediately (in case there is pre-filled text from an existing review)
+        updateCharCount();
     // ---------------------------------------------
 }
 
