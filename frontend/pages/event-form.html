@@ -149,6 +149,19 @@
         color: white;
         flex: 2;
     }
+
+    /* --- AI Assist Button Styles --- */
+    .label-with-ai {
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .ai-assist-btn {
+        background: none; border: 1px solid var(--primary-color);
+        color: var(--primary-color); padding: 2px 8px; border-radius: 12px;
+        font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;
+        transition: all 0.2s;
+    }
+    .ai-assist-btn:hover { background: var(--bg-tertiary); transform: translateY(-1px); }
+    .ai-assist-btn.loading { opacity: 0.7; cursor: wait; }
 </style>
 
 <div class="create-event-form page-transition-enter-active">
@@ -173,7 +186,14 @@
             <label for="evTitle">Event Title*</label>
             <input id="evTitle" type="text" placeholder="e.g. Spring Hackathon" required>
             
-            <label for="evDescription">Description</label>
+            <div class="label-with-ai">
+                <label for="evDescription">Description</label>
+                <!-- AI INTEGRATION BUTTON -->
+                <button type="button" class="ai-assist-btn" id="aiRewriteBtn">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>
+                    AI Rewrite
+                </button>
+            </div>
             <textarea id="evDescription" placeholder="Tell attendees about your event..." rows="5"></textarea>
         </div>
         
@@ -305,6 +325,59 @@ async function init() {
     handleLocationTypeChange();
 }
 
+// --- AI REWRITE LOGIC (NEW) ---
+const aiRewriteBtn = document.getElementById('aiRewriteBtn');
+aiRewriteBtn.addEventListener('click', async () => {
+    const currentText = evDescription.value.trim();
+    if (!currentText && !evTitle.value.trim()) {
+        alert("Please enter a title or some description text first.");
+        return;
+    }
+    
+    aiRewriteBtn.classList.add('loading');
+    aiRewriteBtn.textContent = 'Rewriting...';
+    aiRewriteBtn.disabled = true;
+    
+    try {
+        const payload = {
+            prompt: "Rewrite this description to be professional, engaging, and clear.",
+            context: "Main Event Form Description Field",
+            current_values: {
+                title: evTitle.value,
+                description: evDescription.value
+            }
+        };
+        
+        const result = await api('/ai/wizard-helper', 'POST', payload, token);
+        
+        if (result && result.actions) {
+            // Find the action for the description field
+            const descAction = result.actions.find(a => a.field === 'evDescription');
+            if (descAction) {
+                evDescription.value = descAction.value;
+                // Highlight effect
+                evDescription.style.transition = 'background-color 0.5s';
+                evDescription.style.backgroundColor = '#e6f3ff';
+                setTimeout(() => evDescription.style.backgroundColor = '', 1000);
+            }
+        } else if (result && result.response) {
+             // Fallback if no specific action was generated
+             // Check if response looks like a description (simple heuristic)
+             if (result.response.length > 20) {
+                 evDescription.value = result.response;
+             }
+        }
+    } catch (err) {
+        console.error("AI rewrite failed:", err);
+        alert("Could not rewrite text at this time.");
+    } finally {
+        aiRewriteBtn.classList.remove('loading');
+        aiRewriteBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg> AI Rewrite`;
+        aiRewriteBtn.disabled = false;
+    }
+});
+
+
 // --- Create vs Edit Setup ---
 
 function setupCreateMode() {
@@ -339,8 +412,6 @@ async function setupEditMode() {
         evMapsLink.value = event.google_maps_link || "";
 
         // --- TIMEZONE FIX FOR EDITING ---
-        // If the backend sends a naive UTC string (missing Z or +00:00), append Z.
-        // This forces the browser to treat it as UTC and convert it to local time correctly.
         let startStr = event.start_time;
         let endStr = event.end_time;
         
@@ -456,7 +527,7 @@ function applyAIDraft() {
             document.querySelector('input[name="location_type"][value="custom"]').checked = true;
             handleLocationTypeChange();
         }
-        // NEW: Handle date/time fields
+        // Handle date/time fields
         if (draft.start_time) {
             evStart.value = formatDateTimeForInput(draft.start_time);
         }
@@ -490,9 +561,6 @@ form.addEventListener("submit", async (e) => {
         return;
     }
 
-    // --- TIMEZONE FIX FOR SUBMITTING ---
-    // Convert the local "YYYY-MM-DDTHH:MM" strings to ISO 8601 UTC strings (e.g., "...T15:00:00.000Z")
-    // This ensures the backend receives the exact instant you selected, regardless of server timezone.
     const startISO = startLocal ? new Date(startLocal).toISOString() : null;
     const endISO = endLocal ? new Date(endLocal).toISOString() : null;
 

@@ -138,9 +138,8 @@
         font-size: 1.05rem; 
     }
     #reviewStepContainer .review-value.description { 
-        white-space: pre-wrap; 
-        background: var(--bg-secondary); 
-        padding: 0.75rem 1rem; 
+        white-space: pre-wrap;
+        padding: 0.75rem; 
         border-radius: var(--radius-sm);
         line-height: 1.6;
     }
@@ -158,18 +157,22 @@
         position: sticky;
         top: 2rem; 
         max-height: calc(100vh - 4rem); /* Constrain height */
+        transition: all 0.3s ease;
     }
     .ai-helper-header {
         display: flex;
-        gap: 0.75rem;
+        justify-content: space-between; /* Space for toggle icon */
         align-items: center;
         margin-bottom: 1rem;
         padding-bottom: 1rem;
         border-bottom: 1px solid var(--border-color);
         flex-shrink: 0;
+        cursor: default;
     }
     .ai-helper-header h3 { font-size: 1.25rem; color: var(--text-primary); margin: 0; }
     
+    .ai-toggle-icon { display: none; } /* Hidden on desktop */
+
     .ai-helper-messages {
         flex-grow: 1;
         overflow-y: auto; /* Makes messages scroll */
@@ -177,19 +180,39 @@
         min-height: 200px;
     }
 
-    /* Message styles copied from ai-chat.html */
-    .ai-helper-msg { display: flex; align-items: flex-end; margin-bottom: 1rem; max-width: 95%; }
-    .ai-helper-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 0.5rem; }
+    /* Message styles */
+    .ai-helper-msg { display: flex; align-items: flex-start; margin-bottom: 1rem; max-width: 100%; }
+    .ai-helper-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 0.5rem; margin-top: 4px;}
     .ai-helper-msg.ai .ai-helper-avatar { background: var(--gradient-primary); color: white; }
     .ai-helper-msg.user { flex-direction: row-reverse; margin-left: auto; }
     .ai-helper-msg.user .ai-helper-avatar { margin-right: 0; margin-left: 0.5rem; background: var(--bg-tertiary); }
-    .ai-helper-bubble { padding: 0.6rem 1rem; border-radius: var(--radius-lg); font-size: 0.9rem; line-height: 1.5; }
-    .ai-helper-msg.user .ai-helper-bubble { background: var(--gradient-primary); color: white; }
-    .ai-helper-msg.ai .ai-helper-bubble { background: var(--bg-tertiary); color: var(--text-primary); }
-    .ai-helper-msg.is-loading .ai-helper-bubble { background: var(--bg-tertiary); color: var(--text-light); }
-    .ai-helper-msg.is-loading .ai-helper-bubble { font-style: italic; }
     
-    /* Input form copied from ai-chat.html */
+    .ai-helper-bubble { padding: 0.75rem; border-radius: var(--radius-lg); font-size: 0.9rem; line-height: 1.5; background: var(--bg-tertiary); color: var(--text-primary); width: 100%;}
+    .ai-helper-msg.user .ai-helper-bubble { background: var(--gradient-primary); color: white; width: auto;}
+    .ai-helper-msg.is-loading .ai-helper-bubble { font-style: italic; color: var(--text-light); }
+
+    /* Suggestion Actions */
+    .ai-suggestion-action {
+        display: block;
+        margin-top: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        background: #e6f3ff;
+        border: 1px solid #b3d4ff;
+        border-radius: var(--radius-md);
+        color: #0056b3;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+    }
+    .ai-suggestion-action:hover {
+        background: #cce5ff;
+        transform: translateY(-1px);
+    }
+    .ai-suggestion-action strong { display: block; font-size: 0.75rem; color: #555; font-weight: 500; margin-bottom: 2px; }
+    
+    /* Input form */
     .ai-helper-form { flex-shrink: 0; margin-top: 1rem; }
     .ai-helper-input-wrapper { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 0.25rem 0.5rem 0.25rem 1rem; }
     .ai-helper-input-wrapper input { flex-grow: 1; border: none; background: transparent; font-size: 0.9rem; padding: 0.5rem 0; }
@@ -200,20 +223,55 @@
     .step-error { color: #c53030; background: #fff5f5; border: 1px solid #f56565; padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; display: none; }
     #wizardSubmitMessage { display: none; margin-top: 1rem; }
 
-    /* --- Mobile breakpoint and layout --- */
+    /* --- Mobile Breakpoint & Collapsible Logic --- */
     @media (max-width: 768px) {
         .wizard-container { 
-            flex-direction: column-reverse; /* Keep AI helper at bottom */
+            flex-direction: column; /* CHANGED: Put AI at bottom (not reverse) */
         }
         .wizard-sidebar { 
             max-width: 100%; 
             position: static;
-            max-height: 400px; 
-            margin-bottom: 1.5rem; /* Add spacing */
+            margin-top: 2rem;
+            margin-bottom: 1rem; 
         }
         .wizard-content { min-height: auto; }
         .wizard-stepper { font-size: 0.8rem; }
         .stepper-label { font-size: 0.75rem; max-width: 60px; line-height: 1.2; }
+
+        /* Mobile specific AI card styles */
+        .ai-helper-card {
+            padding: 1rem;
+            max-height: none; /* Let it grow if expanded */
+        }
+        
+        .ai-helper-header {
+            cursor: pointer;
+            margin-bottom: 0; /* Remove margin when collapsed */
+            padding-bottom: 0; /* Remove padding when collapsed */
+            border-bottom: none;
+        }
+
+        .ai-toggle-icon {
+            display: block;
+            transform: rotate(0deg);
+            transition: transform 0.3s;
+        }
+
+        /* Collapsed State (Default on Mobile) */
+        .ai-helper-card.collapsed .ai-helper-messages,
+        .ai-helper-card.collapsed .ai-helper-form {
+            display: none;
+        }
+
+        /* Expanded State */
+        .ai-helper-card.expanded .ai-helper-header {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .ai-helper-card.expanded .ai-toggle-icon {
+            transform: rotate(180deg);
+        }
     }
 </style>
 
@@ -358,11 +416,15 @@
         </div>
     </div>
 
-    <!-- Right Side: AI Helper (New UI) -->
+    <!-- Right Side: AI Helper (Updated for Mobile) -->
     <aside class="wizard-sidebar">
-        <div class="ai-helper-card">
-            <div class="ai-helper-header">
-                <h3>AI Brainstorm Helper</h3>
+        <!-- Added 'collapsed' class logic via JS -->
+        <div class="ai-helper-card" id="aiHelperCard">
+            <div class="ai-helper-header" onclick="toggleMobileAI()">
+                <h3>AI Co-Pilot</h3>
+                <div class="ai-toggle-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                </div>
             </div>
             <div class="ai-helper-messages" id="ai-helper-messages">
                 <div class="ai-helper-msg ai">
@@ -370,14 +432,13 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>
                     </div>
                     <div class="ai-helper-bubble">
-                        <p id="ai-helper-intro-text">Stuck on your event title? Ask me for ideas!</p>
+                        <p id="ai-helper-intro-text">I'm here to help! I can brainstorm titles or rewrite descriptions for you.</p>
                     </div>
                 </div>
             </div>
             <form class="ai-helper-form" id="ai-helper-form">
                 <div class="ai-helper-input-wrapper">
-                    <!-- ACCESSIBILITY FIX: Added aria-label -->
-                    <input type="text" id="ai-helper-input" placeholder="e.g. 'Suggest 3 titles'" aria-label="AI Assistant Input">
+                    <input type="text" id="ai-helper-input" placeholder="Ask for suggestions..." aria-label="AI Assistant Input">
                     <button type="submit" id="ai-helper-send" aria-label="Send">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 3L22 12L2 21L5 13L15 12L5 11L2 3Z"/></svg>
                     </button>
@@ -391,12 +452,13 @@
 <script type="module">
     import { api } from '../js/api.js';
     import { getRoleFromToken } from '../js/app.js';
+    import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 
     const token = localStorage.getItem("token");
     const userRole = getRoleFromToken();
 
     let currentStep = 1;
-    let maxStepCompleted = 1; // Variable for stepper logic
+    let maxStepCompleted = 1;
     const wizardData = {};
 
     // --- DOM Elements ---
@@ -412,6 +474,25 @@
         visibilityContainer.querySelector('input[value="public"]').disabled = true;
         visibilityContainer.querySelector('input[value="private"]').checked = true;
         visibilityWarning.textContent = 'As an attendee, your events will be created as "Private". Contact an admin to make it public.';
+    }
+
+    // --- Mobile AI Toggle Logic ---
+    window.toggleMobileAI = () => {
+        // Only works on mobile breakpoint check usually done via CSS state, 
+        // but here we just toggle classes that only affect mobile CSS.
+        const card = document.getElementById('aiHelperCard');
+        if (card.classList.contains('expanded')) {
+            card.classList.remove('expanded');
+            card.classList.add('collapsed');
+        } else {
+            card.classList.remove('collapsed');
+            card.classList.add('expanded');
+        }
+    };
+
+    // Initialize state for mobile (Collapsed by default)
+    if (window.innerWidth <= 768) {
+        document.getElementById('aiHelperCard').classList.add('collapsed');
     }
 
     // --- Location Toggle Logic ---
@@ -451,9 +532,7 @@
         updateWizardView();
     }
     
-    // --- Go to specific step ---
     window.goToStep = (stepNum) => {
-        // Allow jumping to steps <= max completed step
         if (stepNum <= maxStepCompleted) {
             currentStep = stepNum;
             updateWizardView();
@@ -468,13 +547,12 @@
         stepperItems.forEach((item, index) => {
             const step = index + 1;
             item.classList.toggle('active', step === currentStep);
-            item.classList.toggle('completed', step < maxStepCompleted); // Use maxStep
+            item.classList.toggle('completed', step < maxStepCompleted);
             
-            if (step < maxStepCompleted) { // Allow clicking any completed step
+            if (step < maxStepCompleted) {
                 item.onclick = () => goToStep(step);
                 item.style.cursor = 'pointer';
             } else {
-                // Allow clicking the current step (or max)
                 item.onclick = (step === currentStep) ? () => goToStep(step) : null;
                 item.style.cursor = (step === currentStep) ? 'pointer' : 'not-allowed';
             }
@@ -484,7 +562,7 @@
         const activeStepEl = document.querySelector(`.wizard-step.active`);
         if (activeStepEl) {
             const context = activeStepEl.dataset.context;
-            document.getElementById('ai-helper-intro-text').textContent = `Stuck on ${context.toLowerCase()}? Ask me for ideas!`;
+            document.getElementById('ai-helper-intro-text').textContent = `I'm ready to help with your ${context.toLowerCase()}.`;
             document.getElementById('ai-helper-messages').dataset.context = context;
         }
 
@@ -558,7 +636,6 @@
         const f = (label, value, isDesc = false) => {
             const val = value || 'Not provided';
             const valClass = value ? (isDesc ? 'description' : '') : 'missing';
-            // Use <div> for review items to ensure vertical stacking
             return `<div class="review-item"><span class="review-label">${label}</span><span class="review-value ${valClass}">${val}</span></div>`;
         };
         container.innerHTML = `
@@ -572,11 +649,20 @@
         `;
     }
 
-    // --- AI Helper Chat ---
+    // --- AI Helper Chat & Actions ---
     const aiForm = document.getElementById('ai-helper-form');
     const aiInput = document.getElementById('ai-helper-input');
     const aiSendBtn = document.getElementById('ai-helper-send');
     const aiMessages = document.getElementById('ai-helper-messages');
+
+    // Get current field values to send to AI for context
+    function getCurrentStepValues() {
+        return {
+            title: document.getElementById('w-title').value,
+            description: document.getElementById('w-description').value,
+            customLocation: document.getElementById('w-customLocation').value
+        };
+    }
 
     aiForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -592,10 +678,17 @@
         const loadingMsg = addHelperMessage('is-loading', '...');
 
         try {
-            const result = await api('/ai/wizard-helper', 'POST', { prompt, context }, token);
+            const payload = { 
+                prompt, 
+                context, 
+                current_values: getCurrentStepValues() 
+            };
+            const result = await api('/ai/wizard-helper', 'POST', payload, token);
             loadingMsg.remove();
+            
             if (result.response) {
-                addHelperMessage('ai', result.response);
+                // Pass actions if they exist
+                addHelperMessage('ai', result.response, result.actions);
             } else {
                 addHelperMessage('ai', `Error: ${result.error || 'No response'}`);
             }
@@ -609,7 +702,7 @@
         }
     });
 
-    function addHelperMessage(sender, text) {
+    function addHelperMessage(sender, text, actions = null) {
         const msg = document.createElement('div');
         msg.className = `ai-helper-msg ${sender}`;
         
@@ -620,9 +713,24 @@
 
         if (sender === 'ai' || sender === 'is-loading') {
             avatar.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>`;
-            bubble.innerHTML = (sender === 'is-loading') 
-                ? '...' 
-                : text.replace(/\n/g, '<br>'); // Simple formatting
+            
+            // Render text with Markdown
+            bubble.innerHTML = (sender === 'is-loading') ? '...' : marked.parse(text);
+
+            // Render Actions
+            if (actions && actions.length > 0) {
+                actions.forEach(action => {
+                    const btn = document.createElement('button');
+                    btn.className = 'ai-suggestion-action';
+                    // Clean up field name for display (e.g., w-title -> Title)
+                    const fieldName = action.field.replace('w-', '').replace('ev', '').replace(/([A-Z])/g, ' $1').trim();
+                    const displayValue = action.value.length > 50 ? action.value.substring(0, 48) + '...' : action.value;
+                    
+                    btn.innerHTML = `<strong>Update ${fieldName}</strong> "${displayValue}"`;
+                    btn.onclick = () => applyAIAction(action.field, action.value, btn);
+                    bubble.appendChild(btn);
+                });
+            }
         } else { // user
             avatar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
             bubble.textContent = text;
@@ -634,6 +742,27 @@
         aiMessages.scrollTop = aiMessages.scrollHeight;
         return msg;
     }
+
+    function applyAIAction(fieldId, value, btnElement) {
+        const field = document.getElementById(fieldId);
+        if (field) {
+            field.value = value;
+            // Visual feedback
+            field.style.transition = "background-color 0.3s";
+            field.style.backgroundColor = "#e6f3ff"; // highlight blue
+            setTimeout(() => { field.style.backgroundColor = ""; }, 1000);
+            
+            // Button feedback
+            btnElement.innerHTML = `<strong>Updated!</strong>`;
+            btnElement.style.background = "#d4edda";
+            btnElement.style.color = "#155724";
+            btnElement.style.borderColor = "#c3e6cb";
+            btnElement.disabled = true;
+            btnElement.style.cursor = "default";
+        } else {
+            console.error("Field not found:", fieldId);
+        }
+    }
     
     // --- FINAL SUBMIT ---
     window.submitWizard = async () => {
@@ -642,16 +771,14 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
 
-        // --- TIMEZONE FIX ---
-        // Convert the local time string gathered in Step 2 into a strict ISO 8601 UTC string.
         const startISO = wizardData.start_time ? new Date(wizardData.start_time).toISOString() : null;
         const endISO = wizardData.end_time ? new Date(wizardData.end_time).toISOString() : null;
 
         const payload = {
             title: wizardData.title,
             description: wizardData.description,
-            start_time: startISO, // Use the ISO string
-            end_time: endISO,     // Use the ISO string
+            start_time: startISO, 
+            end_time: endISO, 
             location_type: wizardData.location_type,
             google_maps_link: wizardData.google_maps_link || null,
             visibility: wizardData.visibility,
@@ -686,7 +813,6 @@
     handleLocationTypeChange();
     loadVenues();
     updateWizardView();
-    // Add click listeners to stepper items
     stepperItems.forEach((item, index) => {
         item.onclick = () => goToStep(index + 1);
     });

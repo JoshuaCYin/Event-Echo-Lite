@@ -48,26 +48,37 @@ EVENT_DRAFT_SCHEMA = {
     "required": ["title", "description"]
 }
 
-DRAFTING_RESPONSE_SCHEMA = {
+# Used for the Side-Car Wizard Helper
+WIZARD_ACTION_SCHEMA = {
     "type": "object",
     "properties": {
-        "response": {"type": "string", "description": "The conversational, user-facing chat response (can be markdown)."},
-        "eventDraft": {
-            "type": ["object", "null"],
-            "description": "The event draft object. This MUST be null unless the user explicitly asks for a draft or a new event idea.",
-            "properties": EVENT_DRAFT_SCHEMA["properties"]
+        "response": {"type": "string", "description": "Helpful, concise text response to the user."},
+        "actions": {
+            "type": "array",
+            "description": "List of actions to populate form fields.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "field": {
+                        "type": "string", 
+                        "enum": ["w-title", "w-description", "w-customLocation", "evTitle", "evDescription", "evCustomLocation"],
+                        "description": "The specific HTML ID of the input field to populate."
+                    },
+                    "value": {"type": "string", "description": "The text value to put into the field."}
+                },
+                "required": ["field", "value"]
+            }
         }
     },
-    "required": ["response", "eventDraft"]
+    "required": ["response", "actions"]
 }
 
-
-# 1. Try to initialize OpenAI first (as requested)
+# 1. Try to initialize OpenAI first
 if OPENAI_API_KEY:
     try:
         openai_client = OpenAI(api_key=OPENAI_API_KEY)
         ACTIVE_AI_SERVICE = "openai"
-        print("INFO: Successfully initialized OpenAI client. Using as default AI service.")
+        print("INFO: Successfully initialized OpenAI client.")
     except Exception as e:
         openai_client = None
         print(f"WARNING: OpenAI client initialization failed: {e}. Trying fallback.")
@@ -77,70 +88,56 @@ if ACTIVE_AI_SERVICE is None and GEMINI_API_KEY:
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         
-        gemini_schema = types.Schema(
-            type=types.Type.OBJECT,
-            properties={
-                'response': types.Schema(type=types.Type.STRING, description=DRAFTING_RESPONSE_SCHEMA['properties']['response']['description']),
-                'eventDraft': types.Schema(
-                    type=types.Type.OBJECT,
-                    description=DRAFTING_RESPONSE_SCHEMA['properties']['eventDraft']['description'],
-                    properties={
-                        'title': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['title']['description']),
-                        'description': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['description']['description']),
-                        'location': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['location']['description']),
-                        'start_time': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['start_time']['description']),
-                        'end_time': types.Schema(type=types.Type.STRING, description=EVENT_DRAFT_SCHEMA['properties']['end_time']['description']),
-                    },
-                    nullable=True
-                )
-            },
-            required=["response", "eventDraft"]
-        )
-
-        gemini_model = genai.GenerativeModel(
-            'gemini-1.5-flash',
-            generation_config=types.GenerationConfig(
-                response_mime_type="application/json",
-                response_schema=gemini_schema,
-            )
-        )
+        # Configure the schemas for Gemini
+        gemini_model = genai.GenerativeModel('gemini-1.5-flash')
+        
         ACTIVE_AI_SERVICE = "gemini"
-        print("INFO: Successfully initialized Gemini client with JSON mode. Using as fallback AI service.")
+        print("INFO: Successfully initialized Gemini client.")
     except Exception as e:
         gemini_model = None
         print(f"WARNING: Gemini client initialization failed: {e}.")
 
-if ACTIVE_AI_SERVICE is None:
-    print("CRITICAL: No AI service could be initialized. AI endpoints will fail.")
 
+# --- System Prompts ---
 
-# --- System Prompt (Main Chatbot) ---
 MAIN_SYSTEM_PROMPT = f"""
-You are an AI assistant for the "EventEcho" campus event planning app.
-Your identity: You are the "EventEcho AI Assistant". You are powered by {ACTIVE_AI_SERVICE}.
-*** CRITICAL: You MUST reply in the specified JSON format. ***
-
-**CURRENT DATE/TIME:** The current date and time is provided in the user's message.
+You are the "EventEcho AI Assistant". 
+**CRITICAL:** You MUST reply in JSON format.
 
 **CONTEXT:**
-You will be given a list of "Upcoming Public Events" and the user's "Conversation History".
-This event list is the *only* source of truth.
-* If the user asks for events and the list is empty, you MUST state that there are no upcoming public events.
-* If the user asks for a specific event that is not on the list, you MUST state you do not have information on that event.
-* **DO NOT** say "I don't have information..." and then list events. Use the list *first*.
-* **DO NOT** invent or hallucinate any events under any circumstances.
+You will be given a list of "Upcoming Public Events" and "Conversation History".
+This event list is the source of truth.
 
 **TASKS:**
-1.  **CONVERSATION:** Answer user questions about event planning or the provided event data.
-2.  **EVENT DRAFTING:** If the user's *latest prompt* asks to create, draft, or "make an event" (e.g., "draft a description for a workshop", "make an event for a fundraiser"), you MUST populate the `eventDraft` object.
+1. Answer user questions about event planning or data.
+2. If the user asks to create/draft an event, populate the `eventDraft` object.
 
 **EVENT DRAFT RULES:**
-* For a simple chat or question (e.g., "what events are happening?"), `eventDraft` MUST be `null`.
-* For an event creation request, `eventDraft` MUST be populated with ALL fields.
-* If the user specifies dates/times, use those. Otherwise, suggest reasonable future dates (e.g., next week, appropriate time of day).
-* **CRITICAL:** start_time and end_time MUST be in ISO 8601 format: 'YYYY-MM-DDTHH:MM:SS'
-* Always provide a friendly, conversational `response` in markdown.
+* For simple chats, `eventDraft` MUST be `null`.
+* For creation requests, populate `eventDraft`.
+* `start_time` and `end_time` MUST be ISO 8601 ('YYYY-MM-DDTHH:MM:SS').
 """
+
+WIZARD_SYSTEM_PROMPT = """
+You are an AI Co-Pilot for an event creation form.
+**CRITICAL:** You MUST reply in JSON format.
+
+Your Goal: Help the user fill out the form fields.
+1. `response`: A short, friendly, helpful message.
+2. `actions`: An array of objects to autofill fields if applicable.
+
+**Targetable Fields (IDs):**
+- Title: "w-title" (Wizard) or "evTitle" (Main Form)
+- Description: "w-description" (Wizard) or "evDescription" (Main Form)
+- Custom Address: "w-customLocation" (Wizard) or "evCustomLocation" (Main Form)
+
+**Rules:**
+- If the user asks for suggestions (e.g., "Give me 3 titles"), provide them in the `response` text using Markdown lists. DO NOT fill `actions` yet, as we don't know which one they want.
+- If the user asks to "Rewrite this" or "Use [X] as the title", populate the `actions` array with the best option.
+- Keep `response` brief (under 50 words).
+"""
+
+# --- Routes ---
 
 @ai_blueprint.route('/chat', methods=['POST'])
 def handle_chat():
@@ -150,107 +147,95 @@ def handle_chat():
     data = request.json or {}
     user_prompt = data.get("prompt")
     history = data.get("history", [])
-    event_context = data.get("event_context", "No live event data was provided.")
+    event_context = data.get("event_context", "No live event data provided.")
 
     if not user_prompt:
         return jsonify({"error": "No prompt provided."}), 400
 
     try:
-        # --- Prioritize OpenAI ---
         if ACTIVE_AI_SERVICE == "openai":
             messages = [{"role": "system", "content": MAIN_SYSTEM_PROMPT}]
-            
             for item in history:
                 role = "assistant" if item["role"] == "ai" else item["role"]
                 messages.append({"role": role, "content": item["content"]})
             
             messages.append({"role": "user", "content": user_prompt})
-            messages.append({"role": "system", "content": f"--- UPCOMING PUBLIC EVENTS ---\n{event_context}\n------------------------------"})
+            messages.append({"role": "system", "content": f"--- EVENTS ---\n{event_context}"})
 
             response = openai_client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=messages,
-                response_format={"type": "json_object"}  # Request JSON output
+                response_format={"type": "json_object"}
             )
             result_json = json.loads(response.choices[0].message.content)
-
-            # --- If user asks to create or draft an event, populate the eventDraft object and show the event creation button ---
-            if "eventDraft" in result_json and result_json["eventDraft"] is not None:
-                result_json["showEventCreationButton"] = True  # Indicate the button should be shown
-
+            if "eventDraft" in result_json and result_json["eventDraft"]:
+                result_json["showEventCreationButton"] = True
             return jsonify(result_json)
 
         elif ACTIVE_AI_SERVICE == "gemini":
-            # --- Gemini Logic (Fallback) ---
-            gemini_history = []
+            # Gemini JSON Schema Config
+            response_schema = types.Schema(
+                type=types.Type.OBJECT,
+                properties={
+                    'response': types.Schema(type=types.Type.STRING),
+                    'eventDraft': types.Schema(
+                        type=types.Type.OBJECT,
+                        nullable=True,
+                        properties={
+                            'title': types.Schema(type=types.Type.STRING),
+                            'description': types.Schema(type=types.Type.STRING),
+                            'location': types.Schema(type=types.Type.STRING),
+                            'start_time': types.Schema(type=types.Type.STRING),
+                            'end_time': types.Schema(type=types.Type.STRING),
+                        }
+                    )
+                },
+                required=["response"]
+            )
+
+            contents = [types.Part(text=MAIN_SYSTEM_PROMPT, role="user")]
             for item in history:
                 role = "model" if item["role"] == "ai" else "user"
-                gemini_history.append(types.Part(text=item["content"], role=role))
+                contents.append(types.Part(text=item["content"], role=role))
             
-            system_instruction = MAIN_SYSTEM_PROMPT
-            
-            contents = [
-                *gemini_history,
-                types.Part(text=user_prompt, role="user"),
-                types.Part(text=f"\n--- UPCOMING PUBLIC EVENTS ---\n{event_context}\n------------------------------", role="user"),
-                types.Part(text="", role="model")  # Start the response
-            ]
+            contents.append(types.Part(text=f"{user_prompt}\n\nEvents Context:\n{event_context}", role="user"))
 
             response = gemini_model.generate_content(
                 contents=contents,
-                system_instruction=system_instruction
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=response_schema
+                )
             )
             result_json = json.loads(response.text)
-
-            # --- If user asks to create or draft an event, populate the eventDraft object and show the event creation button ---
-            if "eventDraft" in result_json and result_json["eventDraft"] is not None:
-                result_json["showEventCreationButton"] = True  # Indicate the button should be shown
-
+            if "eventDraft" in result_json and result_json["eventDraft"]:
+                result_json["showEventCreationButton"] = True
             return jsonify(result_json)
 
-    # --- Error Handling ---
-    except (OpenAIAuthError, GeminiAPIError) as e:
-        if "API key" in str(e): return jsonify({"error": f"{ACTIVE_AI_SERVICE} Authentication failed. Check API key."}), 401
-    except (OpenAIRateLimitError, GeminiAPIError) as e:
-        if "rate limit" in str(e): return jsonify({"error": f"{ACTIVE_AI_SERVICE} rate limit reached."}), 429
-    except (OpenAIAPIError, OpenAIConnectionError, GeminiAPIError) as e:
-        print(f"AI API error: {e}")
-        return jsonify({"error": f"The {ACTIVE_AI_SERVICE} service encountered an internal error: {str(e)}"}), 503
     except Exception as e:
-        print(f"Unexpected error in /chat: {e}")
-        return jsonify({"error": f"An unexpected error occurred: {str(e)}", "service": ACTIVE_AI_SERVICE}), 500
+        print(f"Chat Error: {e}")
+        return jsonify({"error": f"AI Error: {str(e)}"}), 500
 
-
-# --- Wizard Helper Chatbot ---
-WIZARD_SYSTEM_PROMPT = """
-You are an AI brainstorming partner for an event creation wizard.
-Your role is to provide creative, concise, and helpful suggestions.
-The user is on a specific step, provided in the 'context'.
-Your answer MUST be helpful for that context.
-Be friendly, but stay on topic. DO NOT be conversational.
-If the user asks for "3 titles", give 3 titles.
-If the user asks for a "description", write a 1-2 sentence description.
-If the user asks something unrelated (e.g., "what's the weather"),
-politely decline: "I can only help with ideas for your event. For other questions, please use the main 'AI Assistant' tab."
-"""
 
 @ai_blueprint.route('/wizard-helper', methods=['POST'])
 def handle_wizard_helper():
+    """
+    Handles specific field-level assistance (Wizard & Main Form).
+    Returns JSON with 'response' and optional 'actions'.
+    """
     if ACTIVE_AI_SERVICE is None:
         return jsonify({"error": "AI service is not configured."}), 500
 
     data = request.json or {}
     user_prompt = data.get("prompt")
-    context = data.get("context", "the current step")
-
-    if not user_prompt:
-        return jsonify({"error": "No prompt provided."}), 400
-
-    full_prompt = f"Context: {context}\nUser: {user_prompt}"
+    context = data.get("context", "general")
+    
+    # Optional: Allow passing current field values to help the AI rewrite them
+    current_values = data.get("current_values", {})
+    
+    full_prompt = f"Context: {context}\nCurrent Values: {json.dumps(current_values)}\nUser Request: {user_prompt}"
 
     try:
-        ai_response = ""
-        # --- Prioritize OpenAI ---
         if ACTIVE_AI_SERVICE == "openai":
             response = openai_client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -258,23 +243,47 @@ def handle_wizard_helper():
                     {"role": "system", "content": WIZARD_SYSTEM_PROMPT},
                     {"role": "user", "content": full_prompt}
                 ],
-                temperature=0.7
+                temperature=0.7,
+                response_format={"type": "json_object"}
             )
-            ai_response = response.choices[0].message.content.strip()
+            result = json.loads(response.choices[0].message.content)
+            return jsonify(result)
 
         elif ACTIVE_AI_SERVICE == "gemini":
-            text_only_model = genai.GenerativeModel('gemini-1.5-flash')
-            response = text_only_model.generate_content(
-                [WIZARD_SYSTEM_PROMPT, full_prompt],
-                generation_config=types.GenerationConfig(temperature=0.7)
+            # Gemini Schema for Actions
+            wizard_schema = types.Schema(
+                type=types.Type.OBJECT,
+                properties={
+                    'response': types.Schema(type=types.Type.STRING),
+                    'actions': types.Schema(
+                        type=types.Type.ARRAY,
+                        items=types.Schema(
+                            type=types.Type.OBJECT,
+                            properties={
+                                'field': types.Schema(type=types.Type.STRING),
+                                'value': types.Schema(type=types.Type.STRING)
+                            },
+                            required=['field', 'value']
+                        )
+                    )
+                },
+                required=["response", "actions"]
             )
-            ai_response = response.text.strip()
 
-        if not ai_response:
-            return jsonify({"error": "Empty response from AI."}), 500
-            
-        return jsonify({"response": ai_response})
+            response = gemini_model.generate_content(
+                contents=[
+                    types.Part(text=WIZARD_SYSTEM_PROMPT, role="user"),
+                    types.Part(text=full_prompt, role="user")
+                ],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=wizard_schema,
+                    temperature=0.7
+                )
+            )
+            result = json.loads(response.text)
+            return jsonify(result)
 
     except Exception as e:
-        print(f"Unexpected error in /wizard-helper: {e}")
-        return jsonify({"error": "An unexpected error occurred."}), 500
+        print(f"Wizard Helper Error: {e}")
+        return jsonify({"error": "Failed to process request."}), 500

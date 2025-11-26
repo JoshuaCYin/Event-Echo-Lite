@@ -388,6 +388,7 @@
     background: var(--bg-primary);
     color: var(--primary-color);
     transform: rotate(90deg);
+    transform-origin: center center;
 }
 
 .event-detail-box h3 {
@@ -951,7 +952,12 @@ function createModals() {
     detailModal.style.display = 'none'; 
     detailModal.innerHTML = `
         <div class="event-detail-box">
-            <button class="detail-close" id="closeDetailModal">×</button>
+            <button class="detail-close" id="closeDetailModal">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
             <h3 id="detailTitle"></h3>
             
             <div id="detailRating" class="event-rating" style="font-size: 1.1rem; margin-bottom: 1rem;"></div>
