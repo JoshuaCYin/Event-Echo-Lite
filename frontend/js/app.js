@@ -47,13 +47,21 @@ export function checkAuthAndRedirect() {
     return false; // User is on a public page, no redirect needed
   }
   
-  // Token exists - verify it's valid
+  // Token exists - verify it's valid structure
   const payload = decodeToken(token);
   if (!payload) {
-    // Invalid token
+    // Invalid token structure
     localStorage.removeItem("token");
     window.location.hash = "#/landing";
     return false;
+  }
+
+  // Check Expiration Client-Side (Optional but good for UX)
+  const now = Math.floor(Date.now() / 1000);
+  if (payload.exp && payload.exp < now) {
+     console.warn("Token expired (client-side check). Logging out.");
+     handleLogout();
+     return false;
   }
 
   // --- Role-based Redirect Logic ---
@@ -96,6 +104,10 @@ export function updateUserInfo() {
   // Fetch full user info for display name
   if (userName) {
     api("/auth/me", "GET", null, token).then(res => {
+      // FIX: If we got a 401 error, api.js handled the redirect. 
+      // Stop execution so we don't show "User ##"
+      if (res.status === 401) return; 
+
       if (res.first_name || res.last_name) {
         // Use first and last name
         userName.textContent = `${res.first_name || ''} ${res.last_name || ''}`.trim();
@@ -103,13 +115,15 @@ export function updateUserInfo() {
         // Fallback to email prefix
         userName.textContent = res.email.split('@')[0];
       } else {
-        // Fallback to user ID from token
-         userName.textContent = `User #${payload.sub}`;
+        // Only show fallback ID if it's NOT an error
+        if (!res.error) {
+            userName.textContent = `User #${payload.sub}`;
+        }
       }
     }).catch(err => {
       console.log("Could not fetch user info:", err);
-      // Fallback to user ID from token
-      userName.textContent = `User #${payload.sub}`;
+      // Only fallback on network errors, not auth errors
+      // userName.textContent = `User #${payload.sub}`; 
     });
   }
 }
@@ -126,9 +140,9 @@ export async function handleLogin(email, password) {
       // --- Role-based Redirect on Login ---
       const payload = decodeToken(res.token);
       if (payload.role === 'admin' || payload.role === 'organizer') {
-        window.location.hash = "#/dashboard"; // Admin/Org go to Dashboard
+        window.location.hash = "#/dashboard"; 
       } else {
-        window.location.hash = "#/calendar"; // Attendees go to Calendar
+        window.location.hash = "#/calendar"; 
       }
       
       return { success: true, ...res };
@@ -203,4 +217,3 @@ export function updateNavbarForAuth() {
     }
   });
 }
-
