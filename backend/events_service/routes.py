@@ -4,8 +4,7 @@ Events service routes: create, read, update, delete events, and RSVP.
 
 from flask import Blueprint, request, jsonify
 from backend.database.db_connection import get_db
-from backend.auth_service.utils import verify_token_from_request
-from backend.auth_service.routes import verify_token # Simple token check
+from backend.auth_service.utils import verify_token_from_request, verify_token
 import os
 from datetime import datetime
 from dotenv import load_dotenv
