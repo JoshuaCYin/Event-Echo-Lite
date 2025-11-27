@@ -18,6 +18,7 @@
         top: 2rem;
     }
 
+    /* --- AI Helper Sidebar --- */
     .ai-helper-card {
         background: var(--bg-primary, #ffffff);
         border: 1px solid var(--border-color, #e0e0e0);
@@ -26,8 +27,9 @@
         padding: 1.25rem;
         display: flex;
         flex-direction: column;
+        position: sticky;
+        top: 2rem;
         height: calc(100vh - 4rem);
-        max-height: 800px;
         transition: all 0.3s ease;
     }
 
@@ -62,8 +64,7 @@
 
     .ai-helper-msg {
         display: flex;
-        align-items:
-            flex-end;
+        align-items: flex-end;
         max-width: 100%;
     }
 
@@ -117,6 +118,11 @@
         background: var(--gradient-primary, #007bff);
         color: white;
         border-bottom-right-radius: 2px;
+    }
+
+    .ai-helper-msg.is-loading .ai-helper-bubble {
+        font-style: italic;
+        color: var(--text-light, #6b7280);
     }
 
     .ai-suggestion-action {
@@ -198,10 +204,6 @@
         transform: none;
     }
 
-    .ai-toggle-icon {
-        display: none;
-    }
-
     /* --- Existing Form Styles --- */
     .form-header {
         display: flex;
@@ -258,10 +260,8 @@
     textarea,
     select {
         width: 100%;
-        padding: 0.75rem;
-        border: 1px solid var(--border-color, #ccc);
-        border-radius: var(--radius-md, 8px);
-        background-color: var(--bg-secondary, #f9f9f9);
+        padding-top: 0.75rem;
+        padding-bottom: 0.75rem;
         box-sizing: border-box;
     }
 
@@ -557,7 +557,6 @@
                 </form>
             </div>
         </aside>
-
     </div>
 </div>
 
