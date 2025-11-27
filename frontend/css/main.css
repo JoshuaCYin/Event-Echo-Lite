@@ -539,6 +539,7 @@ img {
     /* Truncate long descriptions */
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -620,6 +621,7 @@ img {
     margin-bottom: 1rem;
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -722,6 +724,7 @@ img {
     /* Show 1 line of description in list view */
     display: -webkit-box;
     -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1078,19 +1081,19 @@ input.is-invalid {
 /* --- 5a. Auth Pages (Login/Register) --- */
 .main-content.auth-layout {
     display: flex;
-    align-items: flex-start; /* Align to the top */
+    align-items: center;     /* Vertical center */
     justify-content: center;
     min-height: 100vh;
     background:
         url('../assets/chapel_auditorium.jpeg') center/cover no-repeat;
-    padding: calc(70px + 2rem) 2rem 2rem 2rem; 
+    padding: 90px 2rem 2rem 2rem;
     margin-left: 0 !important; /* Override sidebar margin */
     overflow-y: auto; /* Ensures page scrolls if card is tall */
 }
 
 .glass-card {
     position: relative;
-    background: rgba(255, 255, 255, 0.15); /* Subtle transparent background */
+    background: rgba(205, 205, 205, 0.15); /* Subtle transparent background */
     backdrop-filter: blur(3.5px) saturate(180%); /* Light blur and saturation */
     border: 1px solid rgba(255, 255, 255, 0.8); /* Soft border */
     border-radius: 2rem; /* Rounded corners */
@@ -1213,7 +1216,7 @@ input.is-invalid {
   left: 0;
   right: 0;
   height: 70px;
-  background: rgba(0,0,0,0.2); /* Making navbar transparent to see hero bg */
+  background: rgba(0,0,0,0.3); /* Making navbar transparent to see hero bg */
   backdrop-filter: blur(5px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   z-index: 1000;
@@ -1857,6 +1860,13 @@ input.is-invalid {
     font-weight: 500;
 }
 
+/* Fix FullCalendar List hover turning white */
+.fc .fc-list-event:hover,
+.fc .fc-list-event:hover td {
+    background: #dee1ff !important;
+    color: var(--text-primary) !important;
+}
+
 .calendar-view-wrapper {
     background: var(--bg-primary);
     border-radius: var(--radius-lg);
@@ -2172,11 +2182,10 @@ a:focus-visible {
     border: 1px solid var(--primary-dark);
 }
 
-/* FullCalendar Text Colors (App view) */
+/* FullCalendar Text Colors */
 .fc-event-title, .fc-event-time, .fc-list-event-title, .fc-list-event-time {
     color: #ffffff !important;
 }
-
 
 /* ===================================
    8. Responsive Media Queries
