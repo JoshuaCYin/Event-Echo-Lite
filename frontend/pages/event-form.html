@@ -821,6 +821,10 @@
     const aiSendBtn = document.getElementById('ai-helper-send');
     const aiMessages = document.getElementById('ai-helper-messages');
 
+    // --- NEW: History State ---
+    const MAX_HISTORY = 10;
+    let chatHistory = [];
+
     function getFormValuesForAI() {
         return {
             evTitle: evTitle.value,
@@ -843,6 +847,9 @@
         aiInput.disabled = true;
         aiSendBtn.disabled = true;
 
+        // --- NEW: Add to history ---
+        chatHistory.push({ role: "user", content: prompt });
+
         addHelperMessage('user', prompt);
         const loadingMsg = addHelperMessage('is-loading', 'Thinking...');
 
@@ -851,12 +858,15 @@
                 prompt,
                 context: "Standard Event Form - Editing Details", // Context for backend
                 user_time: new Date().toISOString(),
-                current_values: getFormValuesForAI()
+                current_values: getFormValuesForAI(),
+                history: chatHistory.slice(-MAX_HISTORY) // --- NEW: Send History
             };
             const result = await api('/ai/wizard-helper', 'POST', payload, token);
             loadingMsg.remove();
 
             if (result.response) {
+                // --- NEW: Add response to history ---
+                chatHistory.push({ role: "ai", content: result.response });
                 addHelperMessage('ai', result.response, result.actions);
             } else {
                 addHelperMessage('ai', `Error: ${result.error || 'No response'}`);

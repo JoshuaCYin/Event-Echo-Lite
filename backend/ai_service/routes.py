@@ -127,16 +127,19 @@ if ACTIVE_AI_SERVICE is None and GEMINI_API_KEY:
 
 # --- System Prompts ---
 
-# --- UPDATED: Rewritten to use tools for reliability ---
+# --- UPDATED: Added User Profile Context and Recommendation Rules ---
 MAIN_SYSTEM_PROMPT = f"""
 You are the "EventEcho AI Assistant".
 Your goal is to be a helpful event planning assistant.
 You MUST call the `submit_chat_response` tool to respond.
 
 **CONTEXT:**
-You will be given the current user's time and a list of "Upcoming Public Events".
+You will be given the current user's time, a list of "Upcoming Public Events", and a "User Profile".
 This event list is your source of truth. It *only* contains future events.
 Current User Time: {{user_time_placeholder}}
+
+**USER PROFILE:**
+{{user_profile_placeholder}}
 
 CRITICAL TIME RULES:
 - When the user asks for "the time", "the date", "what day is it", or any similar question:
@@ -155,7 +158,12 @@ IMPORTANT: User Time is the *only* correct current time.
 **TASKS:**
 1.  **Answer Questions:** Answer user questions about event planning or the provided event data.
 2.  **Check Events:** When asked to "check upcoming events", ONLY use the event context. Do NOT invent events or show past events unless specifically asked "show me past events".
-3.  **Event Drafts:**
+3.  **Personalized Recommendations:**
+    * If the user asks for recommendations (e.g., "What should I attend?", "Recommend something"), compare the **User Profile** (interests, major, bio) with the **Upcoming Public Events**.
+    * Prioritize events that match their major or hobbies.
+    * Explain *why* you are recommending them (e.g., "Since you are a Computer Science major, you might like the Hackathon.").
+    * If no events match their profile specifically, recommend general popular events but mention that.
+4.  **Event Drafts:**
     * Your conversational reply goes in the `response` field of the tool.
     * For simple chats, the `eventDraft` field MUST be `null`.
     * If the user asks "Help me draft an event", you MUST first ask follow-up questions to get (at minimum) a title, description, and suggested date/time.
@@ -203,6 +211,8 @@ def handle_chat():
     user_prompt = data.get("prompt")
     history = data.get("history", [])
     event_context = data.get("event_context", "No live event data provided.")
+    user_profile_data = data.get("user_profile", {}) # --- NEW: Get Profile Data
+
     # Normalize user_time into a readable string for the system prompt
     raw_user_time = data.get("user_time")
 
@@ -224,10 +234,24 @@ def handle_chat():
     if not user_prompt:
         return jsonify({"error": "No prompt provided."}), 400
         
-    # --- UPDATED: Pass current user time to system prompt ---
+    # --- NEW: Format User Profile for Prompt ---
+    if user_profile_data and not "error" in user_profile_data:
+        profile_str = (
+            f"- Name: {user_profile_data.get('first_name')} {user_profile_data.get('last_name')}\n"
+            f"- Major: {user_profile_data.get('major_department', 'Undeclared')}\n"
+            f"- Hobbies/Interests: {user_profile_data.get('hobbies', 'None listed')}\n"
+            f"- Bio: {user_profile_data.get('bio', 'None')}"
+        )
+    else:
+        profile_str = "No specific user profile data available (User might be guest or has empty profile)."
+
+    # --- UPDATED: Pass current user time AND profile to system prompt ---
     system_prompt = MAIN_SYSTEM_PROMPT.replace(
         "{user_time_placeholder}", 
         user_time
+    ).replace(
+        "{user_profile_placeholder}",
+        profile_str
     )
 
     try:
@@ -326,26 +350,34 @@ def handle_wizard_helper():
     data = request.json or {}
     user_prompt = data.get("prompt")
     context = data.get("context", "general")
+    history = data.get("history", [])  # <--- NEW: Get history
     
     # Optional: Allow passing current field values to help the AI rewrite them
     current_values = data.get("current_values", {})
     user_time = data.get("user_time")  # ISO string from browser
     
-    full_prompt = (
+    # Context block for the current turn
+    current_context_block = (
         f"Context: {context}\n"
         f"User Time: {user_time}\n"
         f"Current Values: {json.dumps(current_values)}\n"
-        f"User Request: {user_prompt}"
     )
 
     try:
         if ACTIVE_AI_SERVICE == "openai":
+            messages = [{"role": "system", "content": WIZARD_SYSTEM_PROMPT}]
+            
+            # --- NEW: Append History ---
+            for item in history:
+                role = "assistant" if item["role"] == "ai" else item["role"]
+                messages.append({"role": role, "content": item["content"]})
+            
+            # Append current request with context
+            messages.append({"role": "user", "content": f"{current_context_block}\nUser Request: {user_prompt}"})
+
             response = openai_client.chat.completions.create(
                 model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": WIZARD_SYSTEM_PROMPT},
-                    {"role": "user", "content": full_prompt}
-                ],
+                messages=messages,
                 temperature=0.7,
                 response_format={"type": "json_object"}
             )
@@ -377,11 +409,18 @@ def handle_wizard_helper():
                 required=["response", "actions"]
             )
 
+            # --- NEW: Build Content with History ---
+            contents = [types.Part(text=WIZARD_SYSTEM_PROMPT, role="user")]
+            
+            for item in history:
+                role = "model" if item["role"] == "ai" else "user"
+                contents.append(types.Part(text=item["content"], role=role))
+            
+            # Append current request
+            contents.append(types.Part(text=f"{current_context_block}\nUser Request: {user_prompt}", role="user"))
+
             response = gemini_model.generate_content(
-                contents=[
-                    types.Part(text=WIZARD_SYSTEM_PROMPT, role="user"),
-                    types.Part(text=full_prompt, role="user")
-                ],
+                contents=contents,
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
                     response_schema=gemini_wizard_schema,
