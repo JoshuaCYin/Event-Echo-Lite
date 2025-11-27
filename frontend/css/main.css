@@ -1587,10 +1587,13 @@ input.is-invalid {
 /* --- 5d. Events Pages (Create, List, Shared) --- */
 .create-event-form {
     background: var(--bg-primary);
-    border-radius: var(--radius-lg);
     padding: 2rem;
-    box-shadow: var(--shadow-sm);
-    max-width: 600px;
+    flex: 3; /* Takes up 60-70% of width */
+    border-radius: var(--radius-lg, 12px);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
+    width: 100%;
+    max-width: 100%;
+    min-width: 0; /* Prevent flex overflow */
 }
 
 .create-event-form h2 {

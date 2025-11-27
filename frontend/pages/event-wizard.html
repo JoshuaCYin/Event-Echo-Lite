@@ -1,3 +1,4 @@
+<link rel="stylesheet" href="css/main.css">
 <style>
     /* --- Main Layout --- */
     .wizard-container {
@@ -14,7 +15,7 @@
         background: var(--bg-primary, #ffffff);
         border-radius: var(--radius-lg, 12px);
         padding: 2rem;
-        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
+        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
         /* Changed from min-height: 70vh to fit-content */
         height: fit-content;
         display: flex;
@@ -37,6 +38,7 @@
         list-style: none;
         user-select: none;
     }
+
     .stepper-item {
         display: flex;
         flex-direction: column;
@@ -45,7 +47,7 @@
         cursor: not-allowed;
         position: relative;
     }
-    
+
     /* Stepper Dots */
     .stepper-dot {
         width: 36px;
@@ -74,6 +76,7 @@
     .stepper-item.completed {
         cursor: pointer;
     }
+
     .stepper-item.completed .stepper-dot {
         background: white;
         color: var(--primary-color, #007bff);
@@ -87,6 +90,7 @@
         font-weight: 500;
         text-align: center;
     }
+
     .stepper-item.active .stepper-label,
     .stepper-item.completed .stepper-label {
         color: var(--text-primary, #111827);
@@ -99,11 +103,13 @@
         width: 100%;
         height: 3px;
         background: var(--border-color, #e5e7eb);
-        top: 18px; /* Half of dot height */
+        top: 18px;
+        /* Half of dot height */
         right: 50%;
         transform: translateY(-50%);
         z-index: 1;
     }
+
     /* Fill line if previous step is completed/active */
     .stepper-item.completed:not(:first-child)::before,
     .stepper-item.active:not(:first-child)::before {
@@ -112,211 +118,434 @@
 
 
     /* --- Step-by-Step Form --- */
-    .wizard-step { display: none; animation: fadeIn 0.3s ease-out; }
-    .wizard-step.active { display: block; }
-    .wizard-step h2 { font-size: 1.75rem; margin-bottom: 0.5rem; }
-    .wizard-step p.step-intro { font-size: 1.1rem; color: var(--text-secondary, #6b7280); margin-bottom: 2rem; }
-    .step-content { flex-grow: 1; }
-    
-    .step-navigation { 
-        display: flex; 
-        justify-content: space-between; 
-        margin-top: 2rem; 
-        padding-top: 1.5rem; 
-        border-top: 1px solid var(--border-color, #e0e0e0); 
+    .wizard-step {
+        display: none;
+        animation: fadeIn 0.3s ease-out;
     }
-    .step-navigation .action-btn { 
-        padding: 0.75rem 1.5rem; 
-        width: 120px; 
+
+    .wizard-step.active {
+        display: block;
+    }
+
+    .wizard-step h2 {
+        font-size: 1.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .wizard-step p.step-intro {
+        font-size: 1.1rem;
+        color: var(--text-secondary, #6b7280);
+        margin-bottom: 2rem;
+    }
+
+    .step-content {
+        flex-grow: 1;
+    }
+
+    .step-navigation {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color, #e0e0e0);
+    }
+
+    .step-navigation .action-btn {
+        padding: 0.75rem 1.5rem;
+        width: 120px;
         justify-content: center;
         border-radius: var(--radius-md, 8px);
         font-weight: 600;
         cursor: pointer;
         border: none;
     }
-    .action-btn.primary { background: var(--primary-color, #007bff); color: white; }
-    .action-btn.secondary { background: var(--bg-tertiary, #f3f4f6); color: var(--text-primary, #111827); }
-    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .action-btn.primary {
+        background: var(--primary-color, #007bff);
+        color: white;
+    }
+
+    .action-btn.secondary {
+        background: var(--bg-tertiary, #f3f4f6);
+        color: var(--text-primary, #111827);
+    }
+
+    .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
 
     /* --- Form Elements --- */
-    .form-section { margin-bottom: 1.5rem; }
-    .form-section label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary, #555); font-size: 0.875rem; font-weight: 500; }
-    
-    .form-section input, 
-    .form-section textarea, 
-    .form-section select { 
-        width: 100%; 
-        padding: 0.875rem 1rem; 
-        border: 2px solid var(--border-color, #e0e0e0); 
-        border-radius: var(--radius-md, 8px); 
-        font-size: 1rem; 
-        font-family: inherit; 
+    .form-section {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary, #555);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .form-section input,
+    .form-section textarea,
+    .form-section select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid var(--border-color, #e0e0e0);
+        border-radius: var(--radius-md, 8px);
+        font-size: 1rem;
+        font-family: inherit;
         box-sizing: border-box;
     }
-    .form-section input:focus, .form-section textarea:focus, .form-section select:focus { 
-        outline: none; border-color: var(--primary-color, #007bff); 
+
+    .form-section input:focus,
+    .form-section textarea:focus,
+    .form-section select:focus {
+        outline: none;
+        border-color: var(--primary-color, #007bff);
     }
-    
-    .radio-group { display: flex; gap: 1rem; margin-bottom: 1rem; }
-    .radio-label { 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; /* Centering Text */
-        gap: 0.5rem; 
-        padding: 0.75rem 1rem; 
-        border: 2px solid var(--border-color, #e0e0e0); 
-        border-radius: var(--radius-md, 8px); 
-        cursor: pointer; 
-        flex: 1; /* Make equal width */
+
+    .radio-group {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
     }
+
+    .radio-label {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* Centering Text */
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color, #e0e0e0);
+        border-radius: var(--radius-md, 8px);
+        cursor: pointer;
+        flex: 1;
+        /* Make equal width */
+    }
+
     /* Hide actual radio button */
-    .radio-label input[type="radio"] { display: none; }
-    .radio-label:has(input:checked) { background: var(--bg-tertiary, #f0f7ff); border-color: var(--primary-color, #007bff); }
-    #w-venueSelectContainer, #w-customLocationContainer { display: none; }
+    .radio-label input[type="radio"] {
+        display: none;
+    }
+
+    .radio-label:has(input:checked) {
+        background: var(--bg-tertiary, #f0f7ff);
+        border-color: var(--primary-color, #007bff);
+    }
+
+    #w-venueSelectContainer,
+    #w-customLocationContainer {
+        display: none;
+    }
 
     /* --- Review Step Formatting --- */
-    #reviewStepContainer .review-item { margin-bottom: 1.25rem; }
-    #reviewStepContainer .review-label { 
+    #reviewStepContainer .review-item {
+        margin-bottom: 1.25rem;
+    }
+
+    #reviewStepContainer .review-label {
         display: block;
         font-weight: 600;
-        color: var(--text-secondary, #6b7280); 
+        color: var(--text-secondary, #6b7280);
         font-size: 0.875rem;
         margin-bottom: 0.25rem;
     }
-    #reviewStepContainer .review-value { color: var(--text-primary, #111827); font-size: 1.05rem; }
-    #reviewStepContainer .review-value.description { 
+
+    #reviewStepContainer .review-value {
+        color: var(--text-primary, #111827);
+        font-size: 1.05rem;
+    }
+
+    #reviewStepContainer .review-value.description {
         white-space: pre-wrap;
-        padding: 0.75rem; 
+        padding: 0.75rem;
         background: var(--bg-tertiary, #f9fafb);
         border-radius: var(--radius-sm, 6px);
         line-height: 1.6;
         font-size: 0.95rem;
     }
-    #reviewStepContainer .review-value.missing { color: var(--text-light, #9ca3af); font-style: italic; }
+
+    #reviewStepContainer .review-value.missing {
+        color: var(--text-light, #9ca3af);
+        font-style: italic;
+    }
 
     /* --- AI Helper Sidebar --- */
     .ai-helper-card {
         background: var(--bg-primary, #ffffff);
         border: 1px solid var(--border-color, #e0e0e0);
-        box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+        box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
         border-radius: var(--radius-lg, 12px);
         padding: 1.25rem;
         display: flex;
         flex-direction: column;
         position: sticky;
-        top: 2rem; 
-        height: calc(100vh - 4rem); 
+        top: 2rem;
+        height: calc(100vh - 4rem);
         transition: all 0.3s ease;
     }
+
     .ai-helper-header {
-        display: flex; justify-content: space-between; align-items: center;
-        margin-bottom: 1rem; padding-bottom: 1rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
         border-bottom: 1px solid var(--border-color, #e0e0e0);
         flex-shrink: 0;
     }
-    .ai-helper-header h3 { font-size: 1.25rem; margin: 0; background: var(--gradient-primary, linear-gradient(135deg, #007bff, #0056b3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    
+
+    .ai-helper-header h3 {
+        font-size: 1.25rem;
+        margin: 0;
+        background: var(--gradient-primary, linear-gradient(135deg, #007bff, #0056b3));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
     .ai-helper-messages {
         flex-grow: 1;
-        overflow-y: auto; 
-        overflow-x: hidden; 
+        overflow-y: auto;
+        overflow-x: hidden;
         padding-right: 0.5rem;
         display: flex;
         flex-direction: column;
         gap: 1rem;
     }
 
-    .ai-helper-msg { display: flex; align-items: flex-end; max-width: 100%; }
-    .ai-helper-msg.user { flex-direction: row-reverse; }
-    
-    .ai-helper-avatar { 
-        width: 28px; height: 28px; 
-        border-radius: 50%; 
-        display: flex; align-items: center; justify-content: center; 
-        flex-shrink: 0; font-size: 0.8rem;
+    .ai-helper-msg {
+        display: flex;
+        align-items: flex-end;
+        max-width: 100%;
     }
-    
+
+    .ai-helper-msg.user {
+        flex-direction: row-reverse;
+    }
+
+    .ai-helper-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 0.8rem;
+    }
+
     .ai-helper-msg.ai .ai-helper-avatar,
-    .ai-helper-msg.is-loading .ai-helper-avatar { 
-        background: var(--gradient-primary, linear-gradient(135deg, #007bff, #0056b3)); 
-        color: white; margin-right: 0.5rem;
+    .ai-helper-msg.is-loading .ai-helper-avatar {
+        background: var(--gradient-primary, linear-gradient(135deg, #007bff, #0056b3));
+        color: white;
+        margin-right: 0.5rem;
     }
-    
-    .ai-helper-msg.user .ai-helper-avatar { 
-        background: var(--bg-tertiary, #e5e7eb); 
-        color: var(--text-primary, #374151); margin-left: 0.5rem;
+
+    .ai-helper-msg.user .ai-helper-avatar {
+        background: var(--bg-tertiary, #e5e7eb);
+        color: var(--text-primary, #374151);
+        margin-left: 0.5rem;
     }
-    
-    .ai-helper-bubble { 
-        padding: 0.75rem 1rem; border-radius: 12px; 
-        font-size: 0.9rem; line-height: 1.5; 
-        width: fit-content; max-width: 85%; 
-        word-break: break-word; overflow-wrap: anywhere;
+
+    .ai-helper-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        width: fit-content;
+        max-width: 85%;
+        word-break: break-word;
+        overflow-wrap: anywhere;
     }
-    
+
     .ai-helper-msg.ai .ai-helper-bubble,
     .ai-helper-msg.is-loading .ai-helper-bubble {
-        background: var(--bg-tertiary, #f3f4f6); 
-        color: var(--text-primary, #1f2937); border-bottom-left-radius: 2px;
+        background: var(--bg-tertiary, #f3f4f6);
+        color: var(--text-primary, #1f2937);
+        border-bottom-left-radius: 2px;
     }
-    
-    .ai-helper-msg.user .ai-helper-bubble { 
-        background: var(--gradient-primary, #007bff); 
-        color: white; border-bottom-right-radius: 2px;
+
+    .ai-helper-msg.user .ai-helper-bubble {
+        background: var(--gradient-primary, #007bff);
+        color: white;
+        border-bottom-right-radius: 2px;
     }
-    
-    .ai-helper-msg.is-loading .ai-helper-bubble { font-style: italic; color: var(--text-light, #6b7280); }
+
+    .ai-helper-msg.is-loading .ai-helper-bubble {
+        font-style: italic;
+        color: var(--text-light, #6b7280);
+    }
 
     .ai-suggestion-action {
-        display: block; margin-top: 0.75rem; padding: 0.5rem 0.75rem;
-        background: white; border: 1px solid #d1d5db; border-radius: 6px;
-        color: var(--primary-color, #007bff); font-size: 0.85rem; font-weight: 600;
-        cursor: pointer; transition: all 0.2s; text-align: left; width: 100%;
+        display: block;
+        margin-top: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        background: white;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        color: var(--primary-color, #007bff);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+        width: 100%;
     }
-    .ai-suggestion-action:hover { background: #f9fafb; border-color: var(--primary-color, #007bff); }
-    
-    .ai-helper-form { flex-shrink: 0; margin-top: 1rem; }
-    .ai-helper-input-wrapper { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-tertiary, #f3f4f6); border: 1px solid var(--border-color, #e5e7eb); border-radius: 24px; padding: 0.25rem 0.5rem 0.25rem 1rem; transition: border-color 0.2s; }
-    .ai-helper-input-wrapper:focus-within { border-color: var(--primary-color, #007bff); background: white; }
-    .ai-helper-input-wrapper input { flex-grow: 1; border: none; background: transparent; font-size: 0.9rem; padding: 0.6rem 0; font-family: inherit; }
-    .ai-helper-input-wrapper input:focus { outline: none; }
-    .ai-helper-input-wrapper button { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px; background: var(--gradient-primary, #007bff); color: white; border: none; border-radius: 50%; cursor: pointer; transition: transform 0.2s; }
-    .ai-helper-input-wrapper button:hover { transform: scale(1.05); }
-    .ai-helper-input-wrapper button:disabled { background: var(--text-light, #ccc); transform: none; }
+
+    .ai-suggestion-action:hover {
+        background: #f9fafb;
+        border-color: var(--primary-color, #007bff);
+    }
+
+    .ai-helper-form {
+        flex-shrink: 0;
+        margin-top: 1rem;
+    }
+
+    .ai-helper-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--bg-tertiary, #f3f4f6);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 24px;
+        padding: 0.25rem 0.5rem 0.25rem 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .ai-helper-input-wrapper:focus-within {
+        border-color: var(--primary-color, #007bff);
+        background: white;
+    }
+
+    .ai-helper-input-wrapper input {
+        flex-grow: 1;
+        border: none;
+        background: transparent;
+        font-size: 0.9rem;
+        padding: 0.6rem 0;
+        font-family: inherit;
+    }
+
+    .ai-helper-input-wrapper input:focus {
+        outline: none;
+    }
+
+    .ai-helper-input-wrapper button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        background: var(--gradient-primary, #007bff);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .ai-helper-input-wrapper button:hover {
+        transform: scale(1.05);
+    }
+
+    .ai-helper-input-wrapper button:disabled {
+        background: var(--text-light, #ccc);
+        transform: none;
+    }
 
     /* Error Message Moved to Bottom */
-    .step-error { 
-        color: #c53030; background: #fff5f5; 
-        border: 1px solid #f56565; padding: 0.75rem 1rem; 
-        border-radius: var(--radius-md); 
-        margin-top: 1.5rem; /* Margin top to separate from buttons */
-        display: none; 
+    .step-error {
+        color: #c53030;
+        background: #fff5f5;
+        border: 1px solid #f56565;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        margin-top: 1.5rem;
+        /* Margin top to separate from buttons */
+        display: none;
     }
-    #wizardSubmitMessage { display: none; margin-top: 1rem; }
-    
-    .ai-toggle-icon { display: none; }
+
+    #wizardSubmitMessage {
+        display: none;
+        margin-top: 1rem;
+    }
+
+    .ai-toggle-icon {
+        display: none;
+    }
 
     @media (max-width: 768px) {
-        .wizard-container { flex-direction: column; }
-        .wizard-sidebar { max-width: 100%; position: static; margin-top: 2rem; }
-        .wizard-content { min-height: auto; }
-        .wizard-stepper { font-size: 0.8rem; }
-        .stepper-label { font-size: 0.75rem; max-width: 60px; line-height: 1.2; }
-        .ai-helper-card { padding: 1rem; height: auto; max-height: 600px; }
-        .ai-helper-header { cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-        .ai-toggle-icon { display: block; transform: rotate(0deg); transition: transform 0.3s; }
+        .wizard-container {
+            flex-direction: column;
+        }
+
+        .wizard-sidebar {
+            max-width: 100%;
+            position: static;
+        }
+
+        .wizard-content {
+            min-height: auto;
+        }
+
+        .wizard-stepper {
+            font-size: 0.8rem;
+        }
+
+        .stepper-label {
+            font-size: 0.75rem;
+            max-width: 60px;
+            line-height: 1.2;
+        }
+
+        .ai-helper-card {
+            padding: 1rem;
+            height: auto;
+            max-height: 600px;
+        }
+
+        .ai-helper-header {
+            cursor: pointer;
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .ai-toggle-icon {
+            display: block;
+            transform: rotate(0deg);
+            transition: transform 0.3s;
+        }
+
         .ai-helper-card.collapsed .ai-helper-messages,
-        .ai-helper-card.collapsed .ai-helper-form { display: none; }
-        .ai-helper-card.expanded .ai-helper-header { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
-        .ai-helper-card.expanded .ai-toggle-icon { transform: rotate(180deg); }
+        .ai-helper-card.collapsed .ai-helper-form {
+            display: none;
+        }
+
+        .ai-helper-card.expanded .ai-helper-header {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ai-helper-card.expanded .ai-toggle-icon {
+            transform: rotate(180deg);
+        }
     }
 </style>
 
 <div class="wizard-container page-transition-enter-active">
-    
+
     <!-- Left Side: Wizard Steps -->
     <div class="wizard-content">
-        
+
         <ol class="wizard-stepper" id="wizard-stepper">
             <li class="stepper-item active" data-step-target="1">
                 <div class="stepper-dot">1</div>
@@ -343,7 +572,8 @@
         <!-- Step 1: Basics -->
         <div class="wizard-step active" data-step="1" data-context="Event Title and Description">
             <h2>Step 1: The Basics</h2>
-            <p class="step-intro">Let's start with the "what" and "why." A great title and clear description are key.</p>
+            <p class="step-intro">Let's start with the "what" and "why." A great title and clear description are key.
+            </p>
             <div class="step-content">
                 <div class="form-section">
                     <label for="w-title">Event Title*</label>
@@ -351,7 +581,8 @@
                 </div>
                 <div class="form-section">
                     <label for="w-description">Description</label>
-                    <textarea id="w-description" placeholder="What is this event about? Who should attend?" rows="5"></textarea>
+                    <textarea id="w-description" placeholder="What is this event about? Who should attend?"
+                        rows="5"></textarea>
                 </div>
             </div>
             <div class="step-navigation">
@@ -391,8 +622,10 @@
             <div class="step-content">
                 <div class="form-section">
                     <div class="radio-group">
-                        <label class="radio-label"> <input type="radio" name="w-location_type" value="custom" checked> Custom Address </label>
-                        <label class="radio-label"> <input type="radio" name="w-location_type" value="venue"> On-Campus Venue </label>
+                        <label class="radio-label"> <input type="radio" name="w-location_type" value="custom" checked>
+                            Custom Address </label>
+                        <label class="radio-label"> <input type="radio" name="w-location_type" value="venue"> On-Campus
+                            Venue </label>
                     </div>
                     <div id="w-customLocationContainer">
                         <label for="w-customLocation">Custom Address*</label>
@@ -400,7 +633,9 @@
                     </div>
                     <div id="w-venueSelectContainer" style="display: none;">
                         <label for="w-venue">Select a Venue*</label>
-                        <select id="w-venue" required> <option value="">Loading venues...</option> </select>
+                        <select id="w-venue" required>
+                            <option value="">Loading venues...</option>
+                        </select>
                     </div>
                 </div>
                 <div class="form-section">
@@ -423,8 +658,10 @@
                 <div class="form-section" id="w-visibilityContainer">
                     <h3>Visibility*</h3>
                     <div class="radio-group">
-                        <label class="radio-label"> <input type="radio" name="w-visibility" value="public" checked> Public </label>
-                        <label class="radio-label"> <input type="radio" name="w-visibility" value="private"> Private </label>
+                        <label class="radio-label"> <input type="radio" name="w-visibility" value="public" checked>
+                            Public </label>
+                        <label class="radio-label"> <input type="radio" name="w-visibility" value="private"> Private
+                        </label>
                     </div>
                     <p style="color: var(--text-light, #9ca3af); font-size: 0.875rem;" id="w-visibilityWarning">
                         Note: "Public" events may require approval.
@@ -459,25 +696,34 @@
             <div class="ai-helper-header" onclick="toggleMobileAI()">
                 <h3>AI Co-Pilot</h3>
                 <div class="ai-toggle-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 9l6 6 6-6" />
+                    </svg>
                 </div>
             </div>
             <div class="ai-helper-messages" id="ai-helper-messages">
                 <div class="ai-helper-msg ai">
                     <div class="ai-helper-avatar">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z" />
+                        </svg>
                     </div>
                     <div class="ai-helper-bubble">
                         <!-- UPDATED: New intro text -->
-                        <p id="ai-helper-intro-text">I'm here to help! Ask me to rewrite a description or suggest a title. If you like my suggestion, I'll give you an 'Update' button to apply it directly to the form.</p>
+                        <p id="ai-helper-intro-text">I'm here to help! Ask me to rewrite a description or suggest a
+                            title. If you like my suggestion, I'll give you an 'Update' button to apply it directly to
+                            the form.</p>
                     </div>
                 </div>
             </div>
             <form class="ai-helper-form" id="ai-helper-form">
                 <div class="ai-helper-input-wrapper">
-                    <input type="text" id="ai-helper-input" placeholder="Ask for suggestions..." aria-label="AI Assistant Input">
+                    <input type="text" id="ai-helper-input" placeholder="Ask for suggestions..."
+                        aria-label="AI Assistant Input">
                     <button type="submit" id="ai-helper-send" aria-label="Send">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 3L22 12L2 21L5 13L15 12L5 11L2 3Z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M2 3L22 12L2 21L5 13L15 12L5 11L2 3Z" />
+                        </svg>
                     </button>
                 </div>
             </form>
@@ -569,7 +815,7 @@
         }
         updateWizardView();
     }
-    
+
     window.goToStep = (stepNum) => {
         // Can always go back to completed steps
         if (stepNum <= maxStepCompleted) {
@@ -583,12 +829,12 @@
         steps.forEach(step => {
             step.classList.toggle('active', parseInt(step.dataset.step) === currentStep);
         });
-        
+
         stepperItems.forEach((item, index) => {
             const step = index + 1;
             item.classList.toggle('active', step === currentStep);
             item.classList.toggle('completed', step < currentStep); // Strictly less than current
-            
+
             // Allow clicking previous steps or current step
             if (step <= maxStepCompleted) {
                 item.onclick = () => goToStep(step);
@@ -640,7 +886,7 @@
                 errorDiv.textContent = 'Please enter a Custom Address.'; isValid = false;
             }
         }
-        
+
         if (!isValid) errorDiv.style.display = 'block';
         return isValid;
     }
@@ -671,13 +917,13 @@
     function populateReviewStep() {
         const container = document.getElementById('reviewStepContainer');
         const venueSelect = document.getElementById('w-venue');
-        
+
         // --- UPDATED: Ensure wizardData is up-to-date before populating ---
         // This ensures any AI changes are reflected
         saveStepData(1); saveStepData(2); saveStepData(3); saveStepData(4);
-        
+
         const venueText = wizardData.venue_id ? (venueSelect.options[venueSelect.selectedIndex]?.text || 'N/A') : 'N/A';
-        
+
         const f = (label, value, isDesc = false) => {
             let displayValue = value;
             // Format dates
@@ -689,7 +935,7 @@
                     });
                 } catch (e) { /* ignore invalid date */ }
             }
-            
+
             const val = displayValue || 'Not provided';
             const valClass = value ? (isDesc ? 'description' : '') : 'missing';
             return `<div class="review-item"><span class="review-label">${label}</span><span class="review-value ${valClass}">${val}</span></div>`;
@@ -714,61 +960,61 @@
     // --- UPDATED: Now reads all fields ---
     function getCurrentStepValues() {
         return {
-                title: document.getElementById('w-title').value,
-                description: document.getElementById('w-description').value,
-                start_time: document.getElementById('w-start').value,
-                end_time: document.getElementById('w-end').value,
-                location_type: document.querySelector('input[name="w-location_type"]:checked').value,
-                venue: document.getElementById('w-venue').value,
-                customLocation: document.getElementById('w-customLocation').value,
-                visibility: document.querySelector('input[name="w-visibility"]:checked').value
-            };
+            title: document.getElementById('w-title').value,
+            description: document.getElementById('w-description').value,
+            start_time: document.getElementById('w-start').value,
+            end_time: document.getElementById('w-end').value,
+            location_type: document.querySelector('input[name="w-location_type"]:checked').value,
+            venue: document.getElementById('w-venue').value,
+            customLocation: document.getElementById('w-customLocation').value,
+            visibility: document.querySelector('input[name="w-visibility"]:checked').value
+        };
+    }
+
+    aiForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const prompt = aiInput.value.trim();
+        if (!prompt) return;
+
+        // Use context from current step, or 'Review' if on step 5
+        let context = "general event planning";
+        if (currentStep === 5) context = "Reviewing Event Details";
+        else {
+            const activeStepEl = document.querySelector(`.wizard-step.active`);
+            if (activeStepEl) context = activeStepEl.dataset.context;
         }
 
-        aiForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const prompt = aiInput.value.trim();
-            if (!prompt) return;
+        aiInput.value = '';
+        aiInput.disabled = true;
+        aiSendBtn.disabled = true;
 
-            // Use context from current step, or 'Review' if on step 5
-            let context = "general event planning";
-            if(currentStep === 5) context = "Reviewing Event Details";
-            else {
-                const activeStepEl = document.querySelector(`.wizard-step.active`);
-                if(activeStepEl) context = activeStepEl.dataset.context;
+        addHelperMessage('user', prompt);
+        const loadingMsg = addHelperMessage('is-loading', 'Thinking...');
+
+        try {
+            const payload = {
+                prompt,
+                context,
+                user_time: new Date().toISOString(),
+                current_values: getCurrentStepValues()
+            };
+            const result = await api('/ai/wizard-helper', 'POST', payload, token);
+            loadingMsg.remove();
+
+            if (result.response) {
+                addHelperMessage('ai', result.response, result.actions);
+            } else {
+                addHelperMessage('ai', `Error: ${result.error || 'No response'}`);
             }
-
-            aiInput.value = '';
-            aiInput.disabled = true;
-            aiSendBtn.disabled = true;
-
-            addHelperMessage('user', prompt);
-            const loadingMsg = addHelperMessage('is-loading', 'Thinking...');
-
-            try {
-                const payload = { 
-                    prompt, 
-                    context, 
-                    user_time: new Date().toISOString(),
-                    current_values: getCurrentStepValues() 
-                };
-                const result = await api('/ai/wizard-helper', 'POST', payload, token);
-                loadingMsg.remove();
-                
-                if (result.response) {
-                    addHelperMessage('ai', result.response, result.actions);
-                } else {
-                    addHelperMessage('ai', `Error: ${result.error || 'No response'}`);
-                }
-            } catch (err) {
-                loadingMsg.remove();
-                addHelperMessage('ai', 'Error connecting to AI helper.');
-            } finally {
-                aiInput.disabled = false;
-                aiSendBtn.disabled = false;
-                aiInput.focus();
-            }
-        });
+        } catch (err) {
+            loadingMsg.remove();
+            addHelperMessage('ai', 'Error connecting to AI helper.');
+        } finally {
+            aiInput.disabled = false;
+            aiSendBtn.disabled = false;
+            aiInput.focus();
+        }
+    });
 
     function addHelperMessage(sender, text, actions = null) {
 
@@ -859,9 +1105,9 @@
                 }
             }
 
-        // -------------------------
-        // USER Message 
-        // -------------------------
+            // -------------------------
+            // USER Message 
+            // -------------------------
         } else {
             avatar.innerHTML = `
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
@@ -900,7 +1146,7 @@
                     handleLocationTypeChange(); // Update UI
                 }
             }
-        } 
+        }
         // Handle Select & Text Inputs
         else {
             const field = document.getElementById(fieldId);
@@ -910,7 +1156,7 @@
                 field.style.transition = "background-color 0.3s";
                 field.style.backgroundColor = "#e6f3ff";
                 setTimeout(() => { field.style.backgroundColor = ""; }, 1000);
-                
+
                 // Map field IDs to wizardData keys
                 if (fieldId === 'w-title') wizardData.title = value;
                 if (fieldId === 'w-description') wizardData.description = value;
@@ -919,7 +1165,7 @@
                 if (fieldId === 'w-venue') wizardData.venue_id = value;
                 if (fieldId === 'w-customLocation') wizardData.custom_location_address = value;
                 if (fieldId === 'w-mapsLink') wizardData.google_maps_link = value;
-                
+
                 fieldChanged = true;
             } else {
                 console.error("Field not found:", fieldId);
@@ -934,16 +1180,16 @@
             btnElement.style.borderColor = "#c3e6cb";
             btnElement.disabled = true;
             btnElement.style.cursor = "default";
-            
+
             // --- KEY FIX: If we are on the Review Step (5), re-render it ---
             if (currentStep === 5) {
                 populateReviewStep();
             }
         } else {
-             console.error("AI action failed for field:", fieldId, "with value:", value);
+            console.error("AI action failed for field:", fieldId, "with value:", value);
         }
     }
-    
+
     // --- FINAL SUBMIT ---
     window.submitWizard = async () => {
         const submitBtn = document.getElementById('wizardSubmitBtn');
@@ -960,8 +1206,8 @@
         const payload = {
             title: wizardData.title,
             description: wizardData.description,
-            start_time: startISO, 
-            end_time: endISO, 
+            start_time: startISO,
+            end_time: endISO,
             location_type: wizardData.location_type,
             google_maps_link: wizardData.google_maps_link || null,
             visibility: wizardData.visibility,
