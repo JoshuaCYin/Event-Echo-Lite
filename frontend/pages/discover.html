@@ -11,48 +11,25 @@ to maintain a consistent look and feel with the rest of the application.
     }
 
     .discover-header {
-        text-align: left;
+        text-align: center; /* Match event header */
         margin-bottom: 2rem;
     }
 
     .discover-header h1 {
-        font-size: 2.5rem;
-        color: var(--text-primary);
+        font-size: 1.75rem;            /* Match Event Hub title size */
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;         /* Gradient text */
         margin-bottom: 0.5rem;
     }
 
     .discover-header p {
-        font-size: 1.1rem;
+        font-size: 1.1rem;             /* Match event header subtitle */
         color: var(--text-secondary);
-        max-width: 800px;
+        max-width: 800px;              /* Match event header width */
+        margin: 0 auto;                /* Center horizontally */
     }
-
-    /* A simple message box for the experimental note
-    .experiment-note {
-        background: var(--bg-tertiary);
-        border: 1px solid var(--border-color);
-        padding: 1.5rem;
-        border-radius: var(--radius-lg);
-        margin-bottom: 2.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-    } */
-
-    /* .experiment-note svg {
-        flex-shrink: 0;
-        color: var(--primary-color);
-    }
-    
-    .experiment-note p {
-        margin: 0;
-        color: var(--text-secondary);
-        line-height: 1.6;
-    }
-    
-    .experiment-note strong {
-        color: var(--text-primary);
-    } */
 
     .discover-section {
         margin-bottom: 3rem;
@@ -154,18 +131,6 @@ to maintain a consistent look and feel with the rest of the application.
         <h1>Discover More</h1>
         <p>Explore what's happening across the Indiana Wesleyan University community. This directory connects you to official calendars and social media feeds.</p>
     </div>
-
-    <!-- Note about the experiment -->
-    <!-- <div class="experiment-note">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-            <path d="M12 16v-4"></path>
-            <path d="M12 8h.01"></path>
-        </svg>
-        <p>
-            <strong>This is a new experimental feature.</strong> We're testing the idea of bringing all IWU event sources into one place. Please let us know if you find this page useful!
-        </p>
-    </div> -->
 
     <!-- Section 1: Official Calendars -->
     <div class="discover-section">

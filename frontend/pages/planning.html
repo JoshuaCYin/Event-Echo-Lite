@@ -2,6 +2,11 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
 <style>
+    /* Force dark readable text on MONTH VIEW events */
+    .fc-daygrid-event .fc-event-main span {
+        color: #1a1a1a !important;
+    }
+
     /* --- Scoped Layout --- */
     .planning-wrapper {
         display: flex;
@@ -23,6 +28,8 @@
         justify-content: space-between;
         align-items: center;
         flex-shrink: 0;
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
     }
 
     .header-title-group {
@@ -418,7 +425,16 @@
 
         <div class="board-column" data-status="done">
             <div class="column-header done">
-                <span>Done</span>
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span>Done</span>
+                    <!-- delete button -->
+                    <button id="deleteAllDoneBtn"
+                            style="background:#fee2e2; color:#991b1b; border:none;
+                                padding:2px 8px; border-radius:4px; font-size:0.75rem;
+                                cursor:pointer;">
+                        Delete All
+                    </button>
+                </div>
                 <span class="column-count" id="count-done">0</span>
             </div>
             <div class="task-list" id="list-done"></div>
@@ -695,7 +711,58 @@ function initCalendar() {
         initialView: 'dayGridMonth',
         headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,listWeek' },
         height: 'auto',
-        eventClick: (info) => openModal(info.event.extendedProps.originalTask)
+        defaultTimedEventDuration: '00:01', // Sets default length to 1 min instead of 1 hour
+        eventClick: (info) => openModal(info.event.extendedProps.originalTask),
+        eventContent: function(arg) {
+            const task = arg.event.extendedProps.originalTask;
+            if (!task) return;
+
+            // Detect current view
+            const viewType = arg.view.type; // "dayGridMonth", "listWeek", etc.
+
+            const priority = task.priority || "medium";
+            const prioColors = {
+                high:   { bg: "#e96b6b", text: "#9b2c2c" },
+                medium: { bg: "#e8c17a", text: "#9c6f1b" },
+                low:    { bg: "#77b59c", text: "#1f5e46" }
+            };
+            const color = prioColors[priority] || prioColors.medium;
+
+            // -------- MONTH VIEW (HIDE BADGE, SHOW TIME) --------
+            if (viewType === "dayGridMonth") {
+                const timeEl = document.createElement("span");
+                const start = arg.event.start;
+                const time = start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+                timeEl.textContent = time + " ";
+                timeEl.style.fontWeight = "600";
+
+                const titleEl = document.createElement("span");
+                titleEl.textContent = arg.event.title;
+
+                return { domNodes: [timeEl, titleEl] };
+            }
+
+            // -------- LIST VIEW (SHOW PRIORITY BADGE) --------
+            const badge = document.createElement("span");
+            badge.textContent = priority.toUpperCase();
+            badge.style.cssText = `
+                padding: 2px 6px;
+                font-size: 0.65rem;
+                font-weight: 700;
+                border-radius: 4px;
+                margin-right: 6px;
+                background: ${color.bg};
+                color: ${color.text};
+                text-transform: uppercase;
+                letter-spacing: .02em;
+            `;
+
+            const title = document.createElement("span");
+            title.textContent = arg.event.title;
+
+            return { domNodes: [badge, title] };
+        }
     });
     planningCalendar.render();
     updateCalendarEvents();
@@ -703,20 +770,45 @@ function initCalendar() {
 
 function updateCalendarEvents() {
     if (!planningCalendar) return;
-    const events = allTasks.filter(t => t.due_date).map(t => ({
-        title: t.title,
-        start: t.due_date,
-        backgroundColor: t.status === 'done' ? '#48bb78' : (t.priority === 'high' ? '#f56565' : '#4299e1'),
-        borderColor: 'transparent',
-        extendedProps: { originalTask: t }
-    }));
+
+    const events = allTasks
+        .filter(task => task.due_date)
+        .map(task => {
+            const startDate = new Date(task.due_date);
+
+            return {
+                title: task.title,
+                start: startDate,
+                allDay: false,
+                display: 'block',
+                backgroundColor: task.status === 'done'
+                    ? '#D3D3D3'
+                    : priorityColor(task),
+                borderColor: 'transparent',
+                extendedProps: { originalTask: task }
+            };
+        });
+
     planningCalendar.removeAllEvents();
     planningCalendar.addEventSource(events);
 }
 
+// --- Determine task color based on priority ---
+function priorityColor(task) {
+    switch (task.priority) {
+        case 'high': return '#e96b6b';   // muted deep red
+        case 'medium': return '#e8c17a'; // muted amber
+        case 'low': return '#77b59c';    // muted forest green
+        default: return '#2b6cb0';       // muted steel blue
+    }
+}
+
 // --- Modal ---
+let currentTask = null;
+
 function openModal(task = null) {
     const isEdit = !!task;
+    currentTask = task;
     document.getElementById('modalTitle').textContent = isEdit ? 'Edit Task' : 'New Task';
     document.getElementById('deleteTaskBtn').style.display = isEdit ? 'block' : 'none';
 
@@ -743,6 +835,119 @@ function openModal(task = null) {
 }
 function closeModal() { taskModal.classList.remove('open'); }
 
+// --- Single Task Delete Modal ---
+function openSingleDeleteModal(taskId, taskTitle) {
+    // Hide task form
+    document.getElementById("taskForm").style.display = "none";
+
+    document.getElementById("modalTitle").textContent = "Delete Task";
+
+    const modalWindow = document.querySelector(".modal-window");
+
+    // Remove existing area if present
+    const old = document.getElementById("singleDeleteArea");
+    if (old) old.remove();
+
+    const area = document.createElement("div");
+    area.id = "singleDeleteArea";
+    area.innerHTML = `
+        <p style="margin-bottom:1rem;">
+            Are you sure you want to delete the task:<br>
+            <strong>"${taskTitle}"</strong>?
+        </p>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+            <button id="cancelSingleDeleteBtn"
+                style="background:transparent; border:1px solid var(--border-color);
+                padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">Cancel</button>
+
+            <button id="confirmSingleDeleteBtn"
+                style="background:#fee2e2; color:#991b1b; border:none;
+                padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">Delete</button>
+        </div>
+    `;
+
+    modalWindow.appendChild(area);
+    taskModal.classList.add("open");
+
+    document.getElementById("cancelSingleDeleteBtn").onclick = () => {
+        area.remove();
+        document.getElementById("taskForm").style.display = "";
+        closeModal();
+    };
+
+    document.getElementById("confirmSingleDeleteBtn").onclick = async () => {
+        try {
+            await api(`/planning/tasks/${taskId}`, "DELETE", null, token);
+            area.remove();
+            document.getElementById("taskForm").style.display = "";
+            closeModal();
+            fetchTasks();
+        } catch (err) {
+            alert("Error deleting task");
+        }
+    };
+}
+
+// Replace direct delete with modal
+document.getElementById("deleteTaskBtn").addEventListener("click", () => {
+    const id = document.getElementById("taskId").value;
+    const titleField = document.getElementById("taskTitle");
+    const title = titleField ? titleField.value || "(Untitled Task)" : "(Untitled Task)";
+    openSingleDeleteModal(id, title);
+});
+
+// --- Delete All Tasks in Done ---
+function openBulkDeleteModal() {
+    document.getElementById('modalTitle').textContent = "Delete All Done Tasks";
+    
+    // Hide irrelevant fields
+    document.getElementById('taskForm').style.display = "none";
+    
+    // Add a simple confirmation UI
+    const modalWindow = document.querySelector(".modal-window");
+    const customArea = document.createElement("div");
+    customArea.id = "bulkDeleteArea";
+    customArea.innerHTML = `
+        <p style="margin-bottom:1rem;">Are you sure you want to delete all tasks marked as <b>Done</b>?</p>
+        <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+            <button id="cancelBulkDeleteBtn" style="background:transparent; border:1px solid var(--border-color); padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">Cancel</button>
+            <button id="confirmBulkDeleteBtn" style="background:#fee2e2; color:#991b1b; border:none; padding:0.5rem 1rem; border-radius:6px; cursor:pointer;">Delete All</button>
+        </div>
+    `;
+
+    modalWindow.appendChild(customArea);
+    taskModal.classList.add("open");
+
+    // Wiring up buttons
+    document.getElementById("cancelBulkDeleteBtn").onclick = closeBulkDeleteModal;
+    document.getElementById("confirmBulkDeleteBtn").onclick = deleteAllDoneTasks;
+}
+
+function closeBulkDeleteModal() {
+    const area = document.getElementById("bulkDeleteArea");
+    if (area) area.remove();
+
+    document.getElementById('taskForm').style.display = ""; // restore form
+    closeModal();
+}
+
+async function deleteAllDoneTasks() {
+    const doneTasks = allTasks.filter(t => t.status === "done");
+
+    try {
+        await Promise.all(
+            doneTasks.map(t =>
+                api(`/planning/tasks/${t.task_id}`, "DELETE", null, token)
+            )
+        );
+        closeBulkDeleteModal();
+        fetchTasks();
+    } catch (err) {
+        alert("Error deleting tasks.");
+    }
+}
+
 // --- Event Listeners ---
 taskForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -764,13 +969,13 @@ taskForm.addEventListener('submit', async (e) => {
     } catch (err) { alert("Error saving task"); }
 });
 
-document.getElementById('deleteTaskBtn').addEventListener('click', async () => {
-    if (!confirm("Delete this task?")) return;
-    try {
-        await api(`/planning/tasks/${document.getElementById('taskId').value}`, "DELETE", null, token);
-        closeModal();
-        fetchTasks();
-    } catch (err) { alert("Error deleting task"); }
+document.getElementById("deleteTaskBtn").addEventListener("click", () => {
+    if (!currentTask) return; // safety
+    openSingleDeleteModal(currentTask.task_id, currentTask.title || "(Untitled Task)");
+});
+
+document.getElementById("deleteAllDoneBtn").addEventListener("click", () => {
+    openBulkDeleteModal(); 
 });
 
 document.getElementById('addTaskBtn').addEventListener('click', () => openModal());
@@ -796,8 +1001,15 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
             toggleGlider.style.transform = 'translateX(100%)';
             document.getElementById('boardView').style.display = 'none';
             document.getElementById('calendarView').style.display = 'block';
-            if(planningCalendar) planningCalendar.updateSize();
+
+            // Force refresh tasks -> calendar events
+            fetchTasks().then(() => {
+                if (planningCalendar) {
+                    planningCalendar.updateSize();
+                }
+            });
         }
+
     });
 });
 

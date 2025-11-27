@@ -13,6 +13,12 @@ load_dotenv()
 
 events_bp = Blueprint("events", __name__)
 
+# --- CONSTANTS FOR VALIDATION ---
+TITLE_MAX_LENGTH = 200
+VALID_VISIBILITY = ['public', 'private']
+VALID_LOCATION_TYPES = ['venue', 'custom']
+VALID_STATUSES = ['upcoming', 'cancelled', 'completed'] # Add any other statuses you use
+
 def parse_dt(val):
     """
     Safely parse an ISO-8601 or datetime-local string.
@@ -178,8 +184,13 @@ def create_event():
     start_str = data.get("start_time")
     end_str = data.get("end_time")
     
+    # --- START VALIDATION ---
     if not title or not start_str or not end_str:
         return jsonify({"error": "title, start_time, and end_time are required"}), 400
+
+    if len(title) > TITLE_MAX_LENGTH:
+        return jsonify({"error": f"Title must be {TITLE_MAX_LENGTH} characters or less."}), 400
+    # --- END VALIDATION ---
 
     start_dt = parse_dt(start_str)
     end_dt = parse_dt(end_str)
@@ -194,16 +205,21 @@ def create_event():
     venue_id = data.get("venue_id")
     custom_location = data.get("custom_location_address")
     
+    # --- START VALIDATION ---
+    if location_type not in VALID_LOCATION_TYPES:
+         return jsonify({"error": f"location_type must be one of: {', '.join(VALID_LOCATION_TYPES)}"}), 400
+    
     if location_type == 'venue' and not venue_id:
         return jsonify({"error": "venue_id is required for location_type 'venue'"}), 400
     if location_type == 'custom' and not custom_location:
         return jsonify({"error": "custom_location_address is required for location_type 'custom'"}), 400
+    # --- END VALIDATION ---
 
     description = data.get("description")
     google_maps_link = data.get("google_maps_link")
     visibility = data.get("visibility", "public")
     
-    if visibility not in ['public', 'private']:
+    if visibility not in VALID_VISIBILITY:
         visibility = 'public'
 
     if visibility == 'public' and role not in ['organizer', 'admin']:
@@ -275,16 +291,27 @@ def update_event(event_id):
     data = request.get_json() or {}
     if not data:
         return jsonify({"error": "No update data provided"}), 400
-
+        
     conn = get_db()
     try:
+        # --- FETCH CURRENT EVENT STATE FIRST FOR VALIDATION ---
         with conn.cursor() as cur:
-            cur.execute("SELECT organizer_id, created_by FROM events WHERE event_id = %s;", (event_id,))
+            # Fetch all fields needed for validation
+            cur.execute(
+                """
+                SELECT organizer_id, created_by, start_time, end_time, 
+                       location_type, venue_id, custom_location_address, visibility
+                FROM events 
+                WHERE event_id = %s;
+                """, 
+                (event_id,)
+            )
             ev = cur.fetchone()
             if not ev:
                 conn.close()
                 return jsonify({"error": "Event not found"}), 404
 
+            # --- PERMISSION CHECKS (MOVED UP) ---
             if role not in ['admin', 'organizer'] and ev["created_by"] != user_id:
                 conn.close()
                 return jsonify({"error": "Permission denied"}), 403
@@ -293,6 +320,64 @@ def update_event(event_id):
                 if role not in ['admin', 'organizer']:
                     conn.close()
                     return jsonify({"error": "Only organizers/admins can make events public"}), 403
+
+        # --- START NEW VALIDATION BLOCK ---
+        
+        if "title" in data:
+            title = data.get("title")
+            if not title:
+                return jsonify({"error": "Title cannot be empty"}), 400
+            if len(title) > TITLE_MAX_LENGTH:
+                return jsonify({"error": f"Title must be {TITLE_MAX_LENGTH} characters or less."}), 400
+
+        # --- Datetime Validation ---
+        start_dt = parse_dt(data.get("start_time")) if "start_time" in data else None
+        end_dt = parse_dt(data.get("end_time")) if "end_time" in data else None
+
+        if "start_time" in data and not start_dt:
+            return jsonify({"error": "Invalid start_time format. Use ISO-8601."}), 400
+        if "end_time" in data and not end_dt:
+            return jsonify({"error": "Invalid end_time format. Use ISO-8601."}), 400
+
+        # Check final start/end times
+        # Use new time if provided, otherwise fall back to existing time from DB
+        final_start = start_dt or ev['start_time']
+        final_end = end_dt or ev['end_time']
+
+        if final_start >= final_end:
+            return jsonify({"error": "start_time must be before end_time"}), 400
+        
+        # --- Enum Validations ---
+        if "visibility" in data and data.get("visibility") not in VALID_VISIBILITY:
+             return jsonify({"error": f"visibility must be one of: {', '.join(VALID_VISIBILITY)}"}), 400
+
+        if "status" in data and data.get("status") not in VALID_STATUSES:
+             return jsonify({"error": f"status must be one of: {', '.join(VALID_STATUSES)}"}), 400
+
+        if "location_type" in data and data.get("location_type") not in VALID_LOCATION_TYPES:
+             return jsonify({"error": f"location_type must be one of: {', '.join(VALID_LOCATION_TYPES)}"}), 400
+             
+        # --- Location Logic Validation ---
+        # Determine the *final* state of the event after the update is applied
+        final_loc_type = data.get("location_type", ev['location_type'])
+        final_venue_id = data.get("venue_id", ev['venue_id'])
+        final_custom_loc = data.get("custom_location_address", ev['custom_location_address'])
+
+        # Handle edge case: if user sets venue_id, auto-set type to 'venue'
+        if "venue_id" in data and "location_type" not in data:
+            final_loc_type = 'venue'
+
+        # Handle edge case: if user sets custom_addr, auto-set type to 'custom'
+        if "custom_location_address" in data and "location_type" not in data:
+            final_loc_type = 'custom'
+
+        if final_loc_type == 'venue' and not final_venue_id:
+            return jsonify({"error": "venue_id is required for location_type 'venue'"}), 400
+        
+        if final_loc_type == 'custom' and not final_custom_loc:
+            return jsonify({"error": "custom_location_address is required for location_type 'custom'"}), 400
+
+        # --- END NEW VALIDATION BLOCK ---
 
         fields = []
         values = []
@@ -311,6 +396,12 @@ def update_event(event_id):
                 else:
                     values.append(data[key])
         
+        # Auto-update location_type if venue_id or custom_location_address was changed
+        if "venue_id" in data and "location_type" not in data:
+             fields.append("location_type = 'venue'")
+        elif "custom_location_address" in data and "location_type" not in data:
+             fields.append("location_type = 'custom'")
+
         if "updated_at" not in fields:
              fields.append("updated_at = CURRENT_TIMESTAMP")
 
@@ -327,6 +418,9 @@ def update_event(event_id):
     except Exception as e:
         conn.rollback()
         print(f"Database error updating event {event_id}: {e}")
+        # Check for the specific error you mentioned
+        if "value too long for type character varying" in str(e):
+             return jsonify({"error": "A value provided was too long for the database."}), 400
         return jsonify({"error": "Failed to update event"}), 500
     finally:
         if conn:

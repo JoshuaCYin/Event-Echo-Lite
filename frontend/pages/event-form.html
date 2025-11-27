@@ -97,10 +97,9 @@
         transition: all 0.2s ease-in-out;
         flex: 1;
     }
+    /* Hide actual radio button */
     .radio-label input[type="radio"] {
-        width: auto;
-        margin-bottom: 0;
-        accent-color: var(--primary-color, #007bff);
+        display: none;
     }
     .radio-label:has(input:checked) {
         background: var(--bg-tertiary, #f0f7ff);
@@ -149,6 +148,20 @@
         color: white;
         flex: 2;
     }
+
+    /* --- AI Assist Button Styles --- */
+    .label-with-ai {
+        display: flex; justify-content: space-between; align-items: center;
+    }
+    .ai-assist-btn {
+        background: none; border: 1px solid var(--primary-color);
+        color: var(--primary-color); padding: 2px 8px; border-radius: 12px;
+        font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;
+        transition: all 0.2s;
+        flex-shrink: 0; /* Add this to prevent shrinking/wrapping */
+    }
+    .ai-assist-btn:hover { background: var(--bg-tertiary); transform: translateY(-1px); }
+    .ai-assist-btn.loading { opacity: 0.7; cursor: wait; }
 </style>
 
 <div class="create-event-form page-transition-enter-active">
@@ -173,7 +186,9 @@
             <label for="evTitle">Event Title*</label>
             <input id="evTitle" type="text" placeholder="e.g. Spring Hackathon" required>
             
-            <label for="evDescription">Description</label>
+            <div class="label-with-ai">
+                <label for="evDescription">Description</label>
+            </div>
             <textarea id="evDescription" placeholder="Tell attendees about your event..." rows="5"></textarea>
         </div>
         
@@ -297,9 +312,10 @@ async function init() {
     // Setup Logic based on Mode
     if (isEditMode) {
         setupEditMode();
-    } else {
-        setupCreateMode();
     }
+
+    // ALWAYS try to apply the AI draft
+    applyAIDraft();
 
     // Initialize Location Logic
     handleLocationTypeChange();
@@ -339,14 +355,10 @@ async function setupEditMode() {
         evMapsLink.value = event.google_maps_link || "";
 
         // --- TIMEZONE FIX FOR EDITING ---
-        // If the backend sends a naive UTC string (missing Z or +00:00), append Z.
-        // This forces the browser to treat it as UTC and convert it to local time correctly.
         let startStr = event.start_time;
         let endStr = event.end_time;
         
-        if (startStr && !startStr.includes('Z') && !startStr.includes('+')) startStr += 'Z';
-        if (endStr && !endStr.includes('Z') && !endStr.includes('+')) endStr += 'Z';
-
+        // This handles UTC 'Z' or offset '+00:00' strings
         evStart.value = formatDateTimeForInput(startStr);
         evEnd.value = formatDateTimeForInput(endStr);
         // --------------------------------
@@ -385,6 +397,12 @@ function showTopError(msg) {
     topErrorDiv.style.display = 'block';
     form.style.opacity = '0.5';
     form.style.pointerEvents = 'none';
+}
+
+function showMessage(msg, typeClass) {
+    messageDiv.className = typeClass; // "success-message" or "error-message"
+    messageDiv.textContent = msg;
+    messageDiv.style.display = "block";
 }
 
 function formatDateTimeForInput(isoString) {
@@ -438,8 +456,7 @@ function handleLocationTypeChange() {
         venueSelectContainer.style.display = 'none';
         customLocationContainer.style.display = 'block';
     }
-    venueSelect.required = false;
-    evCustomLocation.required = false;
+    // --- Validation logic moved to submit handler ---
 }
 
 locationTypeRadios.forEach(radio => radio.addEventListener('change', handleLocationTypeChange));
@@ -456,16 +473,18 @@ function applyAIDraft() {
             document.querySelector('input[name="location_type"][value="custom"]').checked = true;
             handleLocationTypeChange();
         }
-        // NEW: Handle date/time fields
+        // Handle date/time fields
         if (draft.start_time) {
+            // AI returns full ISO, format it for the input
             evStart.value = formatDateTimeForInput(draft.start_time);
         }
         if (draft.end_time) {
+            // AI returns full ISO, format it for the input
             evEnd.value = formatDateTimeForInput(draft.end_time);
         }
         
         const aiDraftMessage = document.getElementById("aiDraftMessage");
-        aiDraftMessage.innerHTML = `<div class="ai-draft-applied"><span>✨ AI Draft applied!</span></div>`;
+        aiDraftMessage.innerHTML = `<div class="ai-draft-applied"><span>✨ AI Draft applied! Review details and save.</span></div>`;
         aiDraftMessage.style.display = 'block';
     } catch (e) { console.error(e); }
     localStorage.removeItem('aiEventDraft');
@@ -483,16 +502,28 @@ form.addEventListener("submit", async (e) => {
     const endLocal = evEnd.value;
     const location_type = document.querySelector('input[name="location_type"]:checked').value;
     
-    if (new Date(startLocal) >= new Date(endLocal)) {
-        messageDiv.className = "error-message";
-        messageDiv.textContent = "End time must be after start time";
-        messageDiv.style.display = "block";
+    // --- Validation ---
+    if (!title || !startLocal || !endLocal) {
+        showMessage("Title, Start Time, and End Time are required.", "error-message");
         return;
     }
+    if (new Date(startLocal) >= new Date(endLocal)) {
+        showMessage("End time must be after start time.", "error-message");
+        return;
+    }
+    const venueId = (location_type === 'venue' && venueSelect.value) ? venueSelect.value : null;
+    const customAddress = (location_type === 'custom' && evCustomLocation.value) ? evCustomLocation.value : null;
 
-    // --- TIMEZONE FIX FOR SUBMITTING ---
-    // Convert the local "YYYY-MM-DDTHH:MM" strings to ISO 8601 UTC strings (e.g., "...T15:00:00.000Z")
-    // This ensures the backend receives the exact instant you selected, regardless of server timezone.
+    if (location_type === 'venue' && !venueId) {
+        showMessage("Please select an on-campus venue.", "error-message");
+        return;
+    }
+    if (location_type === 'custom' && !customAddress) {
+        showMessage("Please enter a custom address.", "error-message");
+        return;
+    }
+    // --- End Validation ---
+
     const startISO = startLocal ? new Date(startLocal).toISOString() : null;
     const endISO = endLocal ? new Date(endLocal).toISOString() : null;
 
@@ -506,8 +537,8 @@ form.addEventListener("submit", async (e) => {
         visibility: (userRole === 'admin' || userRole === 'organizer') 
             ? document.querySelector('input[name="visibility"]:checked').value 
             : 'private',
-        venue_id: (location_type === 'venue' && venueSelect.value) ? venueSelect.value : null,
-        custom_location_address: (location_type === 'custom' && evCustomLocation.value) ? evCustomLocation.value : null,
+        venue_id: venueId,
+        custom_location_address: customAddress,
     };
 
     saveBtn.disabled = true;
@@ -524,18 +555,14 @@ form.addEventListener("submit", async (e) => {
         if (res.error) {
             throw new Error(res.error);
         } else {
-            messageDiv.className = "success-message";
-            messageDiv.textContent = isEditMode ? "Event updated! Redirecting..." : "Event created! Redirecting...";
+            showMessage(isEditMode ? "Event updated! Redirecting..." : "Event created! Redirecting...", "success-message");
             setTimeout(() => { window.location.hash = "#/calendar"; }, 1500);
         }
     } catch (error) {
         console.error("Submit error:", error);
-        messageDiv.className = "error-message";
-        messageDiv.textContent = error.message || "A network error occurred.";
+        showMessage(error.message || "A network error occurred.", "error-message");
         saveBtn.disabled = false;
         saveBtn.textContent = isEditMode ? "Update Event" : "Create Event";
-    } finally {
-        messageDiv.style.display = "block";
     }
 });
 
