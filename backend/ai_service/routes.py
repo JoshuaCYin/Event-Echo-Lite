@@ -48,7 +48,30 @@ EVENT_DRAFT_SCHEMA = {
     "required": ["title", "description"]
 }
 
+# --- NEW: Schema for the main chat response (for OpenAI tool use) ---
+CHAT_RESPONSE_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "response": {"type": "string", "description": "The AI's conversational response to the user."},
+        "eventDraft": {
+            "type": "object",
+            "nullable": True,
+            "description": "An event draft object, or null.",
+            "properties": {
+                "title": {"type": "string"},
+                "description": {"type": "string"},
+                "location": {"type": "string"},
+                "start_time": {"type": "string"},
+                "end_time": {"type": "string"}
+            }
+        }
+    },
+    "required": ["response"]
+}
+
+
 # Used for the Side-Car Wizard Helper
+# --- UPDATED: Added all form fields to the schema enum ---
 WIZARD_ACTION_SCHEMA = {
     "type": "object",
     "properties": {
@@ -61,16 +84,20 @@ WIZARD_ACTION_SCHEMA = {
                 "properties": {
                     "field": {
                         "type": "string", 
-                        "enum": ["w-title", "w-description", "w-customLocation", "evTitle", "evDescription", "evCustomLocation"],
-                        "description": "The specific HTML ID of the input field to populate."
+                        "enum": [
+                            "w-title", "w-description", "w-start", "w-end", "w-location_type", "w-venue", "w-customLocation", "w-visibility",
+                            "evTitle", "evDescription", "evStart", "evEnd", "evCustomLocation", "location_type", "visibility"
+                        ],
+                        "description": "The specific HTML ID or name of the input field to populate."
                     },
                     "value": {"type": "string", "description": "The text value to put into the field."}
                 },
                 "required": ["field", "value"]
-            }
+            },
+            "nullable": True
         }
     },
-    "required": ["response", "actions"]
+    "required": ["response"]
 }
 
 # 1. Try to initialize OpenAI first
@@ -100,41 +127,69 @@ if ACTIVE_AI_SERVICE is None and GEMINI_API_KEY:
 
 # --- System Prompts ---
 
+# --- UPDATED: Rewritten to use tools for reliability ---
 MAIN_SYSTEM_PROMPT = f"""
-You are the "EventEcho AI Assistant". 
-**CRITICAL:** You MUST reply in JSON format.
+You are the "EventEcho AI Assistant".
+Your goal is to be a helpful event planning assistant.
+You MUST call the `submit_chat_response` tool to respond.
 
 **CONTEXT:**
-You will be given a list of "Upcoming Public Events" and "Conversation History".
-This event list is the source of truth.
+You will be given the current user's time and a list of "Upcoming Public Events".
+This event list is your source of truth. It *only* contains future events.
+Current User Time: {{user_time_placeholder}}
+
+CRITICAL TIME RULES:
+- When the user asks for "the time", "the date", "what day is it", or any similar question:
+  ALWAYS answer using the provided User Time.
+- NEVER generate or guess the current time yourself.
+- NEVER use UTC or the server's timezone.
+- ALWAYS use the timezone encoded inside User Time (e.g., "-05:00" or "+02:00").
+- ALWAYS show the time in the user's local timezone.
+- You MUST assume the user lives in that timezone.
+
+When presenting the time, restate it clearly in the user's local timezone, e.g.:
+"Your local time is 3:12 PM (UTC-05:00) on November 27, 2025."
+
+IMPORTANT: User Time is the *only* correct current time.
 
 **TASKS:**
-1. Answer user questions about event planning or data.
-2. If the user asks to create/draft an event, populate the `eventDraft` object.
-
-**EVENT DRAFT RULES:**
-* For simple chats, `eventDraft` MUST be `null`.
-* For creation requests, populate `eventDraft`.
-* `start_time` and `end_time` MUST be ISO 8601 ('YYYY-MM-DDTHH:MM:SS').
+1.  **Answer Questions:** Answer user questions about event planning or the provided event data.
+2.  **Check Events:** When asked to "check upcoming events", ONLY use the event context. Do NOT invent events or show past events unless specifically asked "show me past events".
+3.  **Event Drafts:**
+    * Your conversational reply goes in the `response` field of the tool.
+    * For simple chats, the `eventDraft` field MUST be `null`.
+    * If the user asks "Help me draft an event", you MUST first ask follow-up questions to get (at minimum) a title, description, and suggested date/time.
+    * Once you have those details, populate the `eventDraft` object in the tool.
+    * `start_time` and `end_time` MUST be in future ISO 8601 format ('YYYY-MM-DDTHH:MM:SS').
 """
 
+# --- UPDATED: Added rule to prevent duplicate buttons ---
 WIZARD_SYSTEM_PROMPT = """
 You are an AI Co-Pilot for an event creation form.
 **CRITICAL:** You MUST reply in JSON format.
 
-Your Goal: Help the user fill out the form fields.
+Your Goal: Help the user fill out the form fields based on their request and the `current_values` provided.
 1. `response`: A short, friendly, helpful message.
 2. `actions`: An array of objects to autofill fields if applicable.
 
-**Targetable Fields (IDs):**
+**Targetable Fields (IDs/Names):**
 - Title: "w-title" (Wizard) or "evTitle" (Main Form)
 - Description: "w-description" (Wizard) or "evDescription" (Main Form)
+- Start Time: "w-start" (Wizard) or "evStart" (Main Form) - Use ISO 'YYYY-MM-DDTHH:MM' format
+- End Time: "w-end" (Wizard) or "evEnd" (Main Form) - Use ISO 'YYYY-MM-DDTHH:MM' format
+- w-start and w-end MUST use datetime-local format: "YYYY-MM-DDTHH:MM"
+- Location Type: "w-location_type" (Wizard) or "location_type" (Main Form) - Value must be "custom" or "venue"
+- Venue (Select): "w-venue" (Wizard) - Value should be a venue ID (e.g., '1', '2') if known, or just a name.
 - Custom Address: "w-customLocation" (Wizard) or "evCustomLocation" (Main Form)
+- Visibility: "w-visibility" (Wizard) or "visibility" (Main Form) - Value must be "public" or "private"
+- Apply actions when the user requests or hints at a change.
 
 **Rules:**
-- If the user asks for suggestions (e.g., "Give me 3 titles"), provide them in the `response` text using Markdown lists. DO NOT fill `actions` yet, as we don't know which one they want.
-- If the user asks to "Rewrite this" or "Use [X] as the title", populate the `actions` array with the best option.
-- Keep `response` brief (under 50 words).
+- **CRITICAL: Only return ONE action per field.** For example, do not return two separate actions for "w-description" in the same response.
+- If the user asks for suggestions (e.g., "Give me 3 titles"), provide them in the `response` text using Markdown lists. DO NOT fill `actions` yet.
+- If the user asks to "Rewrite this", "Change the title to X", or "Make it start at 2pm", populate the `actions` array with the specific field and new value.
+- If you update `w-venue` or `w-customLocation`, also add an action to update `w-location_type` to "venue" or "custom" respectively.
+- Keep `response` brief (under 100 words).
 """
 
 # --- Routes ---
@@ -148,13 +203,36 @@ def handle_chat():
     user_prompt = data.get("prompt")
     history = data.get("history", [])
     event_context = data.get("event_context", "No live event data provided.")
+    # Normalize user_time into a readable string for the system prompt
+    raw_user_time = data.get("user_time")
+
+    if isinstance(raw_user_time, dict):
+        # New structured format from frontend
+        iso = raw_user_time.get("iso")
+        offset = raw_user_time.get("offset")
+        local = raw_user_time.get("local")
+
+        # Build a clear unified sentence for AI
+        user_time = f"{local} (ISO={iso}, UTC offset={offset} minutes)"
+    else:
+        # Old format or missing
+        if raw_user_time:
+            user_time = str(raw_user_time)
+        else:
+            user_time = datetime.now().astimezone().isoformat()
 
     if not user_prompt:
         return jsonify({"error": "No prompt provided."}), 400
+        
+    # --- UPDATED: Pass current user time to system prompt ---
+    system_prompt = MAIN_SYSTEM_PROMPT.replace(
+        "{user_time_placeholder}", 
+        user_time
+    )
 
     try:
         if ACTIVE_AI_SERVICE == "openai":
-            messages = [{"role": "system", "content": MAIN_SYSTEM_PROMPT}]
+            messages = [{"role": "system", "content": system_prompt}]
             for item in history:
                 role = "assistant" if item["role"] == "ai" else item["role"]
                 messages.append({"role": role, "content": item["content"]})
@@ -162,15 +240,34 @@ def handle_chat():
             messages.append({"role": "user", "content": user_prompt})
             messages.append({"role": "system", "content": f"--- EVENTS ---\n{event_context}"})
 
+            # --- UPDATED: Use tool calling to enforce JSON schema ---
             response = openai_client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=messages,
-                response_format={"type": "json_object"}
+                tools=[
+                    {
+                        "type": "function",
+                        "function": {
+                            "name": "submit_chat_response",
+                            "description": "Submit your final response and event draft.",
+                            "parameters": CHAT_RESPONSE_SCHEMA
+                        }
+                    }
+                ],
+                tool_choice={"type": "function", "function": {"name": "submit_chat_response"}}
             )
-            result_json = json.loads(response.choices[0].message.content)
-            if "eventDraft" in result_json and result_json["eventDraft"]:
-                result_json["showEventCreationButton"] = True
-            return jsonify(result_json)
+            
+            # Extract the tool call arguments
+            tool_call = response.choices[0].message.tool_calls[0]
+            if tool_call.function.name == "submit_chat_response":
+                result_json = json.loads(tool_call.function.arguments)
+                # --- This key is now 'eventDraft' from the schema ---
+                if "eventDraft" in result_json and result_json["eventDraft"]:
+                    result_json["eventDraft"] = result_json["eventDraft"] 
+                return jsonify(result_json)
+            else:
+                raise Exception("AI did not use the correct tool.")
+            # --- END OF UPDATE ---
 
         elif ACTIVE_AI_SERVICE == "gemini":
             # Gemini JSON Schema Config
@@ -193,7 +290,7 @@ def handle_chat():
                 required=["response"]
             )
 
-            contents = [types.Part(text=MAIN_SYSTEM_PROMPT, role="user")]
+            contents = [types.Part(text=system_prompt, role="user")]
             for item in history:
                 role = "model" if item["role"] == "ai" else "user"
                 contents.append(types.Part(text=item["content"], role=role))
@@ -209,7 +306,7 @@ def handle_chat():
             )
             result_json = json.loads(response.text)
             if "eventDraft" in result_json and result_json["eventDraft"]:
-                result_json["showEventCreationButton"] = True
+                 result_json["eventDraft"] = result_json["eventDraft"]
             return jsonify(result_json)
 
     except Exception as e:
@@ -232,8 +329,14 @@ def handle_wizard_helper():
     
     # Optional: Allow passing current field values to help the AI rewrite them
     current_values = data.get("current_values", {})
+    user_time = data.get("user_time")  # ISO string from browser
     
-    full_prompt = f"Context: {context}\nCurrent Values: {json.dumps(current_values)}\nUser Request: {user_prompt}"
+    full_prompt = (
+        f"Context: {context}\n"
+        f"User Time: {user_time}\n"
+        f"Current Values: {json.dumps(current_values)}\n"
+        f"User Request: {user_prompt}"
+    )
 
     try:
         if ACTIVE_AI_SERVICE == "openai":
@@ -247,11 +350,15 @@ def handle_wizard_helper():
                 response_format={"type": "json_object"}
             )
             result = json.loads(response.choices[0].message.content)
+            if "actions" not in result or result["actions"] is None:
+                result["actions"] = []
+
             return jsonify(result)
 
         elif ACTIVE_AI_SERVICE == "gemini":
             # Gemini Schema for Actions
-            wizard_schema = types.Schema(
+            # --- UPDATED: Using the global WIZARD_ACTION_SCHEMA ---
+            gemini_wizard_schema = types.Schema(
                 type=types.Type.OBJECT,
                 properties={
                     'response': types.Schema(type=types.Type.STRING),
@@ -277,7 +384,7 @@ def handle_wizard_helper():
                 ],
                 config=types.GenerateContentConfig(
                     response_mime_type="application/json",
-                    response_schema=wizard_schema,
+                    response_schema=gemini_wizard_schema,
                     temperature=0.7
                 )
             )

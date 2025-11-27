@@ -1,19 +1,22 @@
 <style>
+    /* --- Main Layout --- */
     .wizard-container {
         display: flex;
         gap: 1.5rem;
         max-width: 1200px;
         margin: 0 auto;
         flex-direction: row;
+        font-family: inherit;
     }
 
     .wizard-content {
         flex: 3;
-        background: var(--bg-primary);
-        border-radius: var(--radius-lg);
+        background: var(--bg-primary, #ffffff);
+        border-radius: var(--radius-lg, 12px);
         padding: 2rem;
-        box-shadow: var(--shadow-sm);
-        min-height: 70vh;
+        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
+        /* Changed from min-height: 70vh to fit-content */
+        height: fit-content;
         display: flex;
         flex-direction: column;
     }
@@ -30,8 +33,9 @@
         justify-content: space-between;
         margin-bottom: 2rem;
         padding-bottom: 1.5rem;
-        border-bottom: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color, #e0e0e0);
         list-style: none;
+        user-select: none;
     }
     .stepper-item {
         display: flex;
@@ -39,89 +43,135 @@
         align-items: center;
         flex: 1;
         cursor: not-allowed;
-        opacity: 0.5;
         position: relative;
     }
-    .stepper-item.completed, .stepper-item.active {
-        opacity: 1;
-    }
-    /* Allow clicking on completed steps */
-    .stepper-item.completed {
-        cursor: pointer;
-    }
+    
+    /* Stepper Dots */
     .stepper-dot {
-        width: 32px;
-        height: 32px;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
-        background: var(--bg-tertiary);
-        color: var(--text-secondary);
-        border: 2px solid var(--border-color);
+        background: var(--bg-tertiary, #f3f4f6);
+        color: var(--text-secondary, #6b7280);
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 600;
-        transition: var(--transition);
+        transition: all 0.2s ease;
         z-index: 2;
+        border: 2px solid var(--border-color, #e5e7eb);
     }
+
+    /* Active Step (Solid Blue) */
+    .stepper-item.active .stepper-dot {
+        background: var(--primary-color, #007bff);
+        color: white;
+        border-color: var(--primary-color, #007bff);
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.2);
+    }
+
+    /* Completed Step (White with Blue Border) */
+    .stepper-item.completed {
+        cursor: pointer;
+    }
+    .stepper-item.completed .stepper-dot {
+        background: white;
+        color: var(--primary-color, #007bff);
+        border-color: var(--primary-color, #007bff);
+    }
+
     .stepper-label {
         margin-top: 0.5rem;
         font-size: 0.875rem;
-        color: var(--text-secondary);
+        color: var(--text-secondary, #6b7280);
         font-weight: 500;
         text-align: center;
     }
-    .stepper-item.active .stepper-dot {
-        background: var(--gradient-primary);
-        color: white;
-        border-color: var(--primary-color);
-    }
-    .stepper-item.active .stepper-label {
-        color: var(--text-primary);
-    }
-    .stepper-item.completed .stepper-dot {
-        background: var(--bg-primary);
-        color: var(--primary-color);
-        border-color: var(--primary-color);
-    }
+    .stepper-item.active .stepper-label,
     .stepper-item.completed .stepper-label {
-        color: var(--text-primary);
+        color: var(--text-primary, #111827);
     }
-    /* Connector line logic */
+
+    /* Connector Lines */
     .stepper-item:not(:first-child)::before {
         content: '';
         position: absolute;
         width: 100%;
-        height: 2px;
-        background: var(--border-color);
-        top: 16px; /* center of dot */
+        height: 3px;
+        background: var(--border-color, #e5e7eb);
+        top: 18px; /* Half of dot height */
         right: 50%;
         transform: translateY(-50%);
         z-index: 1;
     }
-    /* The line before a 'completed' OR 'active' step should be filled */
+    /* Fill line if previous step is completed/active */
     .stepper-item.completed:not(:first-child)::before,
     .stepper-item.active:not(:first-child)::before {
-        background: var(--primary-color);
+        background: var(--primary-color, #007bff);
     }
+
 
     /* --- Step-by-Step Form --- */
     .wizard-step { display: none; animation: fadeIn 0.3s ease-out; }
     .wizard-step.active { display: block; }
-    .wizard-step h2 { font-size: 1.75rem; }
-    .wizard-step p.step-intro { font-size: 1.1rem; color: var(--text-secondary); margin-bottom: 2rem; }
+    .wizard-step h2 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+    .wizard-step p.step-intro { font-size: 1.1rem; color: var(--text-secondary, #6b7280); margin-bottom: 2rem; }
     .step-content { flex-grow: 1; }
-    .step-navigation { display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color); }
-    .step-navigation .action-btn { padding: 0.75rem 1.5rem; width: 120px; justify-content: center; }
+    
+    .step-navigation { 
+        display: flex; 
+        justify-content: space-between; 
+        margin-top: 2rem; 
+        padding-top: 1.5rem; 
+        border-top: 1px solid var(--border-color, #e0e0e0); 
+    }
+    .step-navigation .action-btn { 
+        padding: 0.75rem 1.5rem; 
+        width: 120px; 
+        justify-content: center;
+        border-radius: var(--radius-md, 8px);
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+    }
+    .action-btn.primary { background: var(--primary-color, #007bff); color: white; }
+    .action-btn.secondary { background: var(--bg-tertiary, #f3f4f6); color: var(--text-primary, #111827); }
+    .action-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-    /* Re-using form styles */
+    /* --- Form Elements --- */
     .form-section { margin-bottom: 1.5rem; }
-    .form-section label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary); font-size: 0.875rem; font-weight: 500; }
-    .form-section input, .form-section textarea, .form-section select { width: 100%; padding: 0.875rem 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); font-size: 1rem; }
-    .form-section input:focus, .form-section textarea:focus, .form-section select:focus { outline: none; border-color: var(--primary-color); }
+    .form-section label { display: block; margin-bottom: 0.5rem; color: var(--text-secondary, #555); font-size: 0.875rem; font-weight: 500; }
+    
+    .form-section input, 
+    .form-section textarea, 
+    .form-section select { 
+        width: 100%; 
+        padding: 0.875rem 1rem; 
+        border: 2px solid var(--border-color, #e0e0e0); 
+        border-radius: var(--radius-md, 8px); 
+        font-size: 1rem; 
+        font-family: inherit; 
+        box-sizing: border-box;
+    }
+    .form-section input:focus, .form-section textarea:focus, .form-section select:focus { 
+        outline: none; border-color: var(--primary-color, #007bff); 
+    }
+    
     .radio-group { display: flex; gap: 1rem; margin-bottom: 1rem; }
-    .radio-label { display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1rem; border: 2px solid var(--border-color); border-radius: var(--radius-md); cursor: pointer; }
-    .radio-label input { width: auto; margin-bottom: 0; }
-    .radio-label:has(input:checked) { background: var(--bg-tertiary); border-color: var(--primary-color); }
+    .radio-label { 
+        display: flex; 
+        align-items: center; 
+        justify-content: center; /* Centering Text */
+        gap: 0.5rem; 
+        padding: 0.75rem 1rem; 
+        border: 2px solid var(--border-color, #e0e0e0); 
+        border-radius: var(--radius-md, 8px); 
+        cursor: pointer; 
+        flex: 1; /* Make equal width */
+    }
+    /* Hide actual radio button */
+    .radio-label input[type="radio"] { display: none; }
+    .radio-label:has(input:checked) { background: var(--bg-tertiary, #f0f7ff); border-color: var(--primary-color, #007bff); }
     #w-venueSelectContainer, #w-customLocationContainer { display: none; }
 
     /* --- Review Step Formatting --- */
@@ -129,149 +179,136 @@
     #reviewStepContainer .review-label { 
         display: block;
         font-weight: 600;
-        color: var(--text-secondary); 
+        color: var(--text-secondary, #6b7280); 
         font-size: 0.875rem;
         margin-bottom: 0.25rem;
     }
-    #reviewStepContainer .review-value { 
-        color: var(--text-primary); 
-        font-size: 1.05rem; 
-    }
+    #reviewStepContainer .review-value { color: var(--text-primary, #111827); font-size: 1.05rem; }
     #reviewStepContainer .review-value.description { 
         white-space: pre-wrap;
         padding: 0.75rem; 
-        border-radius: var(--radius-sm);
+        background: var(--bg-tertiary, #f9fafb);
+        border-radius: var(--radius-sm, 6px);
         line-height: 1.6;
+        font-size: 0.95rem;
     }
-    #reviewStepContainer .review-value.missing { color: var(--text-light); font-style: italic; }
+    #reviewStepContainer .review-value.missing { color: var(--text-light, #9ca3af); font-style: italic; }
 
     /* --- AI Helper Sidebar --- */
     .ai-helper-card {
-        background: var(--bg-primary);
-        border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-sm);
-        border-radius: var(--radius-lg);
+        background: var(--bg-primary, #ffffff);
+        border: 1px solid var(--border-color, #e0e0e0);
+        box-shadow: var(--shadow-sm, 0 1px 2px rgba(0,0,0,0.05));
+        border-radius: var(--radius-lg, 12px);
         padding: 1.25rem;
         display: flex;
         flex-direction: column;
         position: sticky;
         top: 2rem; 
-        max-height: calc(100vh - 4rem); /* Constrain height */
+        height: calc(100vh - 4rem); 
         transition: all 0.3s ease;
     }
     .ai-helper-header {
-        display: flex;
-        justify-content: space-between; /* Space for toggle icon */
-        align-items: center;
-        margin-bottom: 1rem;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid var(--border-color);
+        display: flex; justify-content: space-between; align-items: center;
+        margin-bottom: 1rem; padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color, #e0e0e0);
         flex-shrink: 0;
-        cursor: default;
     }
-    .ai-helper-header h3 { font-size: 1.25rem; color: var(--text-primary); margin: 0; }
+    .ai-helper-header h3 { font-size: 1.25rem; margin: 0; background: var(--gradient-primary, linear-gradient(135deg, #007bff, #0056b3)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     
-    .ai-toggle-icon { display: none; } /* Hidden on desktop */
-
     .ai-helper-messages {
         flex-grow: 1;
-        overflow-y: auto; /* Makes messages scroll */
-        padding: 0 0.5rem;
-        min-height: 200px;
+        overflow-y: auto; 
+        overflow-x: hidden; 
+        padding-right: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
     }
 
-    /* Message styles */
-    .ai-helper-msg { display: flex; align-items: flex-start; margin-bottom: 1rem; max-width: 100%; }
-    .ai-helper-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 0.5rem; margin-top: 4px;}
-    .ai-helper-msg.ai .ai-helper-avatar { background: var(--gradient-primary); color: white; }
-    .ai-helper-msg.user { flex-direction: row-reverse; margin-left: auto; }
-    .ai-helper-msg.user .ai-helper-avatar { margin-right: 0; margin-left: 0.5rem; background: var(--bg-tertiary); }
+    .ai-helper-msg { display: flex; align-items: flex-end; max-width: 100%; }
+    .ai-helper-msg.user { flex-direction: row-reverse; }
     
-    .ai-helper-bubble { padding: 0.75rem; border-radius: var(--radius-lg); font-size: 0.9rem; line-height: 1.5; background: var(--bg-tertiary); color: var(--text-primary); width: 100%;}
-    .ai-helper-msg.user .ai-helper-bubble { background: var(--gradient-primary); color: white; width: auto;}
-    .ai-helper-msg.is-loading .ai-helper-bubble { font-style: italic; color: var(--text-light); }
+    .ai-helper-avatar { 
+        width: 28px; height: 28px; 
+        border-radius: 50%; 
+        display: flex; align-items: center; justify-content: center; 
+        flex-shrink: 0; font-size: 0.8rem;
+    }
+    
+    .ai-helper-msg.ai .ai-helper-avatar,
+    .ai-helper-msg.is-loading .ai-helper-avatar { 
+        background: var(--gradient-primary, linear-gradient(135deg, #007bff, #0056b3)); 
+        color: white; margin-right: 0.5rem;
+    }
+    
+    .ai-helper-msg.user .ai-helper-avatar { 
+        background: var(--bg-tertiary, #e5e7eb); 
+        color: var(--text-primary, #374151); margin-left: 0.5rem;
+    }
+    
+    .ai-helper-bubble { 
+        padding: 0.75rem 1rem; border-radius: 12px; 
+        font-size: 0.9rem; line-height: 1.5; 
+        width: fit-content; max-width: 85%; 
+        word-break: break-word; overflow-wrap: anywhere;
+    }
+    
+    .ai-helper-msg.ai .ai-helper-bubble,
+    .ai-helper-msg.is-loading .ai-helper-bubble {
+        background: var(--bg-tertiary, #f3f4f6); 
+        color: var(--text-primary, #1f2937); border-bottom-left-radius: 2px;
+    }
+    
+    .ai-helper-msg.user .ai-helper-bubble { 
+        background: var(--gradient-primary, #007bff); 
+        color: white; border-bottom-right-radius: 2px;
+    }
+    
+    .ai-helper-msg.is-loading .ai-helper-bubble { font-style: italic; color: var(--text-light, #6b7280); }
 
-    /* Suggestion Actions */
     .ai-suggestion-action {
-        display: block;
-        margin-top: 0.75rem;
-        padding: 0.5rem 0.75rem;
-        background: #e6f3ff;
-        border: 1px solid #b3d4ff;
-        border-radius: var(--radius-md);
-        color: #0056b3;
-        font-size: 0.85rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.2s;
-        text-align: left;
+        display: block; margin-top: 0.75rem; padding: 0.5rem 0.75rem;
+        background: white; border: 1px solid #d1d5db; border-radius: 6px;
+        color: var(--primary-color, #007bff); font-size: 0.85rem; font-weight: 600;
+        cursor: pointer; transition: all 0.2s; text-align: left; width: 100%;
     }
-    .ai-suggestion-action:hover {
-        background: #cce5ff;
-        transform: translateY(-1px);
-    }
-    .ai-suggestion-action strong { display: block; font-size: 0.75rem; color: #555; font-weight: 500; margin-bottom: 2px; }
+    .ai-suggestion-action:hover { background: #f9fafb; border-color: var(--primary-color, #007bff); }
     
-    /* Input form */
     .ai-helper-form { flex-shrink: 0; margin-top: 1rem; }
-    .ai-helper-input-wrapper { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 0.25rem 0.5rem 0.25rem 1rem; }
-    .ai-helper-input-wrapper input { flex-grow: 1; border: none; background: transparent; font-size: 0.9rem; padding: 0.5rem 0; }
+    .ai-helper-input-wrapper { display: flex; align-items: center; gap: 0.5rem; background: var(--bg-tertiary, #f3f4f6); border: 1px solid var(--border-color, #e5e7eb); border-radius: 24px; padding: 0.25rem 0.5rem 0.25rem 1rem; transition: border-color 0.2s; }
+    .ai-helper-input-wrapper:focus-within { border-color: var(--primary-color, #007bff); background: white; }
+    .ai-helper-input-wrapper input { flex-grow: 1; border: none; background: transparent; font-size: 0.9rem; padding: 0.6rem 0; font-family: inherit; }
     .ai-helper-input-wrapper input:focus { outline: none; }
-    .ai-helper-input-wrapper button { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px; background: var(--gradient-primary); color: white; border: none; border-radius: var(--radius-md); cursor: pointer; }
-    .ai-helper-input-wrapper button:disabled { background: var(--text-light); }
+    .ai-helper-input-wrapper button { display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; height: 36px; background: var(--gradient-primary, #007bff); color: white; border: none; border-radius: 50%; cursor: pointer; transition: transform 0.2s; }
+    .ai-helper-input-wrapper button:hover { transform: scale(1.05); }
+    .ai-helper-input-wrapper button:disabled { background: var(--text-light, #ccc); transform: none; }
 
-    .step-error { color: #c53030; background: #fff5f5; border: 1px solid #f56565; padding: 0.75rem 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; display: none; }
+    /* Error Message Moved to Bottom */
+    .step-error { 
+        color: #c53030; background: #fff5f5; 
+        border: 1px solid #f56565; padding: 0.75rem 1rem; 
+        border-radius: var(--radius-md); 
+        margin-top: 1.5rem; /* Margin top to separate from buttons */
+        display: none; 
+    }
     #wizardSubmitMessage { display: none; margin-top: 1rem; }
+    
+    .ai-toggle-icon { display: none; }
 
-    /* --- Mobile Breakpoint & Collapsible Logic --- */
     @media (max-width: 768px) {
-        .wizard-container { 
-            flex-direction: column; /* CHANGED: Put AI at bottom (not reverse) */
-        }
-        .wizard-sidebar { 
-            max-width: 100%; 
-            position: static;
-            margin-top: 2rem;
-            margin-bottom: 1rem; 
-        }
+        .wizard-container { flex-direction: column; }
+        .wizard-sidebar { max-width: 100%; position: static; margin-top: 2rem; }
         .wizard-content { min-height: auto; }
         .wizard-stepper { font-size: 0.8rem; }
         .stepper-label { font-size: 0.75rem; max-width: 60px; line-height: 1.2; }
-
-        /* Mobile specific AI card styles */
-        .ai-helper-card {
-            padding: 1rem;
-            max-height: none; /* Let it grow if expanded */
-        }
-        
-        .ai-helper-header {
-            cursor: pointer;
-            margin-bottom: 0; /* Remove margin when collapsed */
-            padding-bottom: 0; /* Remove padding when collapsed */
-            border-bottom: none;
-        }
-
-        .ai-toggle-icon {
-            display: block;
-            transform: rotate(0deg);
-            transition: transform 0.3s;
-        }
-
-        /* Collapsed State (Default on Mobile) */
+        .ai-helper-card { padding: 1rem; height: auto; max-height: 600px; }
+        .ai-helper-header { cursor: pointer; margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .ai-toggle-icon { display: block; transform: rotate(0deg); transition: transform 0.3s; }
         .ai-helper-card.collapsed .ai-helper-messages,
-        .ai-helper-card.collapsed .ai-helper-form {
-            display: none;
-        }
-
-        /* Expanded State */
-        .ai-helper-card.expanded .ai-helper-header {
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .ai-helper-card.expanded .ai-toggle-icon {
-            transform: rotate(180deg);
-        }
+        .ai-helper-card.collapsed .ai-helper-form { display: none; }
+        .ai-helper-card.expanded .ai-helper-header { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color); }
+        .ai-helper-card.expanded .ai-toggle-icon { transform: rotate(180deg); }
     }
 </style>
 
@@ -308,7 +345,6 @@
             <h2>Step 1: The Basics</h2>
             <p class="step-intro">Let's start with the "what" and "why." A great title and clear description are key.</p>
             <div class="step-content">
-                <div class="step-error" id="error-1"></div>
                 <div class="form-section">
                     <label for="w-title">Event Title*</label>
                     <input id="w-title" type="text" placeholder="e.g. Annual Design Symposium" required>
@@ -319,9 +355,10 @@
                 </div>
             </div>
             <div class="step-navigation">
-                <button class="action-btn secondary" disabled>Back</button>
+                <button class="action-btn secondary" style="visibility: hidden;">Back</button>
                 <button class="action-btn primary" onclick="navigateWizard(1, 'next')">Next</button>
             </div>
+            <div class="step-error" id="error-1"></div>
         </div>
 
         <!-- Step 2: Date & Time -->
@@ -329,7 +366,6 @@
             <h2>Step 2: Date & Time</h2>
             <p class="step-intro">When is your event happening? Be sure to check for conflicts.</p>
             <div class="step-content">
-                <div class="step-error" id="error-2"></div>
                 <div class="form-section" style="display: flex; gap: 1rem; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 200px;">
                         <label for="w-start">Start Time*</label>
@@ -345,6 +381,7 @@
                 <button class="action-btn secondary" onclick="navigateWizard(2, 'prev')">Back</button>
                 <button class="action-btn primary" onclick="navigateWizard(2, 'next')">Next</button>
             </div>
+            <div class="step-error" id="error-2"></div>
         </div>
 
         <!-- Step 3: Location -->
@@ -352,7 +389,6 @@
             <h2>Step 3: Location</h2>
             <p class="step-intro">Where will your event be held? On-campus or a custom address.</p>
             <div class="step-content">
-                <div class="step-error" id="error-3"></div>
                 <div class="form-section">
                     <div class="radio-group">
                         <label class="radio-label"> <input type="radio" name="w-location_type" value="custom" checked> Custom Address </label>
@@ -376,6 +412,7 @@
                 <button class="action-btn secondary" onclick="navigateWizard(3, 'prev')">Back</button>
                 <button class="action-btn primary" onclick="navigateWizard(3, 'next')">Next</button>
             </div>
+            <div class="step-error" id="error-3"></div>
         </div>
 
         <!-- Step 4: Settings -->
@@ -383,14 +420,13 @@
             <h2>Step 4: Settings</h2>
             <p class="step-intro">Who should be able to see this event?</p>
             <div class="step-content">
-                <div class="step-error" id="error-4"></div>
                 <div class="form-section" id="w-visibilityContainer">
                     <h3>Visibility*</h3>
                     <div class="radio-group">
-                        <label class="radio-label"> <input type="radio" name="w-visibility" value="public" checked> Public (Visible to everyone) </label>
-                        <label class="radio-label"> <input type="radio" name="w-visibility" value="private"> Private (Only visible to you) </label>
+                        <label class="radio-label"> <input type="radio" name="w-visibility" value="public" checked> Public </label>
+                        <label class="radio-label"> <input type="radio" name="w-visibility" value="private"> Private </label>
                     </div>
-                    <p style="color: var(--text-light); font-size: 0.875rem;" id="w-visibilityWarning">
+                    <p style="color: var(--text-light, #9ca3af); font-size: 0.875rem;" id="w-visibilityWarning">
                         Note: "Public" events may require approval.
                     </p>
                 </div>
@@ -399,6 +435,7 @@
                 <button class="action-btn secondary" onclick="navigateWizard(4, 'prev')">Back</button>
                 <button class="action-btn primary" onclick="navigateWizard(4, 'next')">Review</button>
             </div>
+            <div class="step-error" id="error-4"></div>
         </div>
 
         <!-- Step 5: Review & Submit -->
@@ -410,15 +447,14 @@
                 <div id="wizardSubmitMessage"></div>
             </div>
             <div class="step-navigation">
-                <button class="action-btn secondary" onclick="navigateWizard(5, 'prev')">Back</D>
+                <button class="action-btn secondary" onclick="navigateWizard(5, 'prev')">Back</button>
                 <button id="wizardSubmitBtn" class="action-btn primary" onclick="submitWizard()">Submit Event</button>
             </div>
         </div>
     </div>
 
-    <!-- Right Side: AI Helper (Updated for Mobile) -->
+    <!-- Right Side: AI Helper -->
     <aside class="wizard-sidebar">
-        <!-- Added 'collapsed' class logic via JS -->
         <div class="ai-helper-card" id="aiHelperCard">
             <div class="ai-helper-header" onclick="toggleMobileAI()">
                 <h3>AI Co-Pilot</h3>
@@ -432,7 +468,8 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>
                     </div>
                     <div class="ai-helper-bubble">
-                        <p id="ai-helper-intro-text">I'm here to help! I can brainstorm titles or rewrite descriptions for you.</p>
+                        <!-- UPDATED: New intro text -->
+                        <p id="ai-helper-intro-text">I'm here to help! Ask me to rewrite a description or suggest a title. If you like my suggestion, I'll give you an 'Update' button to apply it directly to the form.</p>
                     </div>
                 </div>
             </div>
@@ -449,10 +486,12 @@
 
 </div>
 
+<!-- Load marked via script tag to avoid module errors -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <script type="module">
     import { api } from '../js/api.js';
     import { getRoleFromToken } from '../js/app.js';
-    import { marked } from "https://cdn.jsdelivr.net/npm/marked/lib/marked.esm.js";
 
     const token = localStorage.getItem("token");
     const userRole = getRoleFromToken();
@@ -478,8 +517,6 @@
 
     // --- Mobile AI Toggle Logic ---
     window.toggleMobileAI = () => {
-        // Only works on mobile breakpoint check usually done via CSS state, 
-        // but here we just toggle classes that only affect mobile CSS.
         const card = document.getElementById('aiHelperCard');
         if (card.classList.contains('expanded')) {
             card.classList.remove('expanded');
@@ -490,7 +527,6 @@
         }
     };
 
-    // Initialize state for mobile (Collapsed by default)
     if (window.innerWidth <= 768) {
         document.getElementById('aiHelperCard').classList.add('collapsed');
     }
@@ -527,13 +563,17 @@
             currentStep++;
             maxStepCompleted = Math.max(maxStepCompleted, currentStep);
         } else {
+            // Save current step data even when going back to preserve edits
+            saveStepData(stepNum);
             currentStep--;
         }
         updateWizardView();
     }
     
     window.goToStep = (stepNum) => {
+        // Can always go back to completed steps
         if (stepNum <= maxStepCompleted) {
+            saveStepData(currentStep); // Save current progress before jump
             currentStep = stepNum;
             updateWizardView();
         }
@@ -547,22 +587,22 @@
         stepperItems.forEach((item, index) => {
             const step = index + 1;
             item.classList.toggle('active', step === currentStep);
-            item.classList.toggle('completed', step < maxStepCompleted);
+            item.classList.toggle('completed', step < currentStep); // Strictly less than current
             
-            if (step < maxStepCompleted) {
+            // Allow clicking previous steps or current step
+            if (step <= maxStepCompleted) {
                 item.onclick = () => goToStep(step);
                 item.style.cursor = 'pointer';
             } else {
-                item.onclick = (step === currentStep) ? () => goToStep(step) : null;
-                item.style.cursor = (step === currentStep) ? 'pointer' : 'not-allowed';
+                item.onclick = null;
+                item.style.cursor = 'not-allowed';
             }
         });
 
-        // Update AI helper context
         const activeStepEl = document.querySelector(`.wizard-step.active`);
         if (activeStepEl) {
             const context = activeStepEl.dataset.context;
-            document.getElementById('ai-helper-intro-text').textContent = `I'm ready to help with your ${context.toLowerCase()}.`;
+            document.getElementById('ai-helper-intro-text').textContent = `Hello! I'm ready to help with your ${context.toLowerCase()}. I can update your details if you ask me to.`;
             document.getElementById('ai-helper-messages').dataset.context = context;
         }
 
@@ -631,17 +671,33 @@
     function populateReviewStep() {
         const container = document.getElementById('reviewStepContainer');
         const venueSelect = document.getElementById('w-venue');
-        const venueText = venueSelect.value ? venueSelect.options[venueSelect.selectedIndex].text : 'N/A';
+        
+        // --- UPDATED: Ensure wizardData is up-to-date before populating ---
+        // This ensures any AI changes are reflected
+        saveStepData(1); saveStepData(2); saveStepData(3); saveStepData(4);
+        
+        const venueText = wizardData.venue_id ? (venueSelect.options[venueSelect.selectedIndex]?.text || 'N/A') : 'N/A';
         
         const f = (label, value, isDesc = false) => {
-            const val = value || 'Not provided';
+            let displayValue = value;
+            // Format dates
+            if (label.includes('Time') && value) {
+                try {
+                    displayValue = new Date(value).toLocaleString('en-US', {
+                        year: 'numeric', month: 'short', day: 'numeric',
+                        hour: 'numeric', minute: '2-digit', hour12: true
+                    });
+                } catch (e) { /* ignore invalid date */ }
+            }
+            
+            const val = displayValue || 'Not provided';
             const valClass = value ? (isDesc ? 'description' : '') : 'missing';
             return `<div class="review-item"><span class="review-label">${label}</span><span class="review-value ${valClass}">${val}</span></div>`;
         };
         container.innerHTML = `
             ${f('Title', wizardData.title)}
-            ${f('Start Time', wizardData.start_time ? new Date(wizardData.start_time).toLocaleString() : '')}
-            ${f('End Time', wizardData.end_time ? new Date(wizardData.end_time).toLocaleString() : '')}
+            ${f('Start Time', wizardData.start_time)}
+            ${f('End Time', wizardData.end_time)}
             ${f('Location', wizardData.location_type === 'venue' ? venueText : wizardData.custom_location_address)}
             ${f('Google Maps Link', wizardData.google_maps_link)}
             ${f('Visibility', wizardData.visibility)}
@@ -655,112 +711,236 @@
     const aiSendBtn = document.getElementById('ai-helper-send');
     const aiMessages = document.getElementById('ai-helper-messages');
 
-    // Get current field values to send to AI for context
+    // --- UPDATED: Now reads all fields ---
     function getCurrentStepValues() {
         return {
-            title: document.getElementById('w-title').value,
-            description: document.getElementById('w-description').value,
-            customLocation: document.getElementById('w-customLocation').value
-        };
-    }
-
-    aiForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const prompt = aiInput.value.trim();
-        if (!prompt) return;
-
-        const context = document.querySelector('.wizard-step.active').dataset.context || "general event planning";
-        aiInput.value = '';
-        aiInput.disabled = true;
-        aiSendBtn.disabled = true;
-
-        addHelperMessage('user', prompt);
-        const loadingMsg = addHelperMessage('is-loading', '...');
-
-        try {
-            const payload = { 
-                prompt, 
-                context, 
-                current_values: getCurrentStepValues() 
+                title: document.getElementById('w-title').value,
+                description: document.getElementById('w-description').value,
+                start_time: document.getElementById('w-start').value,
+                end_time: document.getElementById('w-end').value,
+                location_type: document.querySelector('input[name="w-location_type"]:checked').value,
+                venue: document.getElementById('w-venue').value,
+                customLocation: document.getElementById('w-customLocation').value,
+                visibility: document.querySelector('input[name="w-visibility"]:checked').value
             };
-            const result = await api('/ai/wizard-helper', 'POST', payload, token);
-            loadingMsg.remove();
-            
-            if (result.response) {
-                // Pass actions if they exist
-                addHelperMessage('ai', result.response, result.actions);
-            } else {
-                addHelperMessage('ai', `Error: ${result.error || 'No response'}`);
-            }
-        } catch (err) {
-            loadingMsg.remove();
-            addHelperMessage('ai', 'Error connecting to AI helper.');
-        } finally {
-            aiInput.disabled = false;
-            aiSendBtn.disabled = false;
-            aiInput.focus();
         }
-    });
+
+        aiForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const prompt = aiInput.value.trim();
+            if (!prompt) return;
+
+            // Use context from current step, or 'Review' if on step 5
+            let context = "general event planning";
+            if(currentStep === 5) context = "Reviewing Event Details";
+            else {
+                const activeStepEl = document.querySelector(`.wizard-step.active`);
+                if(activeStepEl) context = activeStepEl.dataset.context;
+            }
+
+            aiInput.value = '';
+            aiInput.disabled = true;
+            aiSendBtn.disabled = true;
+
+            addHelperMessage('user', prompt);
+            const loadingMsg = addHelperMessage('is-loading', 'Thinking...');
+
+            try {
+                const payload = { 
+                    prompt, 
+                    context, 
+                    user_time: new Date().toISOString(),
+                    current_values: getCurrentStepValues() 
+                };
+                const result = await api('/ai/wizard-helper', 'POST', payload, token);
+                loadingMsg.remove();
+                
+                if (result.response) {
+                    addHelperMessage('ai', result.response, result.actions);
+                } else {
+                    addHelperMessage('ai', `Error: ${result.error || 'No response'}`);
+                }
+            } catch (err) {
+                loadingMsg.remove();
+                addHelperMessage('ai', 'Error connecting to AI helper.');
+            } finally {
+                aiInput.disabled = false;
+                aiSendBtn.disabled = false;
+                aiInput.focus();
+            }
+        });
 
     function addHelperMessage(sender, text, actions = null) {
+
+        // --- Friendly labels for Wizard & Main Form fields ---
+        const FIELD_LABELS = {
+            "w-title": "Title",
+            "w-description": "Description",
+            "w-start": "Start Time",
+            "w-end": "End Time",
+            "w-location_type": "Location Type",
+            "w-venue": "Venue",
+            "w-customLocation": "Custom Address",
+            "w-visibility": "Visibility",
+            "w-mapsLink": "Google Maps Link",
+
+            // Main Form fields (fallback)
+            "evTitle": "Title",
+            "evDescription": "Description",
+            "evStart": "Start Time",
+            "evEnd": "End Time",
+            "evCustomLocation": "Custom Address",
+            "location_type": "Location Type",
+            "visibility": "Visibility"
+        };
+
         const msg = document.createElement('div');
-        msg.className = `ai-helper-msg ${sender}`;
-        
+        msg.className = `ai-helper-msg ${sender === 'is-loading' ? 'ai is-loading' : sender}`;
+
         const avatar = document.createElement('div');
         avatar.className = 'ai-helper-avatar';
+
         const bubble = document.createElement('div');
         bubble.className = 'ai-helper-bubble';
 
+        // -------------------------
+        // AI or Loading Message
+        // -------------------------
         if (sender === 'ai' || sender === 'is-loading') {
-            avatar.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>`;
-            
-            // Render text with Markdown
-            bubble.innerHTML = (sender === 'is-loading') ? '...' : marked.parse(text);
+            avatar.innerHTML = `
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/>
+                </svg>
+            `;
 
-            // Render Actions
-            if (actions && actions.length > 0) {
-                actions.forEach(action => {
-                    const btn = document.createElement('button');
-                    btn.className = 'ai-suggestion-action';
-                    // Clean up field name for display (e.g., w-title -> Title)
-                    const fieldName = action.field.replace('w-', '').replace('ev', '').replace(/([A-Z])/g, ' $1').trim();
-                    const displayValue = action.value.length > 50 ? action.value.substring(0, 48) + '...' : action.value;
-                    
-                    btn.innerHTML = `<strong>Update ${fieldName}</strong> "${displayValue}"`;
-                    btn.onclick = () => applyAIAction(action.field, action.value, btn);
-                    bubble.appendChild(btn);
-                });
+            if (sender === 'is-loading') {
+                bubble.innerHTML = `<span class="loading-dots">...</span>`;
+            } else {
+                bubble.innerHTML = window.marked ? window.marked.parse(text) : text;
+
+                // -------------------------
+                // ACTION BUTTONS
+                // -------------------------
+                if (actions && Array.isArray(actions) && actions.length > 0) {
+                    actions.forEach(action => {
+                        const btn = document.createElement('button');
+                        btn.className = 'ai-suggestion-action';
+
+                        // --- Friendly name lookup ---
+                        let friendlyLabel = FIELD_LABELS[action.field];
+
+                        // --- Fallback if unknown or missing ---
+                        if (!friendlyLabel) {
+                            if (action.field) {
+                                // Convert "w-customLocation" → "Custom Location"
+                                friendlyLabel = action.field
+                                    .replace(/^w-/, "")
+                                    .replace(/^ev/, "")
+                                    .replace(/[-_]/g, " ")
+                                    .replace(/([A-Z])/g, " $1")
+                                    .trim();
+                                // Capitalize first letter
+                                friendlyLabel = friendlyLabel.charAt(0).toUpperCase() + friendlyLabel.slice(1);
+                            } else {
+                                friendlyLabel = "Field"; // Safe fallback
+                            }
+                        }
+
+                        // Trim long values
+                        const displayValue = (action.value && action.value.length > 50)
+                            ? action.value.substring(0, 48) + "..."
+                            : (action.value || "");
+
+                        btn.innerHTML = `<strong>Update ${friendlyLabel}</strong> "${displayValue}"`;
+                        btn.onclick = () => applyAIAction(action.field, action.value, btn);
+
+                        bubble.appendChild(btn);
+                    });
+                }
             }
-        } else { // user
-            avatar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+
+        // -------------------------
+        // USER Message 
+        // -------------------------
+        } else {
+            avatar.innerHTML = `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
+                    stroke="currentColor" stroke-width="2.5">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8
+                            a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+            `;
             bubble.textContent = text;
         }
-        
+
+        // Append to sidebar
         msg.appendChild(avatar);
         msg.appendChild(bubble);
         aiMessages.appendChild(msg);
+
+        // Auto-scroll to bottom
         aiMessages.scrollTop = aiMessages.scrollHeight;
+
         return msg;
     }
 
+    // --- UPDATED: Handles all field types and updates wizardData + Review Step ---
     function applyAIAction(fieldId, value, btnElement) {
-        const field = document.getElementById(fieldId);
-        if (field) {
-            field.value = value;
-            // Visual feedback
-            field.style.transition = "background-color 0.3s";
-            field.style.backgroundColor = "#e6f3ff"; // highlight blue
-            setTimeout(() => { field.style.backgroundColor = ""; }, 1000);
-            
-            // Button feedback
+        let fieldChanged = false;
+
+        // Handle Radio Buttons
+        if (fieldId === 'w-location_type' || fieldId === 'w-visibility') {
+            const radio = document.querySelector(`input[name="${fieldId}"][value="${value}"]`);
+            if (radio) {
+                radio.checked = true;
+                wizardData[fieldId] = value;
+                fieldChanged = true;
+                if (fieldId === 'w-location_type') {
+                    handleLocationTypeChange(); // Update UI
+                }
+            }
+        } 
+        // Handle Select & Text Inputs
+        else {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.value = value;
+                // Highlight effect
+                field.style.transition = "background-color 0.3s";
+                field.style.backgroundColor = "#e6f3ff";
+                setTimeout(() => { field.style.backgroundColor = ""; }, 1000);
+                
+                // Map field IDs to wizardData keys
+                if (fieldId === 'w-title') wizardData.title = value;
+                if (fieldId === 'w-description') wizardData.description = value;
+                if (fieldId === 'w-start') wizardData.start_time = value;
+                if (fieldId === 'w-end') wizardData.end_time = value;
+                if (fieldId === 'w-venue') wizardData.venue_id = value;
+                if (fieldId === 'w-customLocation') wizardData.custom_location_address = value;
+                if (fieldId === 'w-mapsLink') wizardData.google_maps_link = value;
+                
+                fieldChanged = true;
+            } else {
+                console.error("Field not found:", fieldId);
+            }
+        }
+
+        if (fieldChanged) {
+            // Update button feedback
             btnElement.innerHTML = `<strong>Updated!</strong>`;
             btnElement.style.background = "#d4edda";
             btnElement.style.color = "#155724";
             btnElement.style.borderColor = "#c3e6cb";
             btnElement.disabled = true;
             btnElement.style.cursor = "default";
+            
+            // --- KEY FIX: If we are on the Review Step (5), re-render it ---
+            if (currentStep === 5) {
+                populateReviewStep();
+            }
         } else {
-            console.error("Field not found:", fieldId);
+             console.error("AI action failed for field:", fieldId, "with value:", value);
         }
     }
     
@@ -770,6 +950,9 @@
         const msgDiv = document.getElementById('wizardSubmitMessage');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
+
+        // --- UPDATED: Ensure data is saved before submit ---
+        saveStepData(currentStep); // Save final step (usually 4, but 5 calls this)
 
         const startISO = wizardData.start_time ? new Date(wizardData.start_time).toISOString() : null;
         const endISO = wizardData.end_time ? new Date(wizardData.end_time).toISOString() : null;
@@ -813,7 +996,4 @@
     handleLocationTypeChange();
     loadVenues();
     updateWizardView();
-    stepperItems.forEach((item, index) => {
-        item.onclick = () => goToStep(index + 1);
-    });
 </script>

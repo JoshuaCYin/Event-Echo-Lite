@@ -182,7 +182,7 @@
                     <svg width="27" height="27" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>
                 </div>
                 <div class="message-bubble">
-                    <p>Hello! I'm EventEcho, your AI assistant. I can see upcoming campus events and help you plan your own. How can I help?</p>
+                    <p>Hello! I'm EventEcho, your AI assistant. How can I help?</p>
                 </div>
             </div>
 
@@ -190,13 +190,13 @@
 
         <div class="smart-start-container" id="smart-start-container">
             <div class="smart-start-grid">
-                <button class="smart-start-btn" data-prompt="What public events are happening this week?">
+                <!-- UPDATED: Prompt is more specific per your request -->
+                <button class="smart-start-btn" data-prompt="What public events are happening soon?">
                     Check upcoming events
                 </button>
                 <button class="smart-start-btn" data-prompt="Suggest 3 themes for a spring fundraiser.">
                     Brainstorm event themes
                 </button>
-                <!-- FIX: Updated data-prompt to be more generic -->
                 <button class="smart-start-btn" data-prompt="Help me draft a new event.">
                     Draft an event
                 </button>
@@ -240,10 +240,8 @@
     const chatError = document.getElementById('chat-error');
     const smartStartContainer = document.getElementById('smart-start-container');
 
-    // --- FIX: RE-IMPLEMENTED LOGIC ---
     const MAX_HISTORY = 10;
     let chatHistory = [];
-    // ---------------------------------
 
     function addMessage(sender, message, eventDraft = null) {
         const messageDiv = document.createElement('div');
@@ -267,7 +265,7 @@
                 bubble.querySelectorAll('pre code').forEach(block => window.hljs.highlightElement(block));
             }
 
-            // --- FIX: RE-IMPLEMENTED DRAFT LOGIC ---
+            // --- This is the Draft Button logic ---
             if (eventDraft && eventDraft.title) {
                 const draftButton = document.createElement('button');
                 draftButton.className = 'ai-draft-button';
@@ -312,7 +310,6 @@
         chatError.style.display = 'none';
     }
 
-    // --- FIX: RE-IMPLEMENTED SMART START ---
     smartStartContainer.addEventListener('click', (e) => {
         const button = e.target.closest('.smart-start-btn');
         if (button) {
@@ -325,37 +322,42 @@
     function hideSmartStart() {
         if (smartStartContainer) smartStartContainer.style.display = 'none';
     }
-    // -------------------------------------
 
-    // --- FIX: RE-IMPLEMENTED EVENT CONTEXT ---
+    // --- UPDATED: This function now strictly filters for upcoming events ---
     async function getEventContext() {
         try {
+            // This API call fetches all events (public, and private-own)
             const events = await api("/events/", "GET", null, token);
             
-            if (!events || events.length === 0 || (events.error && events.length === 1)) {
-                return "No upcoming public events found.";
+            if (!events || !Array.isArray(events) || events.length === 0 || (events.error && events.length === 1)) {
+                return "No upcoming public or private events found.";
             }
             
-            // UPDATE: Filter to include ONLY FUTURE events
+            // --- CRITICAL FIX: Filter to include ONLY FUTURE events ---
             const now = new Date();
-            const upcomingEvents = events.filter(e => new Date(e.start_time) >= now);
+            const upcomingEvents = events.filter(e => {
+                try {
+                    return new Date(e.start_time) >= now;
+                } catch(err) { return false; }
+            });
 
             if (upcomingEvents.length === 0) {
-                return "No upcoming public events found.";
+                return "No upcoming events found.";
             }
 
-            // SORT ASCENDING (Soonest -> Furthest) to give AI the most relevant context
+            // SORT ASCENDING (Soonest -> Furthest)
             upcomingEvents.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
-            let contextString = "Here are the top upcoming public events:\n";
+            let contextString = "Here are the top upcoming events (public and private):\n";
             // Take only top 10
             upcomingEvents.slice(0, 10).forEach((event, index) => {
                 const title = event.title;
                 const start = new Date(event.start_time).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
                 const end = new Date(event.end_time).toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' });
                 const location = event.location_type === 'venue' ? (event.venue_name || 'On-campus') : (event.custom_location_address || 'Custom Location');
+                const visibility = event.visibility || 'private';
                 
-                contextString += `${index + 1}. "${title}" from ${start} to ${end} at ${location}.\n`;
+                contextString += `${index + 1}. [${visibility}] "${title}" from ${start} to ${end} at ${location}.\n`;
             });
             return contextString;
         } catch (err) {
@@ -363,9 +365,7 @@
             return "Could not fetch event data due to a network error.";
         }
     }
-    // -----------------------------------------
 
-    // --- FIX: RE-IMPLEMENTED FULL SUBMIT HANDLER ---
     chatForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const prompt = chatInput.value.trim();
@@ -382,8 +382,18 @@
         const loadingElement = showLoading();
 
         try {
+            // --- UPDATED: Get context *before* sending ---
             const eventContext = await getEventContext();
-            const userTime = new Date().toISOString();
+            // Get accurate user-local time
+            const userTime = {
+                iso: new Date().toISOString(),
+                offset: new Date().getTimezoneOffset(),      // minutes difference from UTC
+                local: new Date().toLocaleString('en-US', {
+                    hour12: false,
+                    timeZoneName: 'short'
+                })
+            };
+
             const payload = { 
                 prompt, 
                 user_time: userTime,
@@ -416,5 +426,4 @@
             chatInput.focus();
         }
     });
-    // ---------------------------------------------
 </script>

@@ -97,10 +97,9 @@
         transition: all 0.2s ease-in-out;
         flex: 1;
     }
+    /* Hide actual radio button */
     .radio-label input[type="radio"] {
-        width: auto;
-        margin-bottom: 0;
-        accent-color: var(--primary-color, #007bff);
+        display: none;
     }
     .radio-label:has(input:checked) {
         background: var(--bg-tertiary, #f0f7ff);
@@ -159,6 +158,7 @@
         color: var(--primary-color); padding: 2px 8px; border-radius: 12px;
         font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;
         transition: all 0.2s;
+        flex-shrink: 0; /* Add this to prevent shrinking/wrapping */
     }
     .ai-assist-btn:hover { background: var(--bg-tertiary); transform: translateY(-1px); }
     .ai-assist-btn.loading { opacity: 0.7; cursor: wait; }
@@ -188,11 +188,6 @@
             
             <div class="label-with-ai">
                 <label for="evDescription">Description</label>
-                <!-- AI INTEGRATION BUTTON -->
-                <button type="button" class="ai-assist-btn" id="aiRewriteBtn">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>
-                    AI Rewrite
-                </button>
             </div>
             <textarea id="evDescription" placeholder="Tell attendees about your event..." rows="5"></textarea>
         </div>
@@ -330,7 +325,8 @@ const aiRewriteBtn = document.getElementById('aiRewriteBtn');
 aiRewriteBtn.addEventListener('click', async () => {
     const currentText = evDescription.value.trim();
     if (!currentText && !evTitle.value.trim()) {
-        alert("Please enter a title or some description text first.");
+        // --- Use a non-blocking message ---
+        showMessage("Please enter a title or some description text first.", "error-message");
         return;
     }
     
@@ -339,12 +335,16 @@ aiRewriteBtn.addEventListener('click', async () => {
     aiRewriteBtn.disabled = true;
     
     try {
+        // --- UPDATED: Send all relevant fields as context ---
         const payload = {
             prompt: "Rewrite this description to be professional, engaging, and clear.",
             context: "Main Event Form Description Field",
             current_values: {
-                title: evTitle.value,
-                description: evDescription.value
+                evTitle: evTitle.value,
+                evDescription: evDescription.value,
+                evStart: evStart.value,
+                evEnd: evEnd.value,
+                evCustomLocation: evCustomLocation.value
             }
         };
         
@@ -360,6 +360,14 @@ aiRewriteBtn.addEventListener('click', async () => {
                 evDescription.style.backgroundColor = '#e6f3ff';
                 setTimeout(() => evDescription.style.backgroundColor = '', 1000);
             }
+            // Also check if it updated the title
+             const titleAction = result.actions.find(a => a.field === 'evTitle');
+             if (titleAction) {
+                evTitle.value = titleAction.value;
+                evTitle.style.transition = 'background-color 0.5s';
+                evTitle.style.backgroundColor = '#e6f3ff';
+                setTimeout(() => evTitle.style.backgroundColor = '', 1000);
+            }
         } else if (result && result.response) {
              // Fallback if no specific action was generated
              // Check if response looks like a description (simple heuristic)
@@ -369,7 +377,7 @@ aiRewriteBtn.addEventListener('click', async () => {
         }
     } catch (err) {
         console.error("AI rewrite failed:", err);
-        alert("Could not rewrite text at this time.");
+        showMessage("Could not rewrite text at this time.", "error-message");
     } finally {
         aiRewriteBtn.classList.remove('loading');
         aiRewriteBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg> AI Rewrite`;
@@ -415,9 +423,7 @@ async function setupEditMode() {
         let startStr = event.start_time;
         let endStr = event.end_time;
         
-        if (startStr && !startStr.includes('Z') && !startStr.includes('+')) startStr += 'Z';
-        if (endStr && !endStr.includes('Z') && !endStr.includes('+')) endStr += 'Z';
-
+        // This handles UTC 'Z' or offset '+00:00' strings
         evStart.value = formatDateTimeForInput(startStr);
         evEnd.value = formatDateTimeForInput(endStr);
         // --------------------------------
@@ -456,6 +462,13 @@ function showTopError(msg) {
     topErrorDiv.style.display = 'block';
     form.style.opacity = '0.5';
     form.style.pointerEvents = 'none';
+}
+
+// --- UPDATED: Renamed for clarity and used for AI rewrite alerts too ---
+function showMessage(msg, typeClass) {
+    messageDiv.className = typeClass; // "success-message" or "error-message"
+    messageDiv.textContent = msg;
+    messageDiv.style.display = "block";
 }
 
 function formatDateTimeForInput(isoString) {
@@ -509,8 +522,7 @@ function handleLocationTypeChange() {
         venueSelectContainer.style.display = 'none';
         customLocationContainer.style.display = 'block';
     }
-    venueSelect.required = false;
-    evCustomLocation.required = false;
+    // --- Validation logic moved to submit handler ---
 }
 
 locationTypeRadios.forEach(radio => radio.addEventListener('change', handleLocationTypeChange));
@@ -529,14 +541,16 @@ function applyAIDraft() {
         }
         // Handle date/time fields
         if (draft.start_time) {
+            // AI returns full ISO, format it for the input
             evStart.value = formatDateTimeForInput(draft.start_time);
         }
         if (draft.end_time) {
+            // AI returns full ISO, format it for the input
             evEnd.value = formatDateTimeForInput(draft.end_time);
         }
         
         const aiDraftMessage = document.getElementById("aiDraftMessage");
-        aiDraftMessage.innerHTML = `<div class="ai-draft-applied"><span>✨ AI Draft applied!</span></div>`;
+        aiDraftMessage.innerHTML = `<div class="ai-draft-applied"><span>✨ AI Draft applied! Review details and save.</span></div>`;
         aiDraftMessage.style.display = 'block';
     } catch (e) { console.error(e); }
     localStorage.removeItem('aiEventDraft');
@@ -554,12 +568,27 @@ form.addEventListener("submit", async (e) => {
     const endLocal = evEnd.value;
     const location_type = document.querySelector('input[name="location_type"]:checked').value;
     
-    if (new Date(startLocal) >= new Date(endLocal)) {
-        messageDiv.className = "error-message";
-        messageDiv.textContent = "End time must be after start time";
-        messageDiv.style.display = "block";
+    // --- Validation ---
+    if (!title || !startLocal || !endLocal) {
+        showMessage("Title, Start Time, and End Time are required.", "error-message");
         return;
     }
+    if (new Date(startLocal) >= new Date(endLocal)) {
+        showMessage("End time must be after start time.", "error-message");
+        return;
+    }
+    const venueId = (location_type === 'venue' && venueSelect.value) ? venueSelect.value : null;
+    const customAddress = (location_type === 'custom' && evCustomLocation.value) ? evCustomLocation.value : null;
+
+    if (location_type === 'venue' && !venueId) {
+        showMessage("Please select an on-campus venue.", "error-message");
+        return;
+    }
+    if (location_type === 'custom' && !customAddress) {
+        showMessage("Please enter a custom address.", "error-message");
+        return;
+    }
+    // --- End Validation ---
 
     const startISO = startLocal ? new Date(startLocal).toISOString() : null;
     const endISO = endLocal ? new Date(endLocal).toISOString() : null;
@@ -574,8 +603,8 @@ form.addEventListener("submit", async (e) => {
         visibility: (userRole === 'admin' || userRole === 'organizer') 
             ? document.querySelector('input[name="visibility"]:checked').value 
             : 'private',
-        venue_id: (location_type === 'venue' && venueSelect.value) ? venueSelect.value : null,
-        custom_location_address: (location_type === 'custom' && evCustomLocation.value) ? evCustomLocation.value : null,
+        venue_id: venueId,
+        custom_location_address: customAddress,
     };
 
     saveBtn.disabled = true;
@@ -592,18 +621,14 @@ form.addEventListener("submit", async (e) => {
         if (res.error) {
             throw new Error(res.error);
         } else {
-            messageDiv.className = "success-message";
-            messageDiv.textContent = isEditMode ? "Event updated! Redirecting..." : "Event created! Redirecting...";
+            showMessage(isEditMode ? "Event updated! Redirecting..." : "Event created! Redirecting...", "success-message");
             setTimeout(() => { window.location.hash = "#/calendar"; }, 1500);
         }
     } catch (error) {
         console.error("Submit error:", error);
-        messageDiv.className = "error-message";
-        messageDiv.textContent = error.message || "A network error occurred.";
+        showMessage(error.message || "A network error occurred.", "error-message");
         saveBtn.disabled = false;
         saveBtn.textContent = isEditMode ? "Update Event" : "Create Event";
-    } finally {
-        messageDiv.style.display = "block";
     }
 });
 
