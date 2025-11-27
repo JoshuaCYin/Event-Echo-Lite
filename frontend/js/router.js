@@ -18,6 +18,7 @@ const routes = {
   "#/dashboard": "pages/dashboard.html", // Admin/Org home
   "#/calendar": "pages/events.html", // Attendee home / Event Hub DEPRECATED
   "#/events": "pages/events.html",  // Event Hub
+  "#/admin": "pages/admin.html",
 
   // Event Creation Flow
   "#/create-event": "pages/create-event.html",   // The choice page
@@ -45,8 +46,9 @@ const authPages = ["#/login", "#/register"];
 const adminOnlyPages = [
     "#/dashboard",
     // "/create-event" is now open to all
-    "#/planning"
+    "#/planning",
     // "/event-form" is open to all, but backend/form logic handles permissions
+    "#/admin"
 ];
 
 async function router() {

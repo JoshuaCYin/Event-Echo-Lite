@@ -1,57 +1,46 @@
 """
-Venues service routes: create and list venues.
-Venues can be created by organizers/admins and listed by anyone.
+Venues service route handlers.
+Manages on-campus locations.
 """
 
 from flask import Blueprint, request, jsonify
 from backend.database.db_connection import get_db
 from backend.auth_service.utils import verify_token_from_request
-from dotenv import load_dotenv
-
-load_dotenv()
 
 venues_bp = Blueprint("venues", __name__)
 
 @venues_bp.route("/", methods=["GET"])
 def list_venues():
     """
-    Return all venues (simple list).
-    This is a public endpoint, as all users need to see venue options.
+    Get all venues. Public access allowed (anyone can see venues).
     """
-    sql = "SELECT venue_id, name, building, room_number, google_maps_link FROM venues ORDER BY name;"
-    
+    sql = "SELECT * FROM venues ORDER BY name;"
     try:
         with get_db() as conn:
             with conn.cursor() as cur:
                 cur.execute(sql)
-                rows = [dict(r) for r in cur.fetchall()]
+                venues = [dict(row) for row in cur.fetchall()]
+                return jsonify(venues), 200
     except Exception as e:
-        print(f"Database error listing venues: {e}")
-        return jsonify({"error": "Failed to retrieve venues"}), 500
-        
-    return jsonify(rows), 200
+        print(f"Error listing venues: {e}")
+        return jsonify({"error": "Failed to list venues"}), 500
+
 
 @venues_bp.route("/", methods=["POST"])
 def create_venue():
     """
-    Create a new venue.
-    Only organizers and admins can create new venues.
-    Body JSON: { 
-        "name": "...", 
-        "building": "..." (optional), 
-        "room_number": "..." (optional), 
-        "google_maps_link": "..." (optional)
-    }
+    Admin-only: Create a new venue.
     """
-    user_id, role, err, code = verify_token_from_request(required_roles=["organizer", "admin"])
+    _, _, err, code = verify_token_from_request(required_roles=["admin"])
     if err:
         return err, code
 
     data = request.get_json() or {}
     name = data.get("name")
+    building = data.get("building")
     
-    if not name:
-        return jsonify({"error": "Venue 'name' is required"}), 400
+    if not name or not building:
+        return jsonify({"error": "Name and Building are required"}), 400
 
     sql = """
         INSERT INTO venues (name, building, room_number, google_maps_link)
@@ -63,16 +52,79 @@ def create_venue():
         with get_db() as conn:
             with conn.cursor() as cur:
                 cur.execute(sql, (
-                    name,
-                    data.get("building"),
-                    data.get("room_number"),
+                    name, 
+                    building, 
+                    data.get("room_number"), 
                     data.get("google_maps_link")
                 ))
-                new_venue = cur.fetchone()
+                venue = cur.fetchone()
                 conn.commit()
-                venue_id = new_venue["venue_id"]
+                return jsonify(venue), 201
     except Exception as e:
-        print(f"Database error creating venue: {e}")
+        print(f"Error creating venue: {e}")
         return jsonify({"error": "Failed to create venue"}), 500
 
-    return jsonify({"venue_id": venue_id, "name": name}), 201
+
+@venues_bp.route("/<int:venue_id>", methods=["PUT"])
+def update_venue(venue_id):
+    """
+    Admin-only: Update a venue.
+    """
+    _, _, err, code = verify_token_from_request(required_roles=["admin"])
+    if err:
+        return err, code
+
+    data = request.get_json() or {}
+    
+    # Simple dynamic update query builder
+    allowed_fields = ["name", "building", "room_number", "google_maps_link"]
+    fields = []
+    values = []
+    
+    for key in allowed_fields:
+        if key in data:
+            fields.append(f"{key} = %s")
+            values.append(data[key])
+            
+    if not fields:
+        return jsonify({"error": "No valid fields to update"}), 400
+        
+    values.append(venue_id)
+    sql = f"UPDATE venues SET {', '.join(fields)} WHERE venue_id = %s RETURNING *;"
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql, values)
+                updated = cur.fetchone()
+                if not updated:
+                    return jsonify({"error": "Venue not found"}), 404
+                conn.commit()
+                return jsonify(dict(updated)), 200
+    except Exception as e:
+        print(f"Error updating venue: {e}")
+        return jsonify({"error": "Failed to update venue"}), 500
+
+
+@venues_bp.route("/<int:venue_id>", methods=["DELETE"])
+def delete_venue(venue_id):
+    """
+    Admin-only: Delete a venue.
+    """
+    _, _, err, code = verify_token_from_request(required_roles=["admin"])
+    if err:
+        return err, code
+
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                # Check for usage (optional, but good practice)
+                # For now, relying on DB constraints (ON DELETE SET NULL in events table)
+                cur.execute("DELETE FROM venues WHERE venue_id = %s;", (venue_id,))
+                if cur.rowcount == 0:
+                     return jsonify({"error": "Venue not found"}), 404
+                conn.commit()
+                return jsonify({"status": "deleted"}), 200
+    except Exception as e:
+        print(f"Error deleting venue: {e}")
+        return jsonify({"error": "Failed to delete venue"}), 500

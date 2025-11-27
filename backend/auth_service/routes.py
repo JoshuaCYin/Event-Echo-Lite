@@ -8,6 +8,7 @@ Provides routes for:
 - Profile retrieval (/me)
 - Profile update (/me PUT)
 - Admin role assignment
+- Admin user listing (New)
 
 All JWT logic is delegated to `auth_service.utils`.
 """
@@ -311,6 +312,42 @@ def update_current_user():
         return jsonify({"error": "Update failed"}), 500
 
     return jsonify(dict(updated_user)), 200
+
+
+# ----------------------------------------------------
+# LIST USERS (ADMIN ONLY)
+# ----------------------------------------------------
+@auth_bp.route("/users", methods=["GET"])
+def list_users():
+    """
+    Admin-only endpoint to list all users.
+    Returns:
+        200: [ {user_id, email, first_name, last_name, role}, ... ]
+    """
+    _, _, err, code = verify_token_from_request(required_roles=["admin"])
+    if err:
+        return err, code
+
+    sql = """
+        SELECT user_id, email, first_name, last_name, role, created_at, major_department 
+        FROM users 
+        ORDER BY user_id ASC;
+    """
+    
+    try:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(sql)
+                users = [dict(row) for row in cur.fetchall()]
+                # Convert timestamps to string
+                for u in users:
+                    if u.get('created_at'):
+                        u['created_at'] = u['created_at'].isoformat()
+    except Exception as e:
+        print(f"Error listing users: {e}")
+        return jsonify({"error": "Failed to retrieve users"}), 500
+
+    return jsonify(users), 200
 
 
 # ----------------------------------------------------
