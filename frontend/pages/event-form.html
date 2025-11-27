@@ -312,79 +312,14 @@ async function init() {
     // Setup Logic based on Mode
     if (isEditMode) {
         setupEditMode();
-    } else {
-        setupCreateMode();
     }
+
+    // ALWAYS try to apply the AI draft
+    applyAIDraft();
 
     // Initialize Location Logic
     handleLocationTypeChange();
 }
-
-// --- AI REWRITE LOGIC (NEW) ---
-const aiRewriteBtn = document.getElementById('aiRewriteBtn');
-aiRewriteBtn.addEventListener('click', async () => {
-    const currentText = evDescription.value.trim();
-    if (!currentText && !evTitle.value.trim()) {
-        // --- Use a non-blocking message ---
-        showMessage("Please enter a title or some description text first.", "error-message");
-        return;
-    }
-    
-    aiRewriteBtn.classList.add('loading');
-    aiRewriteBtn.textContent = 'Rewriting...';
-    aiRewriteBtn.disabled = true;
-    
-    try {
-        // --- UPDATED: Send all relevant fields as context ---
-        const payload = {
-            prompt: "Rewrite this description to be professional, engaging, and clear.",
-            context: "Main Event Form Description Field",
-            current_values: {
-                evTitle: evTitle.value,
-                evDescription: evDescription.value,
-                evStart: evStart.value,
-                evEnd: evEnd.value,
-                evCustomLocation: evCustomLocation.value
-            }
-        };
-        
-        const result = await api('/ai/wizard-helper', 'POST', payload, token);
-        
-        if (result && result.actions) {
-            // Find the action for the description field
-            const descAction = result.actions.find(a => a.field === 'evDescription');
-            if (descAction) {
-                evDescription.value = descAction.value;
-                // Highlight effect
-                evDescription.style.transition = 'background-color 0.5s';
-                evDescription.style.backgroundColor = '#e6f3ff';
-                setTimeout(() => evDescription.style.backgroundColor = '', 1000);
-            }
-            // Also check if it updated the title
-             const titleAction = result.actions.find(a => a.field === 'evTitle');
-             if (titleAction) {
-                evTitle.value = titleAction.value;
-                evTitle.style.transition = 'background-color 0.5s';
-                evTitle.style.backgroundColor = '#e6f3ff';
-                setTimeout(() => evTitle.style.backgroundColor = '', 1000);
-            }
-        } else if (result && result.response) {
-             // Fallback if no specific action was generated
-             // Check if response looks like a description (simple heuristic)
-             if (result.response.length > 20) {
-                 evDescription.value = result.response;
-             }
-        }
-    } catch (err) {
-        console.error("AI rewrite failed:", err);
-        showMessage("Could not rewrite text at this time.", "error-message");
-    } finally {
-        aiRewriteBtn.classList.remove('loading');
-        aiRewriteBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg> AI Rewrite`;
-        aiRewriteBtn.disabled = false;
-    }
-});
-
 
 // --- Create vs Edit Setup ---
 
@@ -464,7 +399,6 @@ function showTopError(msg) {
     form.style.pointerEvents = 'none';
 }
 
-// --- UPDATED: Renamed for clarity and used for AI rewrite alerts too ---
 function showMessage(msg, typeClass) {
     messageDiv.className = typeClass; // "success-message" or "error-message"
     messageDiv.textContent = msg;

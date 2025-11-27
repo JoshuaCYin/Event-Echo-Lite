@@ -602,7 +602,7 @@
         const activeStepEl = document.querySelector(`.wizard-step.active`);
         if (activeStepEl) {
             const context = activeStepEl.dataset.context;
-            document.getElementById('ai-helper-intro-text').textContent = `Hello! I'm ready to help with your ${context.toLowerCase()}. I can update your details if you ask me to.`;
+            document.getElementById('ai-helper-intro-text').textContent = `Hello! I'm ready to help with your ${context.toLowerCase()}. I can help update your details if you ask me to.`;
             document.getElementById('ai-helper-messages').dataset.context = context;
         }
 
