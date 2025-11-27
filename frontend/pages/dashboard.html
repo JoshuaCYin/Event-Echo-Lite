@@ -91,6 +91,12 @@
         border-radius: var(--radius-lg);
         color: var(--text-secondary);
     }
+
+    .admin-only-btn {
+        display: none; /* Hidden by default */
+        background: var(--text-primary) !important;
+        color: white !important;
+    }
 </style>
 
 <div class="page-transition-enter-active">
@@ -169,6 +175,14 @@
                 Create New Event
             </a>
 
+            <a href="#/admin" class="action-btn admin-only-btn" id="adminPanelBtn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+                Admin Console
+            </a>
+
             <a href="#/calendar" class="action-btn secondary">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -212,6 +226,7 @@
 
 <script type="module">
 import { api } from "../js/api.js";
+import { getRoleFromToken } from '../js/app.js';
 
 /**
  * Generates a display string for an event's location.
@@ -242,6 +257,13 @@ function getEventLocation(event) {
 async function loadDashboard() {
     try {
         const token = localStorage.getItem("token");
+        const role = getRoleFromToken();
+
+        // Reveal Admin Button if applicable
+        if (role === 'admin') {
+            document.getElementById('adminPanelBtn').style.display = 'inline-flex';
+        }
+
         const events = await api("/events/", "GET", null, token);
         
         // 1. Update Total Events

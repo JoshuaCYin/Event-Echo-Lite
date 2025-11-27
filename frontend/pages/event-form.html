@@ -488,7 +488,6 @@
                         <select id="evVenue">
                             <option value="">Loading venues...</option>
                         </select>
-                        <a href="#/dashboard" id="manageVenuesLink" style="display: none;">Manage Venues</a>
                     </div>
 
                     <label for="evMapsLink">Google Maps Link (Optional)</label>
@@ -587,7 +586,6 @@
     const customLocationContainer = document.getElementById("customLocationContainer");
     const locationTypeRadios = document.querySelectorAll('input[name="location_type"]');
     const visibilityContainer = document.getElementById("visibilityContainer");
-    const manageVenuesLink = document.getElementById("manageVenuesLink");
 
     // Detect Edit Mode
     const hashParts = window.location.hash.split('?');
@@ -595,13 +593,14 @@
     const eventId = params.get('id');
     const isEditMode = !!eventId;
 
+    let allVenues = [];
+
     // --- Initialization Logic ---
 
     async function init() {
         // Role UI setup
         if (userRole === 'admin' || userRole === 'organizer') {
             visibilityContainer.style.display = 'block';
-            manageVenuesLink.style.display = 'block';
         } else {
             visibilityContainer.style.display = 'none';
             // Force private for regular users
@@ -718,6 +717,8 @@
     async function loadVenues() {
         try {
             const venues = await api("/venues/", "GET", null, token);
+            allVenues = venues || []; // Store globally for map link lookup
+            
             if (venues && venues.length > 0) {
                 venueSelect.innerHTML = '<option value="">-- Select a venue --</option>';
                 venues.forEach(venue => {
@@ -733,6 +734,37 @@
             console.error("Failed to load venues:", error);
         }
     }
+    
+    // Autofill maps link on venue select
+    venueSelect.addEventListener('change', () => {
+        const selectedId = venueSelect.value;
+        if (selectedId && allVenues.length > 0) {
+            const venue = allVenues.find(v => v.venue_id == selectedId);
+            if (venue) {
+                if (venue.google_maps_link) {
+                    // Only autofill if the Maps input is empty
+                    if (!evMapsLink.value) {
+                        evMapsLink.value = venue.google_maps_link;
+                        // Subtle visual cue (background color change)
+                        evMapsLink.style.transition = "background-color 0.3s";
+                        evMapsLink.style.backgroundColor = "#e6f3ff";
+                        setTimeout(() => evMapsLink.style.backgroundColor = "", 1000);
+                    }
+                } else {
+                    // If no Google Maps link is available, set it to an empty string
+                    evMapsLink.value = "";
+                }
+            }
+        }
+    });
+
+    evMapsLink.addEventListener('input', () => {
+        if (!evMapsLink.value) {
+            // If the Google Maps link input is empty, remove the autofilled link.
+            evMapsLink.value = ""; // Make sure the value is cleared.
+            venueSelect.value = ""; // Optionally clear the venue selection (if that's part of the intended behavior).
+        }
+    });
 
     function handleLocationTypeChange() {
         const type = document.querySelector('input[name="location_type"]:checked').value;

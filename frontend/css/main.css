@@ -1607,7 +1607,7 @@ input.is-invalid {
 .create-event-form select {
     width: 100%;
     padding: 0.875rem 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     border: 2px solid var(--border-color);
     border-radius: var(--radius-md);
     font-size: 1rem;
