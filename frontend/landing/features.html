@@ -119,7 +119,7 @@
   }
 
   /* === Robust Image Loading Styles === */
-  
+
   /* 1. By default, hide placeholder, show image */
   .visual-frame .placeholder-content {
     display: none;
@@ -128,6 +128,7 @@
     padding: 2rem;
     width: 100%;
   }
+
   .visual-frame img {
     display: block;
     width: 100%;
@@ -139,6 +140,7 @@
   .visual-frame.has-error img {
     display: none; /* Hide broken image */
   }
+
   .visual-frame.has-error .placeholder-content {
     display: block; /* Show placeholder */
   }
@@ -189,18 +191,19 @@
     .landing-features-container {
       padding: 90px 1rem 2rem 1rem; /* Reduce horizontal padding */
     }
-    
-    .feature-row, 
+
+    .feature-row,
     .feature-row.reverse {
       flex-direction: column;
       gap: 2rem;
       text-align: center;
       overflow: visible; /* Keep decorations visible */
     }
+
     .feature-list li {
       justify-content: center;
     }
-    
+
     /* Fix visual overflow issues */
     .feature-visual {
       width: 100%;
@@ -208,31 +211,32 @@
       overflow: visible; /*  Allow decorations on mobile too */
       position: relative;
     }
-    
+
     .visual-frame {
       aspect-ratio: 16/9;
       width: 100%;
       max-width: 100%; /* Ensure it doesn't exceed container */
     }
-    
+
     /* Hide or constrain decorations on mobile */
     .visual-decoration {
-      display: none; /* Hide decorations on mobile */
+      display: none;
+      /* Hide decorations on mobile */
       /* OR use this instead to keep them but constrained:
       width: 100px !important;
       height: 100px !important;
       filter: blur(40px);
       */
     }
-    
+
     .features-header {
       padding: 0 0.5rem; /* Extra padding constraint */
     }
-    
+
     .features-header h1 {
       font-size: 2rem;
     }
-    
+
     .features-cta {
       padding: 2rem 1rem;
     }
@@ -240,7 +244,7 @@
 </style>
 
 <div class="landing-features-container page-transition-enter-active">
-  
+
   <!-- Header -->
   <div class="features-header">
     <h1>Platform Features</h1>
@@ -252,18 +256,25 @@
     <div class="feature-content">
       <span class="feature-label">Discovery</span>
       <h2>Find Events That Matter</h2>
-      <p>Stop scrolling through endless emails. Our centralized hub makes it easy to find what's happening on campus right now.</p>
+      <p>Stop scrolling through endless emails. Our centralized hub makes it easy to find what's happening on campus
+        right now.</p>
       <ul class="feature-list">
         <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Advanced search & filtering
         </li>
         <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Card and List views
         </li>
         <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Instant category tags (coming soon)
         </li>
       </ul>
@@ -272,11 +283,15 @@
       <div class="visual-decoration decoration-style-1"></div>
       <div class="visual-frame">
         <!-- Primary Image -->
-        <img src="assets/features_discovery.png" alt="Discovery Demo" onerror="this.closest('.visual-frame').classList.add('has-error')">
-        
+        <img src="assets/features_discovery.png" alt="Discovery Demo"
+          onerror="this.closest('.visual-frame').classList.add('has-error')">
+
         <!-- Fallback Placeholder -->
         <div class="placeholder-content">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
           <p>Image missing: <strong>features_discovery.png</strong></p>
         </div>
       </div>
@@ -288,30 +303,44 @@
     <div class="feature-content">
       <span class="feature-label">Planning</span>
       <h2>Visual Calendar View</h2>
-      <p>Get a bird's-eye view of the semester. See overlaps, plan your schedule, and never double-book yourself again.</p>
+      <p>Get a bird's-eye view of the semester. See overlaps, plan your schedule, and never double-book yourself again.
+      </p>
       <ul class="feature-list">
         <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Month, Week, Day, and List views
         </li>
         <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Interactive event details
         </li>
         <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Syncs with your RSVP status
         </li>
       </ul>
     </div>
     <div class="feature-visual">
-      <div class="visual-decoration decoration-style-2" style="left: -10%; right: auto; background: var(--accent-color);"></div>
+      <div class="visual-decoration decoration-style-2"
+        style="left: -10%; right: auto; background: var(--accent-color);"></div>
       <div class="visual-frame">
-        <img src="assets/features_calendar_view.png" alt="Calendar Demo" onerror="this.closest('.visual-frame').classList.add('has-error')">
+        <img src="assets/features_calendar_view.png" alt="Calendar Demo"
+          onerror="this.closest('.visual-frame').classList.add('has-error')">
 
         <!-- Fallback Placeholder -->
         <div class="placeholder-content">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
           <p>Add screenshot of <strong>Calendar View</strong></p>
         </div>
       </div>
@@ -323,18 +352,25 @@
     <div class="feature-content">
       <span class="feature-label">Intelligence</span>
       <h2>AI-Powered Assistant</h2>
-      <p>Not sure what to do this weekend? Our AI assistant analyzes your preferences to suggest events you'll love, or helps organizers write better descriptions.</p>
+      <p>Not sure what to do this weekend? Our AI assistant analyzes your preferences to suggest events you'll love, or
+        helps organizers write better descriptions.</p>
       <ul class="feature-list">
         <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Natural language chat interface
         </li>
         <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Personalized recommendations (coming soon)
         </li>
         <li>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Drafting help for organizers
         </li>
       </ul>
@@ -342,11 +378,14 @@
     <div class="feature-visual">
       <div class="visual-decoration decoration-style-1"></div>
       <div class="visual-frame">
-        <img src="assets/features_ai_upcoming_events.png" alt="AI Demo" onerror="this.closest('.visual-frame').classList.add('has-error')">
+        <img src="assets/features_ai_upcoming_events.png" alt="AI Demo"
+          onerror="this.closest('.visual-frame').classList.add('has-error')">
 
         <!-- Fallback Placeholder -->
         <div class="placeholder-content">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
           <p>Add screenshot of <strong>AI Chat</strong></p>
         </div>
       </div>

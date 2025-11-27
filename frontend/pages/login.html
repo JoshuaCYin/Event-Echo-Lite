@@ -1,70 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login Page</title>
 </head>
+
 <body>
   <div class="glass-card">
     <h2>Welcome Back</h2>
     <p style="color: var(--text-secondary); margin-bottom: 2rem;">Log in to manage your events</p>
-    
+
     <form id="loginForm">
-      <input 
-        id="logEmail" 
-        type="email" 
-        placeholder="Email" 
-        required
-        autocomplete="email"
-      >
-      <input 
-        id="logPass" 
-        type="password" 
-        placeholder="Password" 
-        required
-        autocomplete="current-password"
-      >
+      <input id="logEmail" type="email" placeholder="Email" required autocomplete="email">
+      <input id="logPass" type="password" placeholder="Password" required autocomplete="current-password">
       <button type="submit" id="loginBtn">Log In</button>
     </form>
-    
-    <p class="text-auth-account-question">No account? <a href="#/register" class="text-auth-account-answer">Create one</a></p>
-    
+
+    <p class="text-auth-account-question">
+      No account?
+      <a href="#/register" class="text-auth-account-answer">
+        Create one
+      </a>
+    </p>
+
     <div id="loginError" style="display: none; margin-top: 1rem;"></div>
   </div>
 
-<script type="module">
-import { handleLogin } from "../js/app.js";
+  <script type="module">
+    import { handleLogin } from "../js/app.js";
 
-const form = document.getElementById("loginForm");
-const errorDiv = document.getElementById("loginError");
+    const form = document.getElementById("loginForm");
+    const errorDiv = document.getElementById("loginError");
 
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  
-  const email = document.getElementById("logEmail").value;
-  const pass = document.getElementById("logPass").value;
-  const loginBtn = document.getElementById("loginBtn");
-  
-  // Disable button and show loading
-  loginBtn.disabled = true;
-  loginBtn.textContent = "Logging in...";
-  errorDiv.style.display = "none";
-  
-  const res = await handleLogin(email, pass);
-  
-  if (!res.success) {
-    // Show error
-    errorDiv.className = "error-message";
-    errorDiv.textContent = res.error || "Login failed. Please try again.";
-    errorDiv.style.display = "block";
-    
-    // Re-enable button
-    loginBtn.disabled = false;
-    loginBtn.textContent = "Log In";
-  }
-  // If success, handleLogin will redirect automatically
-});
-</script>
+    // Handle form submission
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("logEmail").value;
+      const pass = document.getElementById("logPass").value;
+      const loginBtn = document.getElementById("loginBtn");
+
+      // Disable button and show loading
+      loginBtn.disabled = true;
+      loginBtn.textContent = "Logging in...";
+      errorDiv.style.display = "none";
+
+      const res = await handleLogin(email, pass);
+
+      if (!res.success) {
+        // Show error
+        errorDiv.className = "error-message";
+        errorDiv.textContent = res.error || "Login failed. Please try again.";
+        errorDiv.style.display = "block";
+
+        // Re-enable button
+        loginBtn.disabled = false;
+        loginBtn.textContent = "Log In";
+      }
+      // If success, handleLogin will redirect automatically
+    });
+  </script>
 </body>
+
 </html>

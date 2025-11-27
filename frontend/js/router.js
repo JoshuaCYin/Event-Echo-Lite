@@ -3,22 +3,22 @@ import { loadPage } from "./utils.js";
 import { checkAuthAndRedirect, updateUserInfo, updateNavbarForAuth, getRoleFromToken } from "./app.js";
 
 const routes = {
-  // Landing/Public Routes
+  // --- Landing/Public Routes ---
   "#/": "landing/home.html",
   "#/landing": "landing/home.html",
   "#/landing-events": "landing/events.html",
   "#/landing-features": "landing/features.html",
   "#/landing-about": "landing/about.html",
 
-  // Auth Routes
+  // --- Auth Routes ---
   "#/login": "pages/login.html",
   "#/register": "pages/register.html",
   
-  // App/Protected Routes
+  // --- App/Protected Routes ---
   "#/dashboard": "pages/dashboard.html", // Admin/Org home
   "#/calendar": "pages/events.html", // Attendee home / Event Hub DEPRECATED
   "#/events": "pages/events.html",  // Event Hub
-  "#/admin": "pages/admin.html",
+  "#/admin": "pages/admin.html", // Admin management
 
   // Event Creation Flow
   "#/create-event": "pages/create-event.html",   // The choice page
@@ -33,6 +33,7 @@ const routes = {
   "#/profile-view": "pages/profile-view.html" // Read-only view of other users
 };
 
+// --- Public/Landing Pages ---
 const landingPages = [
   "#/", 
   "#/landing", 
@@ -40,20 +41,24 @@ const landingPages = [
   "#/landing-features",
   "#/landing-about"
 ];
-const authPages = ["#/login", "#/register"];
+
+// --- Auth Pages ---
+const authPages = [
+  "#/login",
+  "#/register"
+];
 
 // --- Role-protected Pages ---
 const adminOnlyPages = [
     "#/dashboard",
-    // "/create-event" is now open to all
     "#/planning",
-    // "/event-form" is open to all, but backend/form logic handles permissions
     "#/admin"
+    // "/event-form" is open to all, but backend/form logic handles permissions
 ];
 
 async function router() {
-  let hash = window.location.hash || "#/landing"; // <-- NEW
-  let path = hash.split('?')[0]; // NEW (e.g., #/profile-view)
+  let hash = window.location.hash || "#/landing"; // Default to landing
+  let path = hash.split('?')[0]; // Extract base path without query params
 
   // Handle 404
   if (!routes[path]) { // This check now uses the base path
@@ -67,23 +72,25 @@ async function router() {
     window.location.hash = path;
   }
   
+  // Determine page type
   const isLandingPage = landingPages.includes(path);
   const isAuthPage = authPages.includes(path);
   
+  // Get UI elements
   const landingNavbar = document.getElementById("landingNavbar");
   const sidebar = document.getElementById("sidebar");
   const mobileHeader = document.getElementById("mobileHeader");
   const mainContent = document.querySelector(".main-content");
   
-  updateNavbarForAuth();
+  updateNavbarForAuth(); // Update navbar links based on auth status
 
   if (isLandingPage || isAuthPage) {
-    // --- ON A PUBLIC PAGE (EITHER LANDING OR AUTH) ---
-    
+    // --- ON A PUBLIC/LANDING OR AUTH PAGE ---
     if (landingNavbar) landingNavbar.style.display = "flex";
     if (sidebar) sidebar.style.display = "none";
     if (mobileHeader) mobileHeader.style.display = "none";
     
+    // Adjust main content layout
     if (mainContent) {
       mainContent.style.marginLeft = "0";
       
@@ -101,7 +108,7 @@ async function router() {
   } else {
     // --- ON A PROTECTED/APP PAGE ---
     
-    const isAuthenticated = checkAuthAndRedirect();
+    const isAuthenticated = checkAuthAndRedirect(); // Redirects if not auth'd
     
     if (isAuthenticated) {
       // --- Role-based Page Access ---
@@ -112,22 +119,25 @@ async function router() {
           return; // Stop execution
       }
 
+      // Show/hide UI elements
       if (landingNavbar) landingNavbar.style.display = "none";
       if (sidebar) sidebar.style.display = "flex";
       if (mobileHeader) {
-        if (window.innerWidth <= 768) {
-          mobileHeader.style.display = "flex";
+        if (window.innerWidth <= 768) { // Mobile breakpoint
+          mobileHeader.style.display = "flex"; // Show on mobile
         } else {
-          mobileHeader.style.display = "none";
+          mobileHeader.style.display = "none"; // Hide on desktop
         }
       }
       
+      // Reset main content layout
       if (mainContent) {
         mainContent.style.marginLeft = "";
         mainContent.classList.remove("auth-layout");
         mainContent.classList.remove("landing-layout");
       }
       
+      // Update user info in sidebar
       updateUserInfo();
       await loadPage(routes[path]);
     }
@@ -136,6 +146,7 @@ async function router() {
   updateActiveNav(path);
 }
 
+// Handle mobile header visibility on resize
 window.addEventListener('resize', () => {
   const mobileHeader = document.getElementById("mobileHeader");
   const path = window.location.hash || "#/landing";
@@ -150,6 +161,7 @@ window.addEventListener('resize', () => {
   }
 });
 
+// Update active nav items based on current path
 function updateActiveNav(path) {
   const basePath = path.split('?')[0];
   

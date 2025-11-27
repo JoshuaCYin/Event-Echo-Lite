@@ -1,6 +1,8 @@
 <div class="glass-card">
     <h2>Create Account</h2>
-    <p style="color: var(--text-secondary); margin-bottom: 2rem;">Sign up to join the community!</p>
+    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+        Sign up to join the community!
+    </p>
     
     <form id="registerForm">
         <div style="display: flex; gap: 1rem;">
@@ -46,7 +48,12 @@
         <button type="submit" id="registerBtn">Create Account</button>
     </form>
     
-    <p class="text-auth-account-question">Already have an account? <a href="#/login" class="text-auth-account-answer">Log in</a></p>
+    <p class="text-auth-account-question">
+        Already have an account?
+        <a href="#/login" class="text-auth-account-answer">
+            Log in
+        </a>
+    </p>
     
     <div id="registerMessage" style="display: none; margin-top: 1rem;"></div>
 </div>
@@ -82,7 +89,7 @@ form.addEventListener("submit", async (e) => {
         return;
     }
     
-    if (pass.length < 8) {
+    if (pass.length < 8) { // Minimum length check, set to 8
         messageDiv.className = "error-message";
         messageDiv.textContent = "Password must be at least 8 characters.";
         messageDiv.style.display = "block";

@@ -18,6 +18,7 @@
         text-decoration: none;
         color: inherit;
     }
+
     .mini-event-card:hover {
         transform: translateY(-3px);
         box-shadow: var(--shadow-md);
@@ -35,6 +36,7 @@
         padding: 1rem 0.5rem;
         text-align: center;
     }
+
     .mini-card-month {
         font-size: 0.85rem;
         text-transform: uppercase;
@@ -42,6 +44,7 @@
         color: var(--primary-color);
         letter-spacing: 0.5px;
     }
+
     .mini-card-day {
         font-size: 1.75rem;
         font-weight: 700;
@@ -49,6 +52,7 @@
         line-height: 1;
         margin: 0.25rem 0;
     }
+
     .mini-card-time {
         font-size: 0.75rem;
         color: var(--text-secondary);
@@ -60,8 +64,9 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        min-width: 0; /* Text truncation fix */
+        min-width: 0;
     }
+
     .mini-card-title {
         font-size: 1.1rem;
         font-weight: 600;
@@ -71,6 +76,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
     .mini-card-meta {
         display: flex;
         align-items: center;
@@ -78,11 +84,12 @@
         font-size: 0.85rem;
         color: var(--text-secondary);
     }
+
     .mini-card-meta svg {
         flex-shrink: 0;
         color: var(--text-light);
     }
-    
+
     .empty-dashboard-state {
         grid-column: 1 / -1;
         text-align: center;
@@ -177,8 +184,8 @@
 
             <a href="#/admin" class="action-btn admin-only-btn" id="adminPanelBtn">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z"/>
-                    <path d="M12 6v6l4 2"/>
+                    <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" />
+                    <path d="M12 6v6l4 2" />
                 </svg>
                 Admin Console
             </a>
@@ -213,7 +220,9 @@
     <section class="events-section">
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom: 0.5rem;">
             <h2 style="margin:0;">Upcoming This Week</h2>
-            <a href="#/calendar" style="font-size:0.9rem; color:var(--primary-color); text-decoration:none; font-weight:500;">View All &rarr;</a>
+            <a href="#/calendar"
+                style="font-size:0.9rem; color:var(--primary-color); text-decoration:none; font-weight:500;">View All
+                &rarr;</a>
         </div>
         <div class="upcoming-events-container" id="upcomingEventsList">
             <div class="empty-dashboard-state">
@@ -225,95 +234,96 @@
 </div>
 
 <script type="module">
-import { api } from "../js/api.js";
-import { getRoleFromToken } from '../js/app.js';
+    import { api } from "../js/api.js";
+    import { getRoleFromToken } from '../js/app.js';
 
-/**
- * Generates a display string for an event's location.
- * @param {object} event - The event object from the API.
- * @returns {string} A formatted location string.
- */
-function getEventLocation(event) {
-    if (event.location_type === 'custom') {
-        return event.custom_location_address || 'Location TBA';
-    }
-    if (event.location_type === 'venue') {
-        let name = event.venue_name || 'On-Campus Venue';
-        let building = event.venue_building || '';
-        let room = event.venue_room || '';
-        
-        if (building && room) {
-            return `${name} (${building}, ${room})`;
+    /**
+     * Generates a display string for an event's location.
+     * @param {object} event - The event object from the API.
+     * @returns {string} A formatted location string.
+     */
+    function getEventLocation(event) {
+        if (event.location_type === 'custom') {
+            return event.custom_location_address || 'Location TBA';
         }
-        if (building) {
-            return `${name} (${building})`;
+        if (event.location_type === 'venue') {
+            let name = event.venue_name || 'On-Campus Venue';
+            let building = event.venue_building || '';
+            let room = event.venue_room || '';
+
+            if (building && room) {
+                return `${name} (${building}, ${room})`;
+            }
+            if (building) {
+                return `${name} (${building})`;
+            }
+            return name;
         }
-        return name;
+        return 'Location TBA';
     }
-    return 'Location TBA';
-}
 
-// Load dashboard data
-async function loadDashboard() {
-    try {
-        const token = localStorage.getItem("token");
-        const role = getRoleFromToken();
+    // Load dashboard data
+    async function loadDashboard() {
+        try {
+            const token = localStorage.getItem("token");
+            const role = getRoleFromToken();
 
-        // Reveal Admin Button if applicable
-        if (role === 'admin') {
-            document.getElementById('adminPanelBtn').style.display = 'inline-flex';
+            // Reveal Admin Button if applicable
+            if (role === 'admin') {
+                document.getElementById('adminPanelBtn').style.display = 'inline-flex';
+            }
+
+            const events = await api("/events/", "GET", null, token);
+
+            // 1. Update Total Events
+            document.getElementById("totalEvents").textContent = events.length;
+
+            // 2. Update Total Attendees (Sum up attendee_count from backend)
+            // Ensure we handle null/undefined counts safely
+            const totalAttendees = events.reduce((sum, event) => {
+                return sum + (parseInt(event.attendee_count) || 0);
+            }, 0);
+            document.getElementById("totalAttendees").textContent = totalAttendees;
+
+            const now = new Date();
+
+            // 3. Active Events
+            const activeEvents = events.filter(e => {
+                const start = new Date(e.start_time);
+                const end = new Date(e.end_time);
+                return start <= now && end >= now;
+            });
+            document.getElementById("activeEvents").textContent = activeEvents.length;
+
+            // 4. Upcoming Events (Next 7 Days)
+            const sevenDaysFromNow = new Date();
+            sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+
+            const upcomingEvents = events.filter(e => {
+                const start = new Date(e.start_time);
+                return start > now && start <= sevenDaysFromNow;
+            });
+            document.getElementById("upcomingEventsCount").textContent = upcomingEvents.length;
+
+            // 5. Display Upcoming Events
+            // Note: Even if the main list is Newest->Oldest, for a "What's Next" dashboard,
+            // it is best practice to show "Soonest" first.
+            const sortedUpcoming = upcomingEvents.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+
+            displayUpcomingEvents(sortedUpcoming.slice(0, 4)); // Show up to 4
+
+        } catch (error) {
+            console.error("Failed to load dashboard:", error);
+            document.getElementById("upcomingEventsList").innerHTML = '<div class="empty-dashboard-state">Failed to load info.</div>';
         }
-
-        const events = await api("/events/", "GET", null, token);
-        
-        // 1. Update Total Events
-        document.getElementById("totalEvents").textContent = events.length;
-        
-        // 2. Update Total Attendees (Sum up attendee_count from backend)
-        // Ensure we handle null/undefined counts safely
-        const totalAttendees = events.reduce((sum, event) => {
-            return sum + (parseInt(event.attendee_count) || 0);
-        }, 0);
-        document.getElementById("totalAttendees").textContent = totalAttendees;
-
-        const now = new Date();
-        
-        // 3. Active Events
-        const activeEvents = events.filter(e => {
-            const start = new Date(e.start_time);
-            const end = new Date(e.end_time);
-            return start <= now && end >= now;
-        });
-        document.getElementById("activeEvents").textContent = activeEvents.length;
-        
-        // 4. Upcoming Events (Next 7 Days)
-        const sevenDaysFromNow = new Date();
-        sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
-        
-        const upcomingEvents = events.filter(e => {
-            const start = new Date(e.start_time);
-            return start > now && start <= sevenDaysFromNow;
-        });
-        document.getElementById("upcomingEventsCount").textContent = upcomingEvents.length;
-        
-        // 5. Display Upcoming Events
-        // Note: Even if the main list is Newest->Oldest, for a "What's Next" dashboard,
-        // it is best practice to show "Soonest" first.
-        const sortedUpcoming = upcomingEvents.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
-        
-        displayUpcomingEvents(sortedUpcoming.slice(0, 4)); // Show up to 4
-        
-    } catch (error) {
-        console.error("Failed to load dashboard:", error);
-        document.getElementById("upcomingEventsList").innerHTML = '<div class="empty-dashboard-state">Failed to load info.</div>';
     }
-}
 
-function displayUpcomingEvents(events) {
-    const container = document.getElementById("upcomingEventsList");
-    
-    if (!events || events.length === 0) {
-        container.innerHTML = `
+    // Display upcoming events in the dashboard
+    function displayUpcomingEvents(events) {
+        const container = document.getElementById("upcomingEventsList");
+
+        if (!events || events.length === 0) {
+            container.innerHTML = `
             <div class="empty-dashboard-state">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color:var(--text-light); margin-bottom:1rem;">
                     <circle cx="12" cy="12" r="10"></circle>
@@ -324,23 +334,24 @@ function displayUpcomingEvents(events) {
                 <a href="#/calendar" style="color:var(--primary-color); text-decoration:none; font-size:0.9rem; margin-top:0.5rem; display:inline-block;">View Calendar</a>
             </div>
         `;
-        return;
-    }
-    
-    container.innerHTML = events.map(event => {
-        const startDate = new Date(event.start_time);
-        
-        // Format date parts
-        const month = startDate.toLocaleDateString('en-US', { month: 'short' });
-        const day = startDate.getDate();
-        const time = startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        
-        const location = getEventLocation(event);
-        
-        // Truncate location if too long
-        const displayLocation = location.length > 25 ? location.substring(0, 22) + '...' : location;
+            return;
+        }
 
-        return `
+        // Populate events
+        container.innerHTML = events.map(event => {
+            const startDate = new Date(event.start_time);
+
+            // Format date parts
+            const month = startDate.toLocaleDateString('en-US', { month: 'short' });
+            const day = startDate.getDate();
+            const time = startDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+            const location = getEventLocation(event);
+
+            // Truncate location if too long
+            const displayLocation = location.length > 25 ? location.substring(0, 22) + '...' : location;
+
+            return `
             <a href="#/event-form?id=${event.event_id}" class="mini-event-card" onclick="event.preventDefault(); window.location.hash='#/calendar';">
                 <div class="mini-card-date">
                     <span class="mini-card-month">${month}</span>
@@ -359,9 +370,9 @@ function displayUpcomingEvents(events) {
                 </div>
             </a>
         `;
-    }).join('');
-}
+        }).join('');
+    }
 
-// Load on page load
-loadDashboard();
+    // Load on page load
+    loadDashboard();
 </script>

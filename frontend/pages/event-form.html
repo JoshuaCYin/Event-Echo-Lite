@@ -225,8 +225,7 @@
     }
 
     .form-section h3 {
-        font-size: 1.125rem;
-        /* 18px */
+        font-size: 1.125rem; /* 18px */
         color: var(--text-secondary, #555);
         margin-bottom: 1rem;
     }
@@ -249,8 +248,7 @@
         display: block;
         margin-bottom: 0.5rem;
         color: var(--text-secondary, #555);
-        font-size: 0.875rem;
-        /* 14px */
+        font-size: 0.875rem; /* 14px */
         font-weight: 500;
     }
 
@@ -519,7 +517,7 @@
             <div id="formMessage" style="display: none; margin-top: 1rem;"></div>
         </div>
 
-        <!-- AI SIDEBAR (New) -->
+        <!-- AI SIDEBAR -->
         <aside class="wizard-sidebar">
             <div class="ai-helper-card" id="aiHelperCard">
                 <div class="ai-helper-header" onclick="toggleMobileAI()">
@@ -559,7 +557,7 @@
     </div>
 </div>
 
-<!-- Load marked via script tag to avoid module errors (same as wizard) -->
+<!-- Marked.js for Markdown Parsing -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script type="module">
@@ -629,12 +627,14 @@
 
     // --- Create vs Edit Setup ---
 
+    // Create Mode Setup
     function setupCreateMode() {
         document.getElementById("pageTitle").textContent = "New Event Details";
         saveBtn.textContent = "Create Event";
         applyAIDraft(); // ONLY apply drafts in create mode
     }
 
+    // Edit Mode Setup
     async function setupEditMode() {
         document.getElementById("pageTitle").textContent = "Edit Event";
         saveBtn.textContent = "Update Event";
@@ -643,13 +643,15 @@
         backLink.href = "#/calendar";
         backLink.querySelector("span").textContent = "Back to Calendar";
 
+        // Load existing event details
         try {
             const event = await api(`/events/${eventId}`, "GET", null, token);
             if (event.error) {
                 showTopError(event.error);
                 return;
             }
-
+            
+            // Populate form fields
             evTitle.value = event.title || "";
             evDescription.value = event.description || "";
             evMapsLink.value = event.google_maps_link || "";
@@ -657,6 +659,7 @@
             evStart.value = formatDateTimeForInput(event.start_time);
             evEnd.value = formatDateTimeForInput(event.end_time);
 
+            // Location
             if (event.location_type === 'venue') {
                 document.querySelector(`input[name="location_type"][value="venue"]`).checked = true;
                 if (venueSelect.options.length > 1) {
@@ -667,6 +670,7 @@
                 evCustomLocation.value = event.custom_location_address || "";
             }
 
+            // Visibility
             if (event.visibility) {
                 const visRadio = document.querySelector(`input[name="visibility"][value="${event.visibility}"]`);
                 if (visRadio) visRadio.checked = true;
@@ -682,6 +686,7 @@
 
     // --- Helper Functions ---
 
+    // Show top error and disable form
     function showTopError(msg) {
         topErrorDiv.textContent = msg;
         topErrorDiv.style.display = 'block';
@@ -689,12 +694,14 @@
         form.style.pointerEvents = 'none';
     }
 
+    // Show form message
     function showMessage(msg, typeClass) {
         messageDiv.className = typeClass;
         messageDiv.textContent = msg;
         messageDiv.style.display = "block";
     }
 
+    // Format ISO date string to 'YYYY-MM-DDTHH:MM' for datetime-local input
     function formatDateTimeForInput(isoString) {
         if (!isoString) return "";
         try {
@@ -714,11 +721,13 @@
         }
     }
 
+    // Load venues into the select dropdown
     async function loadVenues() {
         try {
             const venues = await api("/venues/", "GET", null, token);
             allVenues = venues || []; // Store globally for map link lookup
-            
+
+            // Populate select
             if (venues && venues.length > 0) {
                 venueSelect.innerHTML = '<option value="">-- Select a venue --</option>';
                 venues.forEach(venue => {
@@ -734,7 +743,7 @@
             console.error("Failed to load venues:", error);
         }
     }
-    
+
     // Autofill maps link on venue select
     venueSelect.addEventListener('change', () => {
         const selectedId = venueSelect.value;
@@ -758,28 +767,31 @@
         }
     });
 
+    // Clear autofilled maps link if user edits it
     evMapsLink.addEventListener('input', () => {
         if (!evMapsLink.value) {
             // If the Google Maps link input is empty, remove the autofilled link.
             evMapsLink.value = ""; // Make sure the value is cleared.
-            venueSelect.value = ""; // Optionally clear the venue selection (if that's part of the intended behavior).
+            venueSelect.value = ""; // Clear the venue selection (could remove).
         }
     });
 
+    // Handle location type change
     function handleLocationTypeChange() {
         const type = document.querySelector('input[name="location_type"]:checked').value;
-        if (type === 'venue') {
+        if (type === 'venue') { // on-campus venue
             venueSelectContainer.style.display = 'block';
             customLocationContainer.style.display = 'none';
-        } else {
+        } else { // custom
             venueSelectContainer.style.display = 'none';
             customLocationContainer.style.display = 'block';
         }
     }
 
+    // Attach event listeners to location type radios
     locationTypeRadios.forEach(radio => radio.addEventListener('change', handleLocationTypeChange));
 
-    // --- Main AI Draft Logic (Preserved) ---
+    // --- Main AI Draft Logic ---
     function applyAIDraft() {
         const draftString = localStorage.getItem('aiEventDraft');
         if (!draftString) return;
@@ -802,7 +814,7 @@
         localStorage.removeItem('aiEventDraft');
     }
 
-    // --- Sidebar AI Co-Pilot Logic (New Integration) ---
+    // --- Sidebar AI Co-Pilot Logic ---
 
     // Mobile Toggle
     window.toggleMobileAI = () => {
@@ -816,15 +828,17 @@
         }
     };
 
+    // AI Chat Logic
     const aiForm = document.getElementById('ai-helper-form');
     const aiInput = document.getElementById('ai-helper-input');
     const aiSendBtn = document.getElementById('ai-helper-send');
     const aiMessages = document.getElementById('ai-helper-messages');
 
-    // --- NEW: History State ---
+    // --- History State ---
     const MAX_HISTORY = 10;
     let chatHistory = [];
 
+    // Get current form values to send as context
     function getFormValuesForAI() {
         return {
             evTitle: evTitle.value,
@@ -838,6 +852,7 @@
         };
     }
 
+    // Handle AI form submission
     aiForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const prompt = aiInput.value.trim();
@@ -847,25 +862,25 @@
         aiInput.disabled = true;
         aiSendBtn.disabled = true;
 
-        // --- NEW: Add to history ---
-        chatHistory.push({ role: "user", content: prompt });
+        chatHistory.push({ role: "user", content: prompt }); // Add user message to history
 
         addHelperMessage('user', prompt);
         const loadingMsg = addHelperMessage('is-loading', 'Thinking...');
 
+        // Send to backend
         try {
             const payload = {
                 prompt,
                 context: "Standard Event Form - Editing Details", // Context for backend
                 user_time: new Date().toISOString(),
                 current_values: getFormValuesForAI(),
-                history: chatHistory.slice(-MAX_HISTORY) // --- NEW: Send History
+                history: chatHistory.slice(-MAX_HISTORY) // Send History
             };
             const result = await api('/ai/wizard-helper', 'POST', payload, token);
             loadingMsg.remove();
 
             if (result.response) {
-                // --- NEW: Add response to history ---
+                // Add response to history
                 chatHistory.push({ role: "ai", content: result.response });
                 addHelperMessage('ai', result.response, result.actions);
             } else {
@@ -873,7 +888,6 @@
             }
         } catch (err) {
             loadingMsg.remove();
-            // console.log(err);
             addHelperMessage('ai', 'Error connecting to AI helper.');
         } finally {
             aiInput.disabled = false;
@@ -882,6 +896,7 @@
         }
     });
 
+    // Add message to AI chat
     function addHelperMessage(sender, text, actions = null) {
         // Friendly labels for Standard Form IDs
         const FIELD_LABELS = {
@@ -953,6 +968,7 @@
         return msg;
     }
 
+    // Apply AI Suggested Action to Form
     function applyAIAction(fieldId, value, btnElement) {
         // Map wizard IDs (which the AI might suggest if confused) to Standard Form IDs
         // This is a safety net in case the AI returns 'w-title' instead of 'evTitle'
@@ -992,6 +1008,7 @@
             }
         }
 
+        // Update button state
         if (fieldChanged) {
             btnElement.innerHTML = `<strong>Updated!</strong>`;
             btnElement.style.background = "#d4edda";
@@ -1004,6 +1021,7 @@
 
     // --- Submit Handler ---
 
+    // Handle form submission
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         messageDiv.style.display = "none";
@@ -1014,7 +1032,7 @@
         const endLocal = evEnd.value;
         const location_type = document.querySelector('input[name="location_type"]:checked').value;
 
-        // --- Validation ---
+        // Validation
         if (!title || !startLocal || !endLocal) {
             showMessage("Title, Start Time, and End Time are required.", "error-message");
             return;
@@ -1035,6 +1053,7 @@
             return;
         }
 
+        // Convert times to ISO strings
         const startISO = startLocal ? new Date(startLocal).toISOString() : null;
         const endISO = endLocal ? new Date(endLocal).toISOString() : null;
 
@@ -1058,6 +1077,7 @@
         saveBtn.disabled = true;
         saveBtn.textContent = isEditMode ? "Updating..." : "Creating...";
 
+        // API Call
         try {
             let res;
             if (isEditMode) {

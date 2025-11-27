@@ -2,899 +2,1012 @@
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
 
 <style>
-/* ------------------------------------------------------ */
-/* HEADER */
-/* ------------------------------------------------------ */
-.event-hub-header {
-    text-align: center;
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 1.5rem;
-    margin-bottom: 2rem;
-}
-.event-hub-header h2 {
-    font-size: 1.75rem;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 0.5rem;
-}
-.event-hub-header p {
-    font-size: 1.1rem;
-    color: var(--text-secondary);
-    max-width: 600px;
-    margin: 0 auto;
-}
-
-/* ------------------------------------------------------ */
-/* RSVP BUTTON + DROPDOWN MENU */
-/* ------------------------------------------------------ */
-.rsvp-btn-container {
-    position: relative;
-    flex: 1;
-}
-/* Make container fit width in list view */
-.app-events-list .rsvp-btn-container {
-    width: 100%; 
-}
-
-.rsvp-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    min-width: 100px;
-    border: 1px solid var(--border-color);
-}
-
-.rsvp-btn.is-going {
-    background: var(--primary-dark);
-    color: white;
-}
-
-/* Shared Dropdown Styles (Used for RSVP and Edit Options) */
-.dropdown-menu {
-    display: none;
-    position: absolute;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    z-index: 50; /* Higher than content */
-    overflow: hidden;
-    min-width: 140px;
-}
-.dropdown-menu.open {
-    display: block;
-}
-.rsvp-btn-container .dropdown-menu {
-    bottom: 110%;
-    left: 0;
-    width: 100%;
-}
-.dropdown-menu button {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    width: 100%;
-    padding: 0.75rem 1rem;
-    text-align: left;
-    background: none;
-    border: none;
-    border-bottom: 1px solid var(--border-color);
-    cursor: pointer;
-    font-size: 0.875rem;
-    transition: var(--transition);
-    color: var(--text-primary);
-}
-.dropdown-menu button:last-child {
-    border-bottom: none;
-}
-.dropdown-menu button:hover {
-    background: var(--bg-tertiary);
-    color: var(--primary-color);
-}
-.dropdown-menu button.clear-rsvp {
-    color: #e53e3e;
-}
-.dropdown-menu button.delete-option {
-    color: #e53e3e;
-}
-.dropdown-menu button.delete-option:hover {
-    background: #fff5f5;
-}
-
-/* ------------------------------------------------------ */
-/* OPTIONS MENU (EDIT/DELETE) */
-/* ------------------------------------------------------ */
-.options-btn-container {
-    position: relative;
-    display: inline-block;
-}
-.options-toggle-btn {
-    background: rgba(255, 255, 255, 0.9); /* High contrast background */
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    padding: 0.4rem;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    width: 36px; /* Fixed width for alignment calculation */
-    height: 36px;
-}
-.options-toggle-btn:hover {
-    background: var(--bg-primary);
-    color: var(--primary-color);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-}
-/* Position the menu for options */
-.options-btn-container .dropdown-menu {
-    top: 110%;
-    right: 0; /* Align right edge */
-    left: auto;
-}
-/* Spacer for alignment when options button is missing in list view */
-.options-spacer {
-    width: 36px;
-    height: 36px;
-    flex-shrink: 0;
-}
-
-/* ------------------------------------------------------ */
-/* EVENT DETAIL MODAL – ATTENDEE LIST */
-/* ------------------------------------------------------ */
-#detailAttendeeList {
-    margin-top: 1.5rem;
-}
-#detailAttendeeList h4 {
-    font-size: 1.25rem;
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-}
-.attendee-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-.attendee-item:last-child {
-    border-bottom: none;
-}
-.attendee-item a {
-    font-weight: 600;
-    color: var(--text-primary);
-    text-decoration: none;
-}
-.attendee-item a:hover {
-    color: var(--primary-color);
-    text-decoration: underline;
-}
-.attendee-item .rsvp-status {
-    font-size: 0.875rem;
-    color: var(--text-light);
-    text-transform: capitalize;
-}
-.attendee-item .rsvp-status.going {
-    color: #38a169;
-}
-
-/* ------------------------------------------------------ */
-/* DIVIDERS FOR PAST EVENTS */
-/* ------------------------------------------------------ */
-.section-divider {
-    grid-column: 1 / -1;
-    margin: 2rem 0 1rem 0;
-    padding-top: 1.5rem;
-    border-top: 2px dashed var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-.section-divider h3 {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    margin: 0;
-}
-.section-divider span {
-    width: 100%;
-    height: 1px;
-    background: var(--border-color);
-}
-
-/* ------------------------------------------------------ */
-/* CONTROL BAR (Search, Filters, View Buttons) */
-/* ------------------------------------------------------ */
-.event-hub-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: nowrap;
-}
-
-/* New Dropdown Styling */
-#eventFilterSelect {
-    padding: 0.65rem 2.5rem 0.65rem 1rem; /* Increased right padding for custom arrow */
-    background-color: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: 0.95rem;
-    cursor: pointer;
-    outline: none;
-    min-width: 140px;
-    height: 100%;
-    
-    /* Custom Arrow Implementation */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-    /* Chevron Down SVG encoded with a neutral gray stroke */
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    /* Position: right edge is 1rem from container right, vertically centered */
-    background-position: right 0.75rem center;
-    background-size: 1em;
-}
-#eventFilterSelect:focus {
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
-}
-
-/* Normalize control button heights */
-.search-filter-group > input[type="date"],
-.search-filter-group > input[type="text"],
-.search-filter-group > select,
-.search-filter-group > .action-btn,
-.view-toggle-buttons > .action-btn {
-    padding-top: 0.65rem;
-    padding-bottom: 0.65rem;
-    box-sizing: border-box;
-    height: 42px; /* Enforce consistent height */
-}
-
-/* Reset button icon centering */
-#resetFiltersBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* ------------------------------------------------------ */
-/* DELETE CONFIRMATION MODAL */
-/* ------------------------------------------------------ */
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.5);
-    z-index: 2000;
-    align-items: center;
-    justify-content: center;
-}
-.modal-overlay.open {
-    display: flex;
-}
-.confirm-box {
-    background: var(--bg-primary);
-    padding: 2rem;
-    border-radius: var(--radius-lg);
-    max-width: 400px;
-    width: 90%;
-    text-align: center;
-    box-shadow: var(--shadow-xl);
-}
-.confirm-box h3 { margin-bottom: 1rem; color: var(--text-primary); }
-.confirm-box p { color: var(--text-secondary); margin-bottom: 1.5rem; }
-.confirm-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-}
-/* Specific button styles for confirmation */
-.confirm-actions .btn-cancel {
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    padding: 0.5rem 1.5rem;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    font-weight: 500;
-}
-.confirm-actions .btn-delete {
-    background: transparent;
-    border: 1px solid #e53e3e;
-    color: #e53e3e;
-    padding: 0.5rem 1.5rem;
-    border-radius: var(--radius-md);
-    cursor: pointer;
-}
-.confirm-actions .btn-delete:hover {
-    background: #fff5f5;
-}
-
-/* ------------------------------------------------------ */
-/* EVENT DETAIL MODAL - Using same structure as delete modal */
-/* ------------------------------------------------------ */
-#eventDetailModal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 3000;
-    align-items: center;
-    justify-content: center;
-}
-
-#eventDetailModal.open {
-    display: flex;
-}
-
-.event-detail-box {
-    background: var(--bg-primary);
-    padding: 2rem;
-    border-radius: var(--radius-lg);
-    max-width: 700px;
-    width: 90%;
-    max-height: 85vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-xl);
-    position: relative;
-    animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-    from {
-        opacity: 0;
+    /* ------------------------------------------------------ */
+    /* HEADER */
+    /* ------------------------------------------------------ */
+    .event-hub-header {
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
     }
-    to {
-        opacity: 1;
+
+    .event-hub-header h2 {
+        font-size: 1.75rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
     }
-}
 
-.detail-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 1.5rem;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    z-index: 10;
-    line-height: 1;
-    padding: 0;
-}
-
-.detail-close:hover {
-    background: var(--bg-primary);
-    color: var(--primary-color);
-    transform: rotate(90deg);
-    transform-origin: center center;
-}
-
-.event-detail-box h3 {
-    font-size: 1.75rem;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    padding-right: 2rem;
-}
-
-.modal-meta-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-    color: var(--text-secondary);
-    font-size: 1rem;
-    letter-spacing: 0.3px;
-}
-
-.modal-meta-row svg {
-    flex-shrink: 0;
-    color: var(--primary-color);
-}
-
-.modal-meta-row .map-link {
-    margin-left: 0.5rem;
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.modal-meta-row .map-link:hover {
-    text-decoration: underline;
-}
-
-#detailDescription {
-    margin: 1.5rem 0;
-    color: var(--text-primary);
-    line-height: 1.6;
-    font-size: 1rem;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    letter-spacing: 0.4px;
-}
-
-#detailActions {
-    display: flex;
-    width: 100%; /* Ensure it spans the modal width */
-    align-items: center;
-    gap: 0.75rem;
-    flex-wrap: nowrap; /* Prevent wrapping to new line */
-}
-
-/* Make the RSVP container fill all available space */
-#detailActions .rsvp-btn-container {
-    flex: 1 1 auto; /* Take up remaining space */
-    min-width: 0; /* Allow shrinking if needed */
-}
-
-/* Make the options button '...' not grow or shrink */
-#detailActions .options-btn-container {
-    flex: 0 0 auto; /* Fixed size, no grow/shrink */
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .event-detail-box {
-        max-width: 95%;
-        max-height: 90vh;
-        padding: 1.5rem;
+    .event-hub-header p {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        max-width: 600px;
+        margin: 0 auto;
     }
-    
-    .event-detail-box h3 {
-        font-size: 1.5rem;
+
+    /* ------------------------------------------------------ */
+    /* RSVP BUTTON + DROPDOWN MENU */
+    /* ------------------------------------------------------ */
+    .rsvp-btn-container {
+        position: relative;
+        flex: 1;
     }
-}
 
-/* Modal button layout - applies to all screen sizes */
-#detailActions .rsvp-btn-container {
-    flex: 1 1 0;
-}
-
-#detailActions .options-btn-container {
-    flex: 0 0 36px;
-    width: 36px;
-}
-
-#detailActions .rsvp-btn {
-    width: 100%;
-}
-
-/* ------------------------------------------------------ */
-/* LIST VIEW */
-/* ------------------------------------------------------ */
-#eventListView .app-event-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    position: relative;      /* for absolute dropdown positioning */
-    overflow: visible;      /* important: let dropdown escape */
-    margin-bottom: 0.7rem;   /* Added spacing between cards */
-}
-
-#eventListView .app-event-card:has(.dropdown-menu.open) {
-    z-index: 100;            /* Raise card when dropdown is open */
-}
-
-#eventListView .event-content {
-    flex: 1 1 auto;      /* content takes remaining space */
-    min-width: 0;  /* allows text to wrap/truncate without overflow */
-}
-
-/* Buttons container */
-#eventListView .event-actions {
-    display: flex;
-    flex-direction: row;     /* Changed from column to row */
-    gap: 0.75rem;            /* Horizontal gap between RSVP and options */
-    flex-shrink: 0;          /* prevent buttons from shrinking */
-    align-items: center;     /* Vertically center buttons */
-}
-
-/* Button sizing */
-#eventListView .event-actions .action-btn,
-#eventListView .rsvp-btn {
-    width: 140px;
-    height: 42px;
-    line-height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
-    flex-shrink: 0;
-    padding: 0 1rem !important;
-}
-
-/* Primary / Going states */
-#eventListView .rsvp-btn.primary {
-    background: var(--gradient-primary);
-    color: white;
-    box-shadow: var(--shadow-md);
-}
-#eventListView .rsvp-btn.primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
-}
-#eventListView .rsvp-btn.is-going {
-    background: var(--primary-dark);
-    color: white;
-    border-color: var(--primary-dark);
-}
-#eventListView .rsvp-btn.is-going:hover {
-    background: var(--primary-color);
-}
-
-/* Ensure RSVP dropdown matches button width */
-#eventListView .rsvp-btn-container {
-    width: 140px;
-    position: relative;  /* dropdown is absolute inside this */
-}
-#eventListView .rsvp-btn-menu {
-    position: absolute;
-    left: 0;
-    width: 140px;
-    min-width: 140px;
-    background: var(--bg-primary);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    z-index: 999;          /* ensure dropdown is above other content */
-    overflow: visible;     /* don’t clip options */
-}
-/* Fix RSVP dropdown to match button width in list view */
-#eventListView .rsvp-btn-container .dropdown-menu {
-    width: 140px;
-    min-width: 140px;
-}
-
-/* (NEW) Ensure options button container is positioned correctly in list */
-#eventListView .options-btn-container {
-    position: relative; 
-}
-
-/* ------------------------------------------------------ */
-/* GRID VIEW - CARD LAYOUT FIX */
-/* ------------------------------------------------------ */
-#eventCardsView .app-event-card {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* Ensure card takes full height of grid cell */
-}
-
-#eventCardsView .event-content {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* Allow content to expand */
-}
-
-#eventCardsView .event-info-wrapper {
-    flex-grow: 0; /* Don't let this section expand */
-}
-
-#eventCardsView .event-meta-wrapper {
-    flex-grow: 0; /* Don't let this section expand */
-}
-
-#eventCardsView .event-actions-wrapper {
-    margin-top: auto; /* Push to bottom */
-}
-
-#eventCardsView .event-actions {
-    display: flex;
-    gap: 0.75rem;
-    width: 100%;
-}
-
-/* ------------------------------------------------------ */
-/* (NEW) RATINGS / REVIEWS STYLES */
-/* ------------------------------------------------------ */
-.event-rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-top: 0.3rem;
-}
-.event-rating .star {
-    color: #F59E0B; /* Amber/Gold */
-}
-.event-rating .count {
-    font-size: 0.8rem;
-    color: var(--text-light);
-}
-
-/* Modal Review List */
-#detailReviewList {
-    margin-top: 1.5rem;
-}
-#detailReviewList h4 {
-    font-size: 1.25rem;
-    color: var(--text-primary);
-    border-bottom: 1px solid var(--border-color);
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-}
-.review-item {
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-.review-item:last-child {
-    border-bottom: none;
-}
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-.review-author {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-.review-date {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-.review-rating .star {
-    color: #F59E0B;
-}
-.review-text {
-    color: var(--text-primary);
-    line-height: 1.6;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* Modal Review Form */
-#detailReviewForm {
-    margin-top: 1.0rem;
-    border-top: 1px solid var(--border-color);
-}
-#detailReviewForm h4 {
-    font-size: 1.25rem;
-    margin-bottom: 1rem;
-}
-
-/* --- STAR RATING HOVER (Hollow Stars) --- */
-.star-rating-input {
-    display: flex;
-    flex-direction: row-reverse; /* To make :hover work correctly */
-    justify-content: flex-end;
-    gap: 0.25rem;
-    margin-top: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-.star-rating-input input[type="radio"] {
-    display: none;
-}
-.star-rating-input label {
-    font-size: 2rem;
-    color: #CBD5E0; /* Default: Gray */
-    cursor: pointer;
-    transition: color 0.2s, -webkit-text-stroke 0.2s;
-}
-
-/* 1. Checked state: Solid Gold */
-.star-rating-input input:checked ~ label {
-    color: #F59E0B;
-    -webkit-text-stroke: 0;
-}
-
-/* 2. Hover state: Hollow Gold (applies to unchecked stars) */
-.star-rating-input label:hover,
-.star-rating-input label:hover ~ label {
-    color: transparent;
-    -webkit-text-stroke: 1.5px #F59E0B;
-}
-
-/* 3. NEW: Hover over checked stars also shows outline */
-.star-rating-input input:checked ~ label:hover,
-.star-rating-input label:hover ~ input:checked ~ label {
-    color: transparent !important;
-    -webkit-text-stroke: 1.5px #F59E0B !important;
-}
-/* --- ================================ --- */
-
-#reviewFormTextarea {
-    width: 100%;
-    min-height: 100px;
-    padding: 0.75rem; 
-    box-sizing: border-box; /* Include padding in width calculation */
-}
-#reviewFormTextarea::placeholder {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    font-style: italic;
-    color: var(--text-secondary);
-}
-#submitReviewBtn {
-    background: var(--gradient-primary);
-    color: white;
-}
-
-.modal-collapsible-section {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-}
-.modal-collapsible-section[open] summary h4 {
-    color: var(--primary-color);
-}
-.modal-collapsible-section summary {
-    cursor: pointer;
-    list-style: none; /* Remove default triangle */
-}
-.modal-collapsible-section summary::-webkit-details-marker {
-    display: none; /* Remove default triangle (Safari) */
-}
-.modal-collapsible-section summary h4 {
-    display: inline-block; /* Allows for icon alignment */
-    margin: 0;
-    font-size: 1.25rem;
-}
-/* Add our own triangle/arrow */
-.modal-collapsible-section summary h4::before {
-    content: '►';
-    font-size: 0.8em;
-    margin-right: 0.75rem;
-    color: var(--text-secondary);
-    display: inline-block;
-    transition: transform 0.2s;
-}
-.modal-collapsible-section[open] summary h4::before {
-    transform: rotate(90deg);
-}
-
-/* ------------------------------------------------------ */
-/* RESPONSIVE LAYOUT FIXES */
-/* ------------------------------------------------------ */
-@media (max-width: 1175px) {
-    .event-hub-controls {
-        flex-wrap: wrap;
-        gap: 0.75rem;
-    }
-    .search-filter-group {
-        flex: 1 1 100%;
-        order: 1;
-    }
-    .view-toggle-buttons {
-        order: 2;
+    /* Make container fit width in list view */
+    .app-events-list .rsvp-btn-container {
         width: 100%;
-        justify-content: flex-end;
     }
-}
 
-@media (max-width: 992px) {
-    .event-hub-controls {
-        flex-wrap: wrap;
-        gap: 0;
-    }
-    .search-filter-group {
-        min-width: 100% !important;
-        order: 1;
-        flex-wrap: wrap;
+    .rsvp-btn {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         gap: 0.5rem;
+        min-width: 100px;
+        border: 1px solid var(--border-color);
     }
-    .search-filter-group > input[type="text"] {
+
+    .rsvp-btn.is-going {
+        background: var(--primary-dark);
+        color: white;
+    }
+
+    /* Shared Dropdown Styles (Used for RSVP and Edit Options) */
+    .dropdown-menu {
+        display: none;
+        position: absolute;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        z-index: 50;
+        /* Higher than content */
+        overflow: hidden;
+        min-width: 140px;
+    }
+
+    .dropdown-menu.open {
+        display: block;
+    }
+
+    .rsvp-btn-container .dropdown-menu {
+        bottom: 110%;
+        left: 0;
         width: 100%;
+    }
+
+    .dropdown-menu button {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 0.75rem 1rem;
+        text-align: left;
+        background: none;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+        font-size: 0.875rem;
+        transition: var(--transition);
+        color: var(--text-primary);
+    }
+
+    .dropdown-menu button:last-child {
+        border-bottom: none;
+    }
+
+    .dropdown-menu button:hover {
+        background: var(--bg-tertiary);
+        color: var(--primary-color);
+    }
+
+    .dropdown-menu button.clear-rsvp {
+        color: #e53e3e;
+    }
+
+    .dropdown-menu button.delete-option {
+        color: #e53e3e;
+    }
+
+    .dropdown-menu button.delete-option:hover {
+        background: #fff5f5;
+    }
+
+    /* ------------------------------------------------------ */
+    /* OPTIONS MENU (EDIT/DELETE) */
+    /* ------------------------------------------------------ */
+    .options-btn-container {
+        position: relative;
+        display: inline-block;
+    }
+
+    .options-toggle-btn {
+        background: rgba(255, 255, 255, 0.9);
+        /* High contrast background */
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        padding: 0.4rem;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 36px;
+        height: 36px;
+    }
+
+    .options-toggle-btn:hover {
+        background: var(--bg-primary);
+        color: var(--primary-color);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Position the menu for options */
+    .options-btn-container .dropdown-menu {
+        top: 110%;
+        right: 0;
+        /* Align right edge */
+        left: auto;
+    }
+
+    /* Spacer for alignment when options button is missing in list view */
+    .options-spacer {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+    }
+
+    /* ------------------------------------------------------ */
+    /* EVENT DETAIL MODAL – ATTENDEE LIST */
+    /* ------------------------------------------------------ */
+    #detailAttendeeList {
+        margin-top: 1.5rem;
+    }
+
+    #detailAttendeeList h4 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .attendee-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .attendee-item:last-child {
+        border-bottom: none;
+    }
+
+    .attendee-item a {
+        font-weight: 600;
+        color: var(--text-primary);
+        text-decoration: none;
+    }
+
+    .attendee-item a:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+
+    .attendee-item .rsvp-status {
+        font-size: 0.875rem;
+        color: var(--text-light);
+        text-transform: capitalize;
+    }
+
+    .attendee-item .rsvp-status.going {
+        color: #38a169;
+    }
+
+    /* ------------------------------------------------------ */
+    /* DIVIDERS FOR PAST EVENTS */
+    /* ------------------------------------------------------ */
+    .section-divider {
+        grid-column: 1 / -1;
+        margin: 2rem 0 1rem 0;
+        padding-top: 1.5rem;
+        border-top: 2px dashed var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .section-divider h3 {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        margin: 0;
+    }
+
+    .section-divider span {
+        width: 100%;
+        height: 1px;
+        background: var(--border-color);
+    }
+
+    /* ------------------------------------------------------ */
+    /* CONTROL BAR (Search, Filters, View Buttons) */
+    /* ------------------------------------------------------ */
+    .event-hub-controls {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: nowrap;
+    }
+
+    /* New Dropdown Styling */
+    #eventFilterSelect {
+        padding: 0.65rem 2.5rem 0.65rem 1rem;
+        /* Increased right padding for custom arrow */
+        background-color: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        cursor: pointer;
+        outline: none;
+        min-width: 140px;
+        height: 100%;
+
+        /* Custom Arrow Implementation */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        /* Chevron Down SVG encoded with a neutral gray stroke */
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        /* Position: right edge is 1rem from container right, vertically centered */
+        background-position: right 0.75rem center;
+        background-size: 1em;
+    }
+
+    #eventFilterSelect:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.1);
+    }
+
+    /* Normalize control button heights */
+    .search-filter-group>input[type="date"],
+    .search-filter-group>input[type="text"],
+    .search-filter-group>select,
+    .search-filter-group>.action-btn,
+    .view-toggle-buttons>.action-btn {
+        padding-top: 0.65rem;
+        padding-bottom: 0.65rem;
+        box-sizing: border-box;
+        height: 42px;
+        /* Enforce consistent height */
+    }
+
+    /* Reset button icon centering */
+    #resetFiltersBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ------------------------------------------------------ */
+    /* DELETE CONFIRMATION MODAL */
+    /* ------------------------------------------------------ */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-overlay.open {
+        display: flex;
+    }
+
+    .confirm-box {
+        background: var(--bg-primary);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .confirm-box h3 {
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+    }
+
+    .confirm-box p {
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+    }
+
+    .confirm-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    /* Specific button styles for confirmation */
+    .confirm-actions .btn-cancel {
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .confirm-actions .btn-delete {
+        background: transparent;
+        border: 1px solid #e53e3e;
+        color: #e53e3e;
+        padding: 0.5rem 1.5rem;
+        border-radius: var(--radius-md);
+        cursor: pointer;
+    }
+
+    .confirm-actions .btn-delete:hover {
+        background: #fff5f5;
+    }
+
+    /* ------------------------------------------------------ */
+    /* EVENT DETAIL MODAL */
+    /* ------------------------------------------------------ */
+    #eventDetailModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #eventDetailModal.open {
+        display: flex;
+    }
+
+    .event-detail-box {
+        background: var(--bg-primary);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        max-width: 700px;
+        width: 90%;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .detail-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+        z-index: 10;
+        line-height: 1;
+        padding: 0;
+    }
+
+    .detail-close:hover {
+        background: var(--bg-primary);
+        color: var(--primary-color);
+        transform: rotate(90deg);
+        transform-origin: center center;
+    }
+
+    .event-detail-box h3 {
+        font-size: 1.75rem;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        padding-right: 2rem;
+    }
+
+    .modal-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+        font-size: 1rem;
+        letter-spacing: 0.3px;
+    }
+
+    .modal-meta-row svg {
+        flex-shrink: 0;
+        color: var(--primary-color);
+    }
+
+    .modal-meta-row .map-link {
+        margin-left: 0.5rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .modal-meta-row .map-link:hover {
+        text-decoration: underline;
+    }
+
+    #detailDescription {
+        margin: 1.5rem 0;
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-size: 1rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        letter-spacing: 0.4px;
+    }
+
+    #detailActions {
+        display: flex;
+        width: 100%;
+        /* Ensure it spans the modal width */
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: nowrap;
+        /* Prevent wrapping to new line */
+    }
+
+    /* Make the RSVP container fill all available space */
+    #detailActions .rsvp-btn-container {
+        flex: 1 1 auto;
+        /* Take up remaining space */
         min-width: 0;
-        order: 1;
+        /* Allow shrinking if needed */
     }
-    .search-filter-group > input[type="date"],
-    .search-filter-group > #resetFiltersBtn,
-    .search-filter-group > select {
-        flex-grow: 1;
-        order: 2;
+
+    /* Make the options button '...' not grow or shrink */
+    #detailActions .options-btn-container {
+        flex: 0 0 auto;
+        /* Fixed size, no grow/shrink */
     }
-    .view-toggle-buttons {
-        order: 2;
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .event-detail-box {
+            max-width: 95%;
+            max-height: 90vh;
+            padding: 1.5rem;
+        }
+
+        .event-detail-box h3 {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* Modal button layout - applies to all screen sizes */
+    #detailActions .rsvp-btn-container {
+        flex: 1 1 0;
+    }
+
+    #detailActions .options-btn-container {
+        flex: 0 0 36px;
+        width: 36px;
+    }
+
+    #detailActions .rsvp-btn {
         width: 100%;
+    }
+
+    /* ------------------------------------------------------ */
+    /* LIST VIEW */
+    /* ------------------------------------------------------ */
+    #eventListView .app-event-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        position: relative;
+        /* for absolute dropdown positioning */
+        overflow: visible;
+        /* important: let dropdown escape */
+        margin-bottom: 0.7rem;
+        /* Added spacing between cards */
+    }
+
+    #eventListView .app-event-card:has(.dropdown-menu.open) {
+        z-index: 100;
+        /* Raise card when dropdown is open */
+    }
+
+    #eventListView .event-content {
+        flex: 1 1 auto;
+        /* content takes remaining space */
+        min-width: 0;
+        /* allows text to wrap/truncate without overflow */
+    }
+
+    /* Buttons container */
+    #eventListView .event-actions {
+        display: flex;
+        flex-direction: row;
+        /* Changed from column to row */
+        gap: 0.75rem;
+        /* Horizontal gap between RSVP and options */
+        flex-shrink: 0;
+        /* prevent buttons from shrinking */
+        align-items: center;
+        /* Vertically center buttons */
+    }
+
+    /* Button sizing */
+    #eventListView .event-actions .action-btn,
+    #eventListView .rsvp-btn {
+        width: 140px;
+        height: 42px;
+        line-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 0 1rem !important;
+    }
+
+    /* Primary / Going states */
+    #eventListView .rsvp-btn.primary {
+        background: var(--gradient-primary);
+        color: white;
+        box-shadow: var(--shadow-md);
+    }
+
+    #eventListView .rsvp-btn.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    #eventListView .rsvp-btn.is-going {
+        background: var(--primary-dark);
+        color: white;
+        border-color: var(--primary-dark);
+    }
+
+    #eventListView .rsvp-btn.is-going:hover {
+        background: var(--primary-color);
+    }
+
+    /* Ensure RSVP dropdown matches button width */
+    #eventListView .rsvp-btn-container {
+        width: 140px;
+        position: relative;
+        /* dropdown is absolute inside this */
+    }
+
+    #eventListView .rsvp-btn-menu {
+        position: absolute;
+        left: 0;
+        width: 140px;
+        min-width: 140px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-lg);
+        z-index: 999;
+        /* ensure dropdown is above other content */
+        overflow: visible;
+        /* don’t clip options */
+    }
+
+    /* Ensure dropdown matches button width */
+    #eventListView .rsvp-btn-container .dropdown-menu {
+        width: 140px;
+        min-width: 140px;
+    }
+
+    /* Ensure options button container is positioned correctly in list */
+    #eventListView .options-btn-container {
+        position: relative;
+    }
+
+    /* ------------------------------------------------------ */
+    /* GRID VIEW */
+    /* ------------------------------------------------------ */
+    #eventCardsView .app-event-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        /* Ensure card takes full height of grid cell */
+    }
+
+    #eventCardsView .event-content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+        /* Allow content to expand */
+    }
+
+    #eventCardsView .event-info-wrapper {
+        flex-grow: 0;
+        /* Don't let this section expand */
+    }
+
+    #eventCardsView .event-meta-wrapper {
+        flex-grow: 0;
+        /* Don't let this section expand */
+    }
+
+    #eventCardsView .event-actions-wrapper {
+        margin-top: auto;
+        /* Push to bottom */
+    }
+
+    #eventCardsView .event-actions {
+        display: flex;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    /* ------------------------------------------------------ */
+    /* RATINGS / REVIEWS STYLES */
+    /* ------------------------------------------------------ */
+    .event-rating {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-top: 0.3rem;
+    }
+
+    .event-rating .star {
+        color: #F59E0B;
+        /* Amber/Gold */
+    }
+
+    .event-rating .count {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    /* Modal Review List */
+    #detailReviewList {
+        margin-top: 1.5rem;
+    }
+
+    #detailReviewList h4 {
+        font-size: 1.25rem;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .review-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .review-item:last-child {
+        border-bottom: none;
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .review-author {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .review-date {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .review-rating .star {
+        color: #F59E0B;
+    }
+
+    .review-text {
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Modal Review Form */
+    #detailReviewForm {
+        margin-top: 1.0rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    #detailReviewForm h4 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    /* --- STAR RATING HOVER (Hollow Stars) --- */
+    .star-rating-input {
+        display: flex;
+        flex-direction: row-reverse;
+        /* To make :hover work correctly */
         justify-content: flex-end;
+        gap: 0.25rem;
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .star-rating-input input[type="radio"] {
+        display: none;
+    }
+
+    .star-rating-input label {
+        font-size: 2rem;
+        color: #CBD5E0;
+        /* Default: Gray */
+        cursor: pointer;
+        transition: color 0.2s, -webkit-text-stroke 0.2s;
+    }
+
+    /* 1. Checked state: Solid Gold */
+    .star-rating-input input:checked~label {
+        color: #F59E0B;
+        -webkit-text-stroke: 0;
+    }
+
+    /* 2. Hover state: Hollow Gold (applies to unchecked stars) */
+    .star-rating-input label:hover,
+    .star-rating-input label:hover~label {
+        color: transparent;
+        -webkit-text-stroke: 1.5px #F59E0B;
+    }
+
+    /* 3. NEW: Hover over checked stars also shows outline */
+    .star-rating-input input:checked~label:hover,
+    .star-rating-input label:hover~input:checked~label {
+        color: transparent !important;
+        -webkit-text-stroke: 1.5px #F59E0B !important;
+    }
+
+    #reviewFormTextarea {
+        width: 100%;
+        min-height: 100px;
+        padding: 0.75rem;
+        box-sizing: border-box;
+        /* Include padding in width calculation */
+    }
+
+    #reviewFormTextarea::placeholder {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        font-style: italic;
+        color: var(--text-secondary);
+    }
+
+    #submitReviewBtn {
+        background: var(--gradient-primary);
+        color: white;
+    }
+
+    .modal-collapsible-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .modal-collapsible-section[open] summary h4 {
+        color: var(--primary-color);
+    }
+
+    .modal-collapsible-section summary {
+        cursor: pointer;
+        list-style: none;
+        /* Remove default triangle */
+    }
+
+    .modal-collapsible-section summary::-webkit-details-marker {
+        display: none;
+        /* Remove default triangle (Safari) */
+    }
+
+    .modal-collapsible-section summary h4 {
+        display: inline-block;
+        /* Allows for icon alignment */
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+    /* Add our own triangle/arrow */
+    .modal-collapsible-section summary h4::before {
+        content: '►';
+        font-size: 0.8em;
+        margin-right: 0.75rem;
+        color: var(--text-secondary);
+        display: inline-block;
+        transition: transform 0.2s;
+    }
+
+    .modal-collapsible-section[open] summary h4::before {
+        transform: rotate(90deg);
+    }
+
+    /* ------------------------------------------------------ */
+    /* RESPONSIVE LAYOUT FIXES */
+    /* ------------------------------------------------------ */
+    @media (max-width: 1175px) {
+        .event-hub-controls {
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .search-filter-group {
+            flex: 1 1 100%;
+            order: 1;
+        }
+
+        .view-toggle-buttons {
+            order: 2;
+            width: 100%;
+            justify-content: flex-end;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .event-hub-controls {
+            flex-wrap: wrap;
+            gap: 0;
+        }
+
+        .search-filter-group {
+            min-width: 100% !important;
+            order: 1;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .search-filter-group>input[type="text"] {
+            width: 100%;
+            min-width: 0;
+            order: 1;
+        }
+
+        .search-filter-group>input[type="date"],
+        .search-filter-group>#resetFiltersBtn,
+        .search-filter-group>select {
+            flex-grow: 1;
+            order: 2;
+        }
+
+        .view-toggle-buttons {
+            order: 2;
+            width: 100%;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+    }
+
+    /* FORCE MODAL POSITIONING */
+    #eventDetailModal.modal-overlay.open,
+    #deleteConfirmModal.modal-overlay.open {
+        display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 9999 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .event-detail-box,
+    .confirm-box {
+        position: relative !important;
+        margin: auto !important;
+    }
+
+    /* ------------------------------------------------------ */
+    /* FORCE MODAL BUTTON LAYOUT (ALL SCREENS) */
+    /* ------------------------------------------------------ */
+    #detailActions {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+        gap: 0.75rem !important;
+    }
+
+    #detailActions .rsvp-btn-container {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+    }
+
+    #detailActions .options-btn-container {
+        flex: 0 0 36px !important;
+        width: 36px !important;
+    }
+
+    #detailActions .rsvp-btn {
+        width: 100% !important;
+    }
+
+    /* ------------------------------------------------------ */
+    /* RESPONSIVE REVIEW SUBMIT WRAPPER */
+    /* ------------------------------------------------------ */
+    .review-submit-wrapper {
+        display: flex;
+        flex-direction: column;
+        /* Mobile: Stack vertically */
+        gap: 0.75rem;
+        /* Slightly more gap for stacking */
+        width: 100%;
         margin-top: 0.5rem;
     }
-}
 
-/* FORCE MODAL POSITIONING - Add at the very end of styles */
-#eventDetailModal.modal-overlay.open,
-#deleteConfirmModal.modal-overlay.open {
-    display: flex !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 9999 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
-
-.event-detail-box,
-.confirm-box {
-    position: relative !important;
-    margin: auto !important;
-}
-
-/* ------------------------------------------------------ */
-/* FORCE MODAL BUTTON LAYOUT (ALL SCREENS) */
-/* ------------------------------------------------------ */
-#detailActions {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    width: 100% !important;
-    gap: 0.75rem !important;
-}
-
-#detailActions .rsvp-btn-container {
-    flex: 1 1 0 !important;
-    min-width: 0 !important;
-}
-
-#detailActions .options-btn-container {
-    flex: 0 0 36px !important;
-    width: 36px !important;
-}
-
-#detailActions .rsvp-btn {
-    width: 100% !important;
-}
-
-/* ------------------------------------------------------ */
-/* NEW: RESPONSIVE REVIEW SUBMIT WRAPPER */
-/* ------------------------------------------------------ */
-.review-submit-wrapper {
-    display: flex;
-    flex-direction: column; /* Mobile: Stack vertically */
-    gap: 0.75rem; /* Slightly more gap for stacking */
-    width: 100%;
-    margin-top: 0.5rem;
-}
-
-.review-status-message {
-    font-size: 0.9rem;
-    line-height: 1.4;
-    color: var(--text-primary); /* Ensure visibility */
-    min-height: 0; /* Robustness */
-}
-
-/* Desktop/Tablet: Side-by-side */
-@media (min-width: 600px) {
-    .review-submit-wrapper {
-        flex-direction: row; 
-        align-items: center; 
-        gap: 1rem;
-        width: auto;
-        margin-top: 0;
-    }
-    
     .review-status-message {
-        white-space: nowrap;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: var(--text-primary);
+        /* Ensure visibility */
+        min-height: 0;
+        /* Robustness */
     }
-}
+
+    /* Desktop/Tablet: Side-by-side */
+    @media (min-width: 600px) {
+        .review-submit-wrapper {
+            flex-direction: row;
+            align-items: center;
+            gap: 1rem;
+            width: auto;
+            margin-top: 0;
+        }
+
+        .review-status-message {
+            white-space: nowrap;
+        }
+    }
 </style>
 
 <div class="event-hub-container page-content-wrapper page-transition-enter-active">
@@ -905,9 +1018,10 @@
 
     <div class="event-hub-controls">
         <div class="search-filter-group" style="flex-grow: 1; min-width: 250px;">
-            <input type="text" id="eventSearchInput" placeholder="Search event titles..." aria-label="Search events by title" style="flex-grow: 1;">
+            <input type="text" id="eventSearchInput" placeholder="Search event titles..."
+                aria-label="Search events by title" style="flex-grow: 1;">
             <input type="date" id="eventDateFilter" aria-label="Filter events by date">
-            
+
             <select id="eventFilterSelect" aria-label="Filter events by type">
                 <option value="all">All Events</option>
                 <!-- My RSVPs option inserted here dynamically if logged in -->
@@ -916,14 +1030,26 @@
             </select>
 
             <button class="action-btn secondary" id="resetFiltersBtn" aria-label="Reset Filters" title="Reset Filters">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 2v6h6M21.5 22v-6h-6"></path><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2.5 2v6h6M21.5 22v-6h-6"></path>
+                    <path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path>
+                </svg>
             </button>
         </div>
-        
+
         <div class="view-toggle-buttons">
-            <button class="action-btn primary active" data-view="cards" id="cardsViewBtn" aria-label="Card View" title="Card View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
-            <button class="action-btn secondary" data-view="list" id="listViewBtn" aria-label="List View" title="List View">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <button class="action-btn primary active" data-view="cards" id="cardsViewBtn" aria-label="Card View"
+                title="Card View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg></button>
+            <button class="action-btn secondary" data-view="list" id="listViewBtn" aria-label="List View"
+                title="List View">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
                     <line x1="8" y1="6" x2="21" y2="6"></line>
                     <line x1="8" y1="12" x2="21" y2="12"></line>
                     <line x1="8" y1="18" x2="21" y2="18"></line>
@@ -932,35 +1058,43 @@
                     <line x1="3" y1="18" x2="3.01" y2="18"></line>
                 </svg>
             </button>
-            <button class="action-btn secondary" data-view="calendar" id="calendarViewBtn" aria-label="Calendar View" title="Calendar View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
+            <button class="action-btn secondary" data-view="calendar" id="calendarViewBtn" aria-label="Calendar View"
+                title="Calendar View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg></button>
         </div>
     </div>
-    
+
     <div id="eventCardsView" class="app-events-grid"></div>
     <div id="eventListView" class="app-events-list" style="display: none;"></div>
-    <div id="eventCalendarView" class="calendar-view-wrapper" style="display: none; background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+    <div id="eventCalendarView" class="calendar-view-wrapper"
+        style="display: none; background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
         <div id="calendar"></div>
     </div>
 </div>
 
 <script type="module">
-import { api } from "../js/api.js";
-import { getRoleFromToken, token } from "../js/app.js";
+    import { api } from "../js/api.js";
+    import { getRoleFromToken, token } from "../js/app.js";
 
-/// --- CREATE AND INJECT MODALS INTO BODY ---
-function createModals() {
-    // Remove existing modals if any (Handles re-entry)
-    const existingDetail = document.getElementById('eventDetailModal');
-    const existingDelete = document.getElementById('deleteConfirmModal');
-    if (existingDetail) existingDetail.remove();
-    if (existingDelete) existingDelete.remove();
+    /// --- CREATE AND INJECT MODALS INTO BODY ---
+    function createModals() {
+        // Remove existing modals if any (Handles re-entry)
+        const existingDetail = document.getElementById('eventDetailModal');
+        const existingDelete = document.getElementById('deleteConfirmModal');
+        if (existingDetail) existingDetail.remove();
+        if (existingDelete) existingDelete.remove();
 
-    // Event Detail Modal
-    const detailModal = document.createElement('div');
-    detailModal.id = 'eventDetailModal';
-    detailModal.className = 'modal-overlay';
-    detailModal.style.display = 'none'; 
-    detailModal.innerHTML = `
+        // Event Detail Modal
+        const detailModal = document.createElement('div');
+        detailModal.id = 'eventDetailModal';
+        detailModal.className = 'modal-overlay';
+        detailModal.style.display = 'none';
+        detailModal.innerHTML = `
         <div class="event-detail-box">
             <button class="detail-close" id="closeDetailModal">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1037,14 +1171,14 @@ function createModals() {
 
         </div>
     `;
-    document.body.appendChild(detailModal);
+        document.body.appendChild(detailModal);
 
-    // Delete Confirmation Modal
-    const deleteModal = document.createElement('div');
-    deleteModal.id = 'deleteConfirmModal';
-    deleteModal.className = 'modal-overlay';
-    deleteModal.style.display = 'none';
-    deleteModal.innerHTML = `
+        // Delete Confirmation Modal
+        const deleteModal = document.createElement('div');
+        deleteModal.id = 'deleteConfirmModal';
+        deleteModal.className = 'modal-overlay';
+        deleteModal.style.display = 'none';
+        deleteModal.innerHTML = `
         <div class="confirm-box">
             <h3>Delete Event?</h3>
             <p>Are you sure you want to delete this event? This action cannot be undone.</p>
@@ -1054,193 +1188,200 @@ function createModals() {
             </div>
         </div>
     `;
-    document.body.appendChild(deleteModal);
-}
+        document.body.appendChild(deleteModal);
+    }
 
-// Create modals immediately
-createModals();
+    // Create modals immediately
+    createModals();
 
-// --- CLEANUP LOGIC (FIX for lingering modals) ---
-// Detect when the "Event Hub" view is removed from the DOM and remove the body-attached modals.
-const eventHubContainer = document.querySelector('.event-hub-container');
-if (eventHubContainer) {
-    const observer = new MutationObserver((mutations) => {
-        if (!document.body.contains(eventHubContainer)) {
-            // The container is gone, so we must remove the global modals we created
-            const dModal = document.getElementById('eventDetailModal');
-            const delModal = document.getElementById('deleteConfirmModal');
-            if (dModal) dModal.remove();
-            if (delModal) delModal.remove();
-            observer.disconnect(); // Stop watching
-        }
-    });
-    
-    // Watch the body for structural changes (e.g. page navigation/swapping)
-    observer.observe(document.body, { childList: true, subtree: true });
-}
-
-const cardsView = document.getElementById("eventCardsView");
-const listView = document.getElementById("eventListView");
-const calendarView = document.getElementById("eventCalendarView");
-const viewButtons = document.querySelectorAll(".view-toggle-buttons .action-btn");
-const searchInput = document.getElementById("eventSearchInput");
-const dateFilter = document.getElementById("eventDateFilter");
-const resetFiltersBtn = document.getElementById("resetFiltersBtn");
-
-// NEW: Select Filter
-const eventFilterSelect = document.getElementById("eventFilterSelect");
-
-// Delete Modal - Get references after creation
-let deleteModal, cancelDeleteBtn, confirmDeleteBtn;
-let eventIdToDelete = null;
-
-function initializeModalReferences() {
-    deleteModal = document.getElementById("deleteConfirmModal");
-    cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
-    confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
-    
-    if (deleteModal && cancelDeleteBtn) {
-        // Attach event listeners
-        cancelDeleteBtn.addEventListener('click', () => {
-            deleteModal.classList.remove('open');
-            // Also hide via inline style to match creation logic
-            deleteModal.style.display = 'none';
-            eventIdToDelete = null;
+    // Detect when the "Event Hub" view is removed from the DOM and remove the body-attached modals.
+    const eventHubContainer = document.querySelector('.event-hub-container');
+    if (eventHubContainer) {
+        const observer = new MutationObserver((mutations) => {
+            if (!document.body.contains(eventHubContainer)) {
+                // The container is gone, so we must remove the global modals we created
+                const dModal = document.getElementById('eventDetailModal');
+                const delModal = document.getElementById('deleteConfirmModal');
+                if (dModal) dModal.remove();
+                if (delModal) delModal.remove();
+                observer.disconnect(); // Stop watching
+            }
         });
 
-        confirmDeleteBtn.addEventListener('click', async () => {
-            if(!eventIdToDelete) return;
-            
-            confirmDeleteBtn.textContent = "Deleting...";
-            confirmDeleteBtn.disabled = true;
+        // Watch the body for structural changes (e.g. page navigation/swapping)
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
 
-            try {
-                await api(`/events/${eventIdToDelete}`, "DELETE", null, token);
+    // --- MAIN EVENT HUB LOGIC ---
+    const cardsView = document.getElementById("eventCardsView");
+    const listView = document.getElementById("eventListView");
+    const calendarView = document.getElementById("eventCalendarView");
+    const viewButtons = document.querySelectorAll(".view-toggle-buttons .action-btn");
+    const searchInput = document.getElementById("eventSearchInput");
+    const dateFilter = document.getElementById("eventDateFilter");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+    const eventFilterSelect = document.getElementById("eventFilterSelect");
+
+    // Delete Modal - Get references after creation
+    let deleteModal, cancelDeleteBtn, confirmDeleteBtn;
+    let eventIdToDelete = null;
+
+    // Initialize Delete Modal References and Event Listeners
+    function initializeModalReferences() {
+        deleteModal = document.getElementById("deleteConfirmModal");
+        cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+        confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+
+        // Attach event listeners for delete modal
+        if (deleteModal && cancelDeleteBtn) {
+            cancelDeleteBtn.addEventListener('click', () => {
                 deleteModal.classList.remove('open');
+                // Also hide via inline style to match creation logic
                 deleteModal.style.display = 'none';
-                closeDetailModal();
-                loadEvents();
-            } catch (err) {
-                console.error("Delete failed", err);
-            } finally {
-                confirmDeleteBtn.textContent = "Delete";
-                confirmDeleteBtn.disabled = false;
                 eventIdToDelete = null;
-            }
-        });
-    }
-}
+            });
 
-// Initialize after modals are created
-initializeModalReferences();
+            confirmDeleteBtn.addEventListener('click', async () => {
+                if (!eventIdToDelete) return;
 
-let allEvents = [];
-let currentEvents = [];
-let currentView = "cards";
-const userRole = getRoleFromToken();
-const userId = token ? JSON.parse(atob(token.split('.')[1])).sub : null; 
+                confirmDeleteBtn.textContent = "Deleting...";
+                confirmDeleteBtn.disabled = true;
 
-// Show "My RSVPs" option only if logged in
-if (userId) {
-    // Insert "My RSVPs" after "All Events"
-    const myRsvpsOption = document.createElement('option');
-    myRsvpsOption.value = 'my_rsvps';
-    myRsvpsOption.textContent = 'My RSVPs';
-    eventFilterSelect.options.add(myRsvpsOption, 1);
-}
-
-// --- Helper Functions ---
-
-function getEventLocation(event) {
-    if (event.location_type === 'custom') {
-        return event.custom_location_address || 'Location TBA';
-    }
-    if (event.location_type === 'venue') {
-        let name = event.venue_name || 'On-Campus Venue';
-        let building = event.venue_building || '';
-        let room = event.venue_room || event.venue_room_number || '';
-        
-        if (building && room) return `${name} (${building}, ${room})`;
-        if (building) return `${name} (${building})`;
-        return name;
-    }
-    return 'Location TBA';
-}
-
-function getMapLink(event) {
-    if (event.google_maps_link) {
-        return `<a href="${event.google_maps_link}" target="_blank" class="map-link" onclick="event.stopPropagation()">View Map</a>`;
-    }
-    const location = getEventLocation(event);
-    if (location && location !== 'Location TBA' && location !== 'On-Campus Venue') {
-        const encodedLocation = encodeURIComponent(location);
-        return `<a href="https://www.google.com/maps/search/?api=1&query=${encodedLocation}" target="_blank" class="map-link" onclick="event.stopPropagation()">Search on Map</a>`;
-    }
-    return '';
-}
-
-// --- COMPONENT: RSVP Button ---
-class RsvpBtn {
-    constructor(event, onRsvp) {
-        this.event = event;
-        this.status = event.my_rsvp_status; 
-        this.onRsvp = onRsvp; 
-        
-        this.container = document.createElement('div');
-        this.container.className = 'rsvp-btn-container';
-        
-        this.button = this.createButton();
-        this.menu = this.createMenu();
-        
-        this.container.appendChild(this.button);
-        this.container.appendChild(this.menu);
-        
-        this.button.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleMenu();
-        });
-        
-        // Close menu if clicking outside
-        document.addEventListener('click', (e) => {
-            if (!this.container.contains(e.target)) {
-                this.closeMenu();
-            }
-        });
-        return this.container;
-    }
-
-    createButton() {
-        const btn = document.createElement('button');
-        btn.className = 'action-btn primary rsvp-btn';
-        this.updateButtonState(btn, this.status);
-        return btn;
-    }
-    
-    updateButtonState(buttonEl, status) {
-        buttonEl.classList.remove('is-going', 'secondary');
-        buttonEl.classList.add('primary'); 
-        
-        let text = 'RSVP';
-        if (status === 'going') {
-            text = '✓ Going';
-            buttonEl.classList.add('is-going');
-        } else if (status === 'maybe') {
-            text = '? Maybe';
-            buttonEl.classList.replace('primary', 'secondary');
-        } else if (status === 'canceled') {
-            text = '✕ Can\'t Go';
-            buttonEl.classList.replace('primary', 'secondary');
+                // Perform delete API call
+                try {
+                    await api(`/events/${eventIdToDelete}`, "DELETE", null, token);
+                    deleteModal.classList.remove('open');
+                    deleteModal.style.display = 'none';
+                    closeDetailModal();
+                    loadEvents();
+                } catch (err) {
+                    console.error("Delete failed", err);
+                } finally {
+                    confirmDeleteBtn.textContent = "Delete";
+                    confirmDeleteBtn.disabled = false;
+                    eventIdToDelete = null;
+                }
+            });
         }
-        
-        buttonEl.innerHTML = `<span>${text}</span>`; 
     }
-    
-    createMenu() {
-        const menu = document.createElement('div');
-        // Reuse common dropdown styling
-        menu.className = 'dropdown-menu';
-        
-        menu.innerHTML = `
+
+    // Initialize after modals are created
+    initializeModalReferences();
+
+    // --- State Variables ---
+    let allEvents = [];
+    let currentEvents = [];
+    let currentView = "cards";
+    const userRole = getRoleFromToken();
+    const userId = token ? JSON.parse(atob(token.split('.')[1])).sub : null;
+
+    // Show "My RSVPs" option only if logged in
+    if (userId) {
+        // Insert "My RSVPs" after "All Events"
+        const myRsvpsOption = document.createElement('option');
+        myRsvpsOption.value = 'my_rsvps';
+        myRsvpsOption.textContent = 'My RSVPs';
+        eventFilterSelect.options.add(myRsvpsOption, 1);
+    }
+
+    // --- Helper Functions ---
+
+    // Get formatted event location
+    function getEventLocation(event) {
+        if (event.location_type === 'custom') {
+            return event.custom_location_address || 'Location TBA';
+        }
+        if (event.location_type === 'venue') {
+            let name = event.venue_name || 'On-Campus Venue';
+            let building = event.venue_building || '';
+            let room = event.venue_room || event.venue_room_number || '';
+
+            if (building && room) return `${name} (${building}, ${room})`;
+            if (building) return `${name} (${building})`;
+            return name;
+        }
+        return 'Location TBA';
+    }
+
+    // Generate map link HTML
+    function getMapLink(event) {
+        if (event.google_maps_link) {
+            return `<a href="${event.google_maps_link}" target="_blank" class="map-link" onclick="event.stopPropagation()">View Map</a>`;
+        }
+        const location = getEventLocation(event);
+        if (location && location !== 'Location TBA' && location !== 'On-Campus Venue') {
+            const encodedLocation = encodeURIComponent(location);
+            return `<a href="https://www.google.com/maps/search/?api=1&query=${encodedLocation}" target="_blank" class="map-link" onclick="event.stopPropagation()">Search on Map</a>`;
+        }
+        return '';
+    }
+
+    // --- COMPONENT: RSVP Button ---
+    class RsvpBtn {
+        constructor(event, onRsvp) {
+            this.event = event;
+            this.status = event.my_rsvp_status;
+            this.onRsvp = onRsvp;
+
+            this.container = document.createElement('div');
+            this.container.className = 'rsvp-btn-container';
+
+            this.button = this.createButton();
+            this.menu = this.createMenu();
+
+            this.container.appendChild(this.button);
+            this.container.appendChild(this.menu);
+
+            this.button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleMenu();
+            });
+
+            // Close menu if clicking outside
+            document.addEventListener('click', (e) => {
+                if (!this.container.contains(e.target)) {
+                    this.closeMenu();
+                }
+            });
+            return this.container;
+        }
+
+        // Create main RSVP button
+        createButton() {
+            const btn = document.createElement('button');
+            btn.className = 'action-btn primary rsvp-btn';
+            this.updateButtonState(btn, this.status);
+            return btn;
+        }
+
+        // Update button appearance based on RSVP status
+        updateButtonState(buttonEl, status) {
+            buttonEl.classList.remove('is-going', 'secondary');
+            buttonEl.classList.add('primary');
+
+            let text = 'RSVP';
+            if (status === 'going') {
+                text = '✓ Going';
+                buttonEl.classList.add('is-going');
+            } else if (status === 'maybe') {
+                text = '? Maybe';
+                buttonEl.classList.replace('primary', 'secondary');
+            } else if (status === 'canceled') {
+                text = '✕ Can\'t Go';
+                buttonEl.classList.replace('primary', 'secondary');
+            }
+
+            buttonEl.innerHTML = `<span>${text}</span>`;
+        }
+
+        // Create dropdown menu for RSVP options
+        createMenu() {
+            const menu = document.createElement('div');
+            // Reuse common dropdown styling
+            menu.className = 'dropdown-menu';
+
+            // Menu options
+            menu.innerHTML = `
             <button data-status="going">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"></path></svg>
                 <span>Going</span>
@@ -1267,68 +1408,71 @@ class RsvpBtn {
                 <span>Clear RSVP</span>
             </button>
         `;
-        
-        menu.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const newStatus = e.currentTarget.dataset.status === 'clear' ? null : e.currentTarget.dataset.status;
-                this.handleRsvpClick(newStatus);
+
+            // Menu button handlers
+            menu.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const newStatus = e.currentTarget.dataset.status === 'clear' ? null : e.currentTarget.dataset.status;
+                    this.handleRsvpClick(newStatus);
+                });
             });
-        });
-        return menu;
-    }
-    
-    async handleRsvpClick(newStatus) {
-        this.button.disabled = true;
-        this.button.innerHTML = `<span>Saving...</span>`;
-        
-        try {
-            const res = await api(`/events/${this.event.event_id}/rsvp`, "POST", { status: newStatus }, token);
-            
-            if (res.status === (newStatus || "cleared")) {
-                this.status = newStatus;
-                this.event.my_rsvp_status = newStatus; 
-                this.updateButtonState(this.button, newStatus);
-                if (this.onRsvp) this.onRsvp();
+            return menu;
+        }
+
+        // Handle RSVP option click
+        async handleRsvpClick(newStatus) {
+            this.button.disabled = true;
+            this.button.innerHTML = `<span>Saving...</span>`;
+
+            // API call to update RSVP status
+            try {
+                const res = await api(`/events/${this.event.event_id}/rsvp`, "POST", { status: newStatus }, token);
+
+                if (res.status === (newStatus || "cleared")) {
+                    this.status = newStatus;
+                    this.event.my_rsvp_status = newStatus;
+                    this.updateButtonState(this.button, newStatus);
+                    if (this.onRsvp) this.onRsvp();
+                }
+            } catch (err) {
+                console.error("RSVP failed", err);
+                this.updateButtonState(this.button, this.status);
+            } finally {
+                this.button.disabled = false;
+                this.closeMenu();
             }
-        } catch (err) {
-            console.error("RSVP failed", err);
-            this.updateButtonState(this.button, this.status); 
-        } finally {
-            this.button.disabled = false;
-            this.closeMenu();
+        }
+
+        toggleMenu() {
+            document.querySelectorAll('.rsvp-btn-container .dropdown-menu.open, .options-btn-container .dropdown-menu.open').forEach(menu => {
+                if (menu !== this.menu) menu.classList.remove('open');
+            });
+            this.menu.classList.toggle('open');
+        }
+
+        closeMenu() {
+            this.menu.classList.remove('open');
         }
     }
-    
-    toggleMenu() {
-        document.querySelectorAll('.rsvp-btn-container .dropdown-menu.open, .options-btn-container .dropdown-menu.open').forEach(menu => {
-            if (menu !== this.menu) menu.classList.remove('open');
-        });
-        this.menu.classList.toggle('open');
-    }
-    
-    closeMenu() {
-        this.menu.classList.remove('open');
-    }
-}
 
-// --- COMPONENT: Options (Edit/Delete) Button ---
-class EventOptionsBtn {
-    constructor(event) {
-        this.event = event;
-        this.container = document.createElement('div');
-        this.container.className = 'options-btn-container';
-        
-        // Button
-        this.btn = document.createElement('button');
-        this.btn.className = 'options-toggle-btn';
-        this.btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>`;
-        this.btn.title = "Options";
-        
-        // Menu
-        this.menu = document.createElement('div');
-        this.menu.className = 'dropdown-menu';
-        this.menu.innerHTML = `
+    // --- COMPONENT: Options (Edit/Delete) Button ---
+    class EventOptionsBtn {
+        constructor(event) {
+            this.event = event;
+            this.container = document.createElement('div');
+            this.container.className = 'options-btn-container';
+
+            // Button
+            this.btn = document.createElement('button');
+            this.btn.className = 'options-toggle-btn';
+            this.btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"></circle><circle cx="19" cy="12" r="1"></circle><circle cx="5" cy="12" r="1"></circle></svg>`;
+            this.btn.title = "Options";
+
+            // Menu
+            this.menu = document.createElement('div');
+            this.menu.className = 'dropdown-menu';
+            this.menu.innerHTML = `
             <button class="edit-option">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
                 <span>Edit</span>
@@ -1338,192 +1482,187 @@ class EventOptionsBtn {
                 <span>Delete</span>
             </button>
         `;
-        
-        this.container.appendChild(this.btn);
-        this.container.appendChild(this.menu);
-        
-        // Handlers
-        this.btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleMenu();
-        });
 
-        this.menu.querySelector('.edit-option').addEventListener('click', (e) => {
-            e.stopPropagation();
-            window.location.hash = `#/event-form?id=${this.event.event_id}`;
-        });
+            this.container.appendChild(this.btn);
+            this.container.appendChild(this.menu);
 
-        this.menu.querySelector('.delete-option').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.closeMenu();
-            openDeleteModal(this.event.event_id);
-        });
+            // Handlers
+            this.btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleMenu();
+            });
 
-        // Global click to close
-        document.addEventListener('click', (e) => {
-            if (!this.container.contains(e.target)) {
+            this.menu.querySelector('.edit-option').addEventListener('click', (e) => {
+                e.stopPropagation();
+                window.location.hash = `#/event-form?id=${this.event.event_id}`;
+            });
+
+            this.menu.querySelector('.delete-option').addEventListener('click', (e) => {
+                e.stopPropagation();
                 this.closeMenu();
-            }
-        });
+                openDeleteModal(this.event.event_id);
+            });
 
-        return this.container;
-    }
+            // Global click to close
+            document.addEventListener('click', (e) => {
+                if (!this.container.contains(e.target)) {
+                    this.closeMenu();
+                }
+            });
 
-    toggleMenu() {
-        document.querySelectorAll('.rsvp-btn-container .dropdown-menu.open, .options-btn-container .dropdown-menu.open').forEach(menu => {
-            if (menu !== this.menu) menu.classList.remove('open');
-        });
-        this.menu.classList.toggle('open');
-    }
-    closeMenu() {
-        this.menu.classList.remove('open');
-    }
-}
+            return this.container;
+        }
 
-// --- Delete Logic ---
-function openDeleteModal(id) {
-    eventIdToDelete = id;
-    deleteModal.classList.add('open');
-    deleteModal.style.display = 'flex';
-}
-
-/**
- * Shows the custom event detail modal.
- */
-async function showDetailModal(event) {
-    if (!event) return;
-    const modal = document.getElementById('eventDetailModal');
-    modal.classList.add('open');
-    modal.style.display = 'flex';
-    
-    document.getElementById('detailTitle').textContent = event.title;
-    
-    // --- TIME FORMATTING ---
-    // Use 'new Date' which automatically converts UTC string (ending in Z) to local time
-    const start = new Date(event.start_time);
-    const end = event.end_time ? new Date(event.end_time) : null;
-    
-    const dateStr = start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    const startTimeStr = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    
-    let timeDisplay = `${dateStr} at ${startTimeStr}`;
-    
-    if (end) {
-        const endDateStr = end.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-        const endTimeStr = end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        
-        if (dateStr === endDateStr) {
-            // Same day: "Friday, January 1, 2024, 10:00 AM – 12:00 PM"
-            timeDisplay = `${dateStr}, ${startTimeStr} – ${endTimeStr}`;
-        } else {
-            // Different day: "Friday... 10:00 AM – Saturday... 10:00 AM"
-            timeDisplay = `${dateStr}, ${startTimeStr} – ${endDateStr}, ${endTimeStr}`;
+        toggleMenu() {
+            document.querySelectorAll('.rsvp-btn-container .dropdown-menu.open, .options-btn-container .dropdown-menu.open').forEach(menu => {
+                if (menu !== this.menu) menu.classList.remove('open');
+            });
+            this.menu.classList.toggle('open');
+        }
+        closeMenu() {
+            this.menu.classList.remove('open');
         }
     }
-    document.getElementById('detailDate').textContent = timeDisplay;
-    // ---------------------------------------------
 
-    // --- NEW: RATING DISPLAY (in modal) ---
-    const detailRatingDiv = document.getElementById('detailRating');
-    if (event.avg_rating) {
-        detailRatingDiv.innerHTML = `
+    // --- Delete Logic ---
+    function openDeleteModal(id) {
+        eventIdToDelete = id;
+        deleteModal.classList.add('open');
+        deleteModal.style.display = 'flex';
+    }
+
+    /**
+     * Shows the custom event detail modal.
+     */
+    async function showDetailModal(event) {
+        if (!event) return;
+        const modal = document.getElementById('eventDetailModal');
+        modal.classList.add('open');
+        modal.style.display = 'flex';
+
+        document.getElementById('detailTitle').textContent = event.title;
+
+        // --- TIME FORMATTING ---
+        // Use 'new Date' which automatically converts UTC string (ending in Z) to local time
+        const start = new Date(event.start_time);
+        const end = event.end_time ? new Date(event.end_time) : null;
+
+        const dateStr = start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        const startTimeStr = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+        let timeDisplay = `${dateStr} at ${startTimeStr}`;
+
+        if (end) {
+            const endDateStr = end.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            const endTimeStr = end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+            if (dateStr === endDateStr) {
+                // Same day: "Friday, January 1, 2024, 10:00 AM – 12:00 PM"
+                timeDisplay = `${dateStr}, ${startTimeStr} – ${endTimeStr}`;
+            } else {
+                // Different day: "Friday... 10:00 AM – Saturday... 10:00 AM"
+                timeDisplay = `${dateStr}, ${startTimeStr} – ${endDateStr}, ${endTimeStr}`;
+            }
+        }
+        document.getElementById('detailDate').textContent = timeDisplay;
+
+        // --- RATING DISPLAY (in modal) ---
+        const detailRatingDiv = document.getElementById('detailRating');
+        if (event.avg_rating) {
+            detailRatingDiv.innerHTML = `
             <span class="star">★</span>
             <strong>${Number(event.avg_rating).toFixed(1)}</strong>
             <span class="count">(${event.review_count} ${event.review_count === 1 ? 'review' : 'reviews'})</span>
         `;
-    } else {
-        detailRatingDiv.innerHTML = `<span class="count">No reviews yet</span>`;
-    }
-    // ---------------------------------------------
+        } else {
+            detailRatingDiv.innerHTML = `<span class="count">No reviews yet</span>`;
+        }
 
-    document.getElementById('detailLocation').textContent = getEventLocation(event);
-    
-    // Add map link
-    const mapLinkContainer = document.getElementById('detailMapLink');
-    const mapLink = getMapLink(event);
-    mapLinkContainer.innerHTML = mapLink;
-    
-    document.getElementById('detailDescription').textContent = event.description || 'No description provided.';
+        document.getElementById('detailLocation').textContent = getEventLocation(event); // Display location
 
-    const detailActions = document.getElementById('detailActions');
-    // NEW: Get references to the *content* divs and the *parent* <details> tags
-    const attendeeListDiv = document.getElementById('detailAttendeeList');
-    const attendeeDetails = document.getElementById('attendeeDetails');
-    
-    const reviewListDiv = document.getElementById('detailReviewList');
-    const reviewDetails = document.getElementById('reviewDetails');
-    
-    const reviewFormDiv = document.getElementById('detailReviewForm');
-    const reviewFormDetails = document.getElementById('reviewFormDetails');
-    
-    // Clear old content
-    detailActions.innerHTML = '';
-    attendeeListDiv.innerHTML = ''; 
-    reviewListDiv.innerHTML = '';
-    
-    // Hide sections by default
-    attendeeDetails.style.display = 'none';
-    reviewFormDetails.style.display = 'none';
-    // We can keep reviewDetails visible as it's the default
-    reviewDetails.style.display = 'block';
+        // Add map link
+        const mapLinkContainer = document.getElementById('detailMapLink');
+        const mapLink = getMapLink(event);
+        mapLinkContainer.innerHTML = mapLink;
 
-    // Check permissions
-    const isOrganizer = userRole === 'admin' || (event.organizer_id === userId) || (event.created_by === userId);
+        document.getElementById('detailDescription').textContent = event.description || 'No description provided.'; // Description
 
-    if (userId) {
-        const rsvpContainer = new RsvpBtn(event, () => {
-            // If filtering by RSVPs, re-apply filters to possibly remove/add event from view
-            if (eventFilterSelect.value === 'my_rsvps') {
-                applyFilters();
-            } else {
-                // Otherwise, just refresh the view to show the new button state on the card
-                switchView(currentView);
-            }
-        });
-        detailActions.appendChild(rsvpContainer);
-    }
-    
-    if (isOrganizer) {
-        // Use the Options Button instead of just Edit
-        const optionsComponent = new EventOptionsBtn(event);
-        // Style tweaks for modal placement if needed
-        detailActions.appendChild(optionsComponent);
-        
-        // NEW: Show the <details> tag
-        attendeeDetails.style.display = 'block';
-        attendeeListDiv.innerHTML = '<div class="loading">Loading attendees...</div>';
-        try {
-            const attendees = await api(`/events/${event.event_id}/rsvps`, "GET", null, token);
-            if (attendees && attendees.length > 0) {
-                // We're now filling the *inner* div
-                attendeeListDiv.innerHTML = attendees.map(att => `
+        const detailActions = document.getElementById('detailActions');
+
+        const attendeeListDiv = document.getElementById('detailAttendeeList');
+        const attendeeDetails = document.getElementById('attendeeDetails');
+
+        const reviewListDiv = document.getElementById('detailReviewList');
+        const reviewDetails = document.getElementById('reviewDetails');
+
+        const reviewFormDiv = document.getElementById('detailReviewForm');
+        const reviewFormDetails = document.getElementById('reviewFormDetails');
+
+        // Clear old content
+        detailActions.innerHTML = '';
+        attendeeListDiv.innerHTML = '';
+        reviewListDiv.innerHTML = '';
+
+        // Hide sections by default
+        attendeeDetails.style.display = 'none';
+        reviewFormDetails.style.display = 'none';
+        reviewDetails.style.display = 'block'; // We can keep reviewDetails visible as it's the default
+
+        // Check permissions
+        const isOrganizer = userRole === 'admin' || (event.organizer_id === userId) || (event.created_by === userId);
+
+        if (userId) {
+            const rsvpContainer = new RsvpBtn(event, () => {
+                // If filtering by RSVPs, re-apply filters to possibly remove/add event from view
+                if (eventFilterSelect.value === 'my_rsvps') {
+                    applyFilters();
+                } else {
+                    // Otherwise, just refresh the view to show the new button state on the card
+                    switchView(currentView);
+                }
+            });
+            detailActions.appendChild(rsvpContainer);
+        }
+
+        if (isOrganizer) {
+            // Use the Options Button instead of just Edit
+            const optionsComponent = new EventOptionsBtn(event);
+            // Style tweaks for modal placement if needed
+            detailActions.appendChild(optionsComponent);
+
+            // --- LOAD ATTENDEES ---
+            attendeeDetails.style.display = 'block';
+            attendeeListDiv.innerHTML = '<div class="loading">Loading attendees...</div>';
+            try {
+                const attendees = await api(`/events/${event.event_id}/rsvps`, "GET", null, token);
+                if (attendees && attendees.length > 0) {
+                    attendeeListDiv.innerHTML = attendees.map(att => `
                     <div class="attendee-item">
                         <a href="#/profile-view?id=${att.user_id}" target="_blank">${att.first_name || ''} ${att.last_name || att.email}</a>
                         <span class="rsvp-status ${att.rsvp_status}">${att.rsvp_status}</span>
                     </div>
                 `).join('');
-            } else {
-                attendeeListDiv.innerHTML = '<p>No one has RSVP\'d yet.</p>';
-            }
-        } catch (err) {
-            attendeeListDiv.innerHTML = `<p class="error-message">Could not load attendee list.</p>`;
-        }
-    }
-
-    // --- NEW: LOAD REVIEWS ---
-    reviewListDiv.innerHTML = '<div class="loading">Loading reviews...</div>';
-    let myReview = null;
-    try {
-        const reviews = await api(`/events/${event.event_id}/reviews`, "GET", null, token);
-        if (reviews && reviews.length > 0) {
-            // We're now filling the *inner* div
-            reviewListDiv.innerHTML = reviews.map(rev => {
-                // Check if this review is by the current user
-                if (rev.user_id === userId) {
-                    myReview = rev;
+                } else {
+                    attendeeListDiv.innerHTML = '<p>No one has RSVP\'d yet.</p>';
                 }
-                const reviewDate = new Date(rev.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                return `
+            } catch (err) {
+                attendeeListDiv.innerHTML = `<p class="error-message">Could not load attendee list.</p>`;
+            }
+        }
+
+        // --- LOAD REVIEWS ---
+        reviewListDiv.innerHTML = '<div class="loading">Loading reviews...</div>';
+        let myReview = null;
+        try {
+            const reviews = await api(`/events/${event.event_id}/reviews`, "GET", null, token);
+            if (reviews && reviews.length > 0) {
+                reviewListDiv.innerHTML = reviews.map(rev => {
+                    // Check if this review is by the current user
+                    if (rev.user_id === userId) {
+                        myReview = rev;
+                    }
+                    const reviewDate = new Date(rev.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    return `
                     <div class="review-item">
                         <div class="review-header">
                             <div>
@@ -1537,116 +1676,117 @@ async function showDetailModal(event) {
                         <p class="review-text">${rev.review_text || '<i>No comment provided.</i>'}</p>
                     </div>
                 `;
-            }).join('');
-        } else {
-            reviewListDiv.innerHTML = '<p>No reviews yet.</p>';
-        }
-    } catch (err) {
-        reviewListDiv.innerHTML = `<p class="error-message">Could not load reviews.</p>`;
-    }
-    // ---------------------------------------------
-
-    // --- NEW: REVIEW FORM LOGIC ---
-    const isPastEvent = new Date(event.start_time) < new Date();
-    if (userId && isPastEvent) {
-        // NEW: Show the <details> tag for the form
-        reviewFormDetails.style.display = 'block';
-        
-        const reviewForm = document.getElementById('eventReviewForm');
-        // Get the button reference from the document (not a clone yet) to update text initially
-        const submitBtnInitial = document.getElementById('submitReviewBtn');
-        const successMsgInitial = document.getElementById('reviewFormSuccess');
-
-        // Reset success/error messages when opening modal
-        if (successMsgInitial) successMsgInitial.style.display = 'none';
-        
-        // Pre-fill form if user already left a review
-        if (myReview) {
-            reviewForm.elements.rating.value = myReview.rating;
-            reviewForm.elements.reviewFormTextarea.value = myReview.review_text;
-            if(submitBtnInitial) submitBtnInitial.textContent = "Update Review";
-        } else {
-            // Reset form
-            reviewForm.reset();
-            if(submitBtnInitial) submitBtnInitial.textContent = "Submit Review";
-        }
-
-        // Remove old listener to prevent duplicates
-        const newReviewForm = reviewForm.cloneNode(true);
-        reviewForm.parentNode.replaceChild(newReviewForm, reviewForm);
-        
-        newReviewForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            // --- JAVASCRIPT BUG FIX ---
-            // Re-query for the elements *inside* the listener
-            // to get the correct references from the cloned form.
-            const submitBtn = document.getElementById('submitReviewBtn');
-            const errorSpan = document.getElementById('reviewFormError');
-            const successSpan = document.getElementById('reviewFormSuccess');
-            const rating = newReviewForm.elements.rating.value;
-            const review_text = newReviewForm.elements.reviewFormTextarea.value;
-
-            if (!rating) {
-                errorSpan.textContent = "Please select a star rating.";
-                errorSpan.style.display = 'inline';
-                if(successSpan) successSpan.style.display = 'none';
-                return;
+                }).join('');
+            } else {
+                reviewListDiv.innerHTML = '<p>No reviews yet.</p>';
             }
-            // --- END FIX ---
+        } catch (err) {
+            reviewListDiv.innerHTML = `<p class="error-message">Could not load reviews.</p>`;
+        }
 
-            errorSpan.style.display = 'none';
-            if(successSpan) successSpan.style.display = 'none';
-            
-            const originalBtnText = submitBtn.textContent;
-            submitBtn.textContent = 'Submitting...';
-            submitBtn.disabled = true;
+        // --- REVIEW FORM LOGIC ---
+        // Show form only if user is logged in and event is in the past
+        const isPastEvent = new Date(event.start_time) < new Date();
+        if (userId && isPastEvent) {
+            // Show the review form section
+            reviewFormDetails.style.display = 'block';
 
-            try {
-                // Submit the review
-                await api(`/events/${event.event_id}/review`, "POST", { 
-                    rating: parseInt(rating), 
-                    review_text: review_text 
-                }, token);
-                
-                // --- SUCCESS HANDLING ---
-                if (successSpan) {
-                    successSpan.textContent = myReview ? "Review updated successfully!" : "Review submitted successfully!";
-                    successSpan.style.display = 'inline';
-                }
-                submitBtn.textContent = myReview ? "Update Review" : "Submit Review";
+            const reviewForm = document.getElementById('eventReviewForm');
+            // Get the button reference from the document (not a clone yet) to update text initially
+            const submitBtnInitial = document.getElementById('submitReviewBtn');
+            const successMsgInitial = document.getElementById('reviewFormSuccess');
 
-                // Wait briefly so user sees the success message before reload
-                setTimeout(async () => {
+            // Reset success/error messages when opening modal
+            if (successMsgInitial) successMsgInitial.style.display = 'none';
+
+            // Pre-fill form if user already left a review
+            if (myReview) {
+                reviewForm.elements.rating.value = myReview.rating;
+                reviewForm.elements.reviewFormTextarea.value = myReview.review_text;
+                if (submitBtnInitial) submitBtnInitial.textContent = "Update Review";
+            } else {
+                // Reset form
+                reviewForm.reset();
+                if (submitBtnInitial) submitBtnInitial.textContent = "Submit Review";
+            }
+
+            // Remove old listener to prevent duplicates
+            const newReviewForm = reviewForm.cloneNode(true);
+            reviewForm.parentNode.replaceChild(newReviewForm, reviewForm);
+
+            newReviewForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                // --- FORM SUBMISSION LOGIC ---
+                const submitBtn = document.getElementById('submitReviewBtn');
+                const errorSpan = document.getElementById('reviewFormError');
+                const successSpan = document.getElementById('reviewFormSuccess');
+                const rating = newReviewForm.elements.rating.value;
+                const review_text = newReviewForm.elements.reviewFormTextarea.value;
+
+                if (!rating) {
+                    errorSpan.textContent = "Please select a star rating.";
+                    errorSpan.style.display = 'inline';
                     if (successSpan) successSpan.style.display = 'none';
-                    
-                    // 1. Re-load all events to get new avg_rating
-                    await loadEvents(); 
-                    
-                    // 2. Find the *updated* event object from the master list
-                    const updatedEvent = allEvents.find(e => e.event_id == event.event_id);
-                    
-                    // 3. Close and re-open the modal with the *new* event data
-                    closeDetailModal();
-                    if (updatedEvent) {
-                        showDetailModal(updatedEvent);
-                    } else {
-                        // Fallback just in case (e.g., event was deleted)
-                        console.warn("Could not find updated event data.");
-                    }
-                }, 1500);
-                
-            } catch (err) {
-                errorSpan.textContent = "Failed to submit review.";
-                errorSpan.style.display = 'inline';
-                submitBtn.textContent = originalBtnText;
-            } finally {
-                submitBtn.disabled = false;
-            }
-        });
-    }
+                    return;
+                }
 
-    const reviewTextarea = document.getElementById('reviewFormTextarea');
+                // Clear previous messages
+                errorSpan.style.display = 'none';
+                if (successSpan) successSpan.style.display = 'none';
+
+                // Disable button and show loading state
+                const originalBtnText = submitBtn.textContent;
+                submitBtn.textContent = 'Submitting...';
+                submitBtn.disabled = true;
+
+                // API call to submit review
+                try {
+                    // Submit the review
+                    await api(`/events/${event.event_id}/review`, "POST", {
+                        rating: parseInt(rating),
+                        review_text: review_text
+                    }, token);
+
+                    // --- SUCCESS HANDLING ---
+                    if (successSpan) {
+                        successSpan.textContent = myReview ? "Review updated successfully!" : "Review submitted successfully!";
+                        successSpan.style.display = 'inline';
+                    }
+                    submitBtn.textContent = myReview ? "Update Review" : "Submit Review";
+
+                    // Wait briefly so user sees the success message before reload
+                    setTimeout(async () => {
+                        if (successSpan) successSpan.style.display = 'none';
+
+                        // 1. Re-load all events to get new avg_rating
+                        await loadEvents();
+
+                        // 2. Find the *updated* event object from the master list
+                        const updatedEvent = allEvents.find(e => e.event_id == event.event_id);
+
+                        // 3. Close and re-open the modal with the *new* event data
+                        closeDetailModal();
+                        if (updatedEvent) {
+                            showDetailModal(updatedEvent);
+                        } else {
+                            // Fallback just in case (e.g., event was deleted)
+                            console.warn("Could not find updated event data.");
+                        }
+                    }, 1500);
+
+                } catch (err) {
+                    errorSpan.textContent = "Failed to submit review.";
+                    errorSpan.style.display = 'inline';
+                    submitBtn.textContent = originalBtnText;
+                } finally {
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+
+        // --- CHARACTER COUNTER FOR REVIEW TEXTAREA ---
+        const reviewTextarea = document.getElementById('reviewFormTextarea');
         const charCountDisplay = document.getElementById('reviewCharCount');
 
         // Function to update the counter text
@@ -1660,115 +1800,119 @@ async function showDetailModal(event) {
 
         // Initialize counter immediately (in case there is pre-filled text from an existing review)
         updateCharCount();
-    // ---------------------------------------------
-}
-
-function closeDetailModal() {
-    const modal = document.getElementById('eventDetailModal');
-    modal.classList.remove('open');
-    modal.style.display = 'none';
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const closeBtn = document.getElementById('closeDetailModal');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeDetailModal);
     }
-});
 
-// Also add listener after modal is created
-setTimeout(() => {
-    const closeBtn = document.getElementById('closeDetailModal');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', closeDetailModal);
+    // Close detail modal
+    function closeDetailModal() {
+        const modal = document.getElementById('eventDetailModal');
+        modal.classList.remove('open');
+        modal.style.display = 'none';
     }
-    
-    // Close modal when clicking outside
-    const modal = document.getElementById('eventDetailModal');
-    if (modal) {
-        modal.addEventListener('click', (e) => {
-            if (e.target.id === 'eventDetailModal') {
-                closeDetailModal();
-            }
-        });
-    }
-}, 100);
 
-// --- Event Rendering ---
-function renderEvents(events, isList = false) {
-    const container = isList ? listView : cardsView;
-    const listClass = isList ? 'list-card-style' : '';
-    
-    if (events.length === 0) {
-        const emptyStateHTML = `
+    // Attach close event listener
+    document.addEventListener('DOMContentLoaded', () => {
+        const closeBtn = document.getElementById('closeDetailModal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeDetailModal);
+        }
+    });
+
+    // Also add listener after modal is created
+    setTimeout(() => {
+        const closeBtn = document.getElementById('closeDetailModal');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeDetailModal);
+        }
+
+        // Close modal when clicking outside
+        const modal = document.getElementById('eventDetailModal');
+        if (modal) {
+            modal.addEventListener('click', (e) => {
+                if (e.target.id === 'eventDetailModal') {
+                    closeDetailModal();
+                }
+            });
+        }
+    }, 100);
+
+    // --- Event Rendering ---
+    function renderEvents(events, isList = false) {
+        const container = isList ? listView : cardsView;
+        const listClass = isList ? 'list-card-style' : '';
+
+        if (events.length === 0) {
+            const emptyStateHTML = `
             <div class="empty-state" style="grid-column: 1 / -1; ${isList ? 'max-width: 100%;' : ''}">
                 <h3>No Events Found</h3>
                 <p>Try adjusting your search or date filters.</p>
             </div>
         `;
-        container.innerHTML = emptyStateHTML;
-        return;
-    }
+            container.innerHTML = emptyStateHTML;
+            return;
+        }
 
-    // --- SPLIT AND SORT EVENTS ---
-    const now = new Date();
-    const upcoming = events.filter(e => new Date(e.start_time) >= now);
-    const past = events.filter(e => new Date(e.start_time) < now);
+        // --- SPLIT AND SORT EVENTS ---
+        const now = new Date();
+        const upcoming = events.filter(e => new Date(e.start_time) >= now);
+        const past = events.filter(e => new Date(e.start_time) < now);
 
-    // Sort Upcoming: Ascending (Soonest -> Furthest)
-    upcoming.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
-    
-    // Sort Past: Descending (Most recent past -> Oldest past)
-    past.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+        // Sort Upcoming: Ascending (Soonest -> Furthest)
+        upcoming.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
 
-    const renderCard = (event) => {
-        const startDate = new Date(event.start_time);
-        const formattedDate = startDate.toLocaleString('en-US', { 
-            weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
-        });
-        const formattedTime = startDate.toLocaleTimeString('en-US', {
-            hour: 'numeric', minute: '2-digit'
-        });
+        // Sort Past: Descending (Most recent past -> Oldest past)
+        past.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
 
-        const locationText = getEventLocation(event);
-        const mapLinkHtml = getMapLink(event);
-        
-        let actionButtons = '';        // For RSVP
-        let optionsPlaceholder = ''; // For '...' button in BOTH views
-        
-        // --- NEW: Rating display for card ---
-        let ratingHtml = '';
-        if (event.avg_rating) {
-            ratingHtml = `
+        const renderCard = (event) => {
+            const startDate = new Date(event.start_time);
+            const formattedDate = startDate.toLocaleString('en-US', {
+                weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+            });
+            const formattedTime = startDate.toLocaleTimeString('en-US', {
+                hour: 'numeric', minute: '2-digit'
+            });
+
+            const locationText = getEventLocation(event);
+            const mapLinkHtml = getMapLink(event);
+
+            let actionButtons = '';        // For RSVP
+            let optionsPlaceholder = ''; // For '...' button in BOTH views
+
+            // --- Rating display for card ---
+            let ratingHtml = '';
+            if (event.avg_rating) {
+                ratingHtml = `
                 <div class="event-rating">
                     <span class="star">★</span>
                     <strong>${Number(event.avg_rating).toFixed(1)}</strong>
                     <span class="count">(${event.review_count})</span>
                 </div>
             `;
-        }
-        // -------------------------------------
-        
-        const canEdit = userRole === 'admin' || (event.organizer_id === userId) || (event.created_by === userId);
+            }
 
-        if (userId) {
-            actionButtons += `<div class="rsvp-btn-placeholder" data-event-id="${event.event_id}"></div>`;
-        } else {
-            actionButtons += `<button class="action-btn primary" disabled title="Log in to RSVP">RSVP</button>`;
-        }
+            // Determine if user can edit (admin or organizer/creator)
+            const canEdit = userRole === 'admin' || (event.organizer_id === userId) || (event.created_by === userId);
 
-        if (canEdit) {
-            optionsPlaceholder = `<div class="options-btn-placeholder" data-event-id="${event.event_id}"></div>`;
-        } else if (isList) {
-            optionsPlaceholder = `<div class="options-spacer"></div>`;
-        }
+            // --- Action Buttons ---
+            if (userId) {
+                actionButtons += `<div class="rsvp-btn-placeholder" data-event-id="${event.event_id}"></div>`;
+            } else {
+                actionButtons += `<button class="action-btn primary" disabled title="Log in to RSVP">RSVP</button>`;
+            }
 
-        const eventId = event.event_id;
-        const visibilityBadge = event.visibility === 'private' 
-            ? `<span class="status-badge" style="background: #E2E8F0; color: #4A5568;">Private</span>`
-            : `<span class="status-badge upcoming">Public</span>`;
+            // --- Options Placeholder ---
+            if (canEdit) {
+                optionsPlaceholder = `<div class="options-btn-placeholder" data-event-id="${event.event_id}"></div>`;
+            } else if (isList) {
+                optionsPlaceholder = `<div class="options-spacer"></div>`;
+            }
 
-        return `
+            // Event ID for reference
+            const eventId = event.event_id;
+            const visibilityBadge = event.visibility === 'private'
+                ? `<span class="status-badge" style="background: #E2E8F0; color: #4A5568;">Private</span>`
+                : `<span class="status-badge upcoming">Public</span>`;
+            // --- CARD HTML ---
+            return `
             <article class="app-event-card ${listClass}" data-event-id="${eventId}">
                 ${!isList ? `<div class="card-options-wrapper" style="position: absolute; top: 10px; right: 10px; z-index: 5;">${optionsPlaceholder}</div>` : ''}
 
@@ -1817,242 +1961,252 @@ function renderEvents(events, isList = false) {
                 </div>
             </article>
         `;
-    };
+        };
 
-    let html = '';
+        let html = ''; // Final HTML to inject
 
-    if (upcoming.length > 0) {
-        html += upcoming.map(renderCard).join("");
-    } else {
-        html += `<p style="grid-column:1/-1; padding:1rem; color:var(--text-secondary);">No upcoming events found matching your filters. You may also want to check past events below.</p>`;
-    }
+        // Render Upcoming Events
+        if (upcoming.length > 0) {
+            html += upcoming.map(renderCard).join("");
+        } else {
+            html += `<p style="grid-column:1/-1; padding:1rem; color:var(--text-secondary);">No upcoming events found matching your filters. You may also want to check past events below.</p>`;
+        }
 
-    if (past.length > 0) {
-        html += `
+        // Render Past Events
+        if (past.length > 0) {
+            html += `
             <div class="section-divider">
                 <span></span>
                 <h3>Past Events</h3>
                 <span></span>
             </div>
         `;
-        html += past.map(renderCard).join("");
-    }
+            html += past.map(renderCard).join("");
+        }
 
-    container.innerHTML = html;
+        container.innerHTML = html; // Inject HTML
 
-    // --- Attach Live Components ---
+        // --- Attach Live Components ---
 
-    // 1. RSVP Buttons
-    container.querySelectorAll('.rsvp-btn-placeholder').forEach(placeholder => {
-        const eventId = placeholder.dataset.eventId;
-        const event = allEvents.find(e => e.event_id == eventId);
-        if (event) {
-            const rsvpComponent = new RsvpBtn(event, () => {
-                if (eventFilterSelect.value === 'my_rsvps') applyFilters();
-                if(currentView === 'calendar') renderCalendar(currentEvents);
+        // 1. RSVP Buttons
+        container.querySelectorAll('.rsvp-btn-placeholder').forEach(placeholder => {
+            const eventId = placeholder.dataset.eventId;
+            const event = allEvents.find(e => e.event_id == eventId);
+            if (event) {
+                const rsvpComponent = new RsvpBtn(event, () => {
+                    if (eventFilterSelect.value === 'my_rsvps') applyFilters();
+                    if (currentView === 'calendar') renderCalendar(currentEvents);
+                });
+                placeholder.replaceWith(rsvpComponent);
+            }
+        });
+
+        // 2. Options (Edit/Delete) Buttons
+        container.querySelectorAll('.options-btn-placeholder').forEach(placeholder => {
+            const eventId = placeholder.dataset.eventId;
+            const event = allEvents.find(e => e.event_id == eventId);
+            if (event) {
+                const optionsComponent = new EventOptionsBtn(event);
+                placeholder.replaceWith(optionsComponent);
+            }
+        });
+
+        // Click to Open Detail Modal
+        container.querySelectorAll('.app-event-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                // Ignore clicks inside buttons/dropdowns
+                if (e.target.closest('.action-btn') || e.target.closest('a') || e.target.closest('.rsvp-btn-container') || e.target.closest('.options-btn-container')) {
+                    return;
+                }
+                const eventId = e.currentTarget.dataset.eventId;
+                const eventData = allEvents.find(e => e.event_id == eventId);
+                showDetailModal(eventData);
             });
-            placeholder.replaceWith(rsvpComponent);
-        }
-    });
-
-    // 2. Options (Edit/Delete) Buttons
-    container.querySelectorAll('.options-btn-placeholder').forEach(placeholder => {
-        const eventId = placeholder.dataset.eventId;
-        const event = allEvents.find(e => e.event_id == eventId);
-        if (event) {
-            const optionsComponent = new EventOptionsBtn(event);
-            placeholder.replaceWith(optionsComponent);
-        }
-    });
-
-    // Click to Open Detail Modal
-    container.querySelectorAll('.app-event-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            // Ignore clicks inside buttons/dropdowns
-            if (e.target.closest('.action-btn') || e.target.closest('a') || e.target.closest('.rsvp-btn-container') || e.target.closest('.options-btn-container')) {
-                return;
-            }
-            const eventId = e.currentTarget.dataset.eventId;
-            const eventData = allEvents.find(e => e.event_id == eventId);
-            showDetailModal(eventData);
         });
-    });
-}
-
-// --- Calendar Functionality ---
-
-function normalizeDateTime(dt) {
-    if (!dt && dt !== 0) return null;
-    if (dt instanceof Date) return dt.toISOString();
-    if (typeof dt === 'number') {
-        if (String(dt).length <= 10) dt = dt * 1000;
-        return new Date(dt).toISOString();
     }
-    if (typeof dt === 'string') {
-        const trimmed = dt.trim();
-        // Basic fix for strings; better to rely on API returning ISO with Z
-        if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return `${trimmed}T00:00:00Z`;
-        if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(trimmed)) return trimmed.replace(' ', 'T') + 'Z';
-        const parsed = new Date(trimmed);
-        if (!isNaN(parsed.getTime())) return parsed.toISOString();
-        return trimmed;
-    }
-    return null;
-}
 
-let fcCalendar = null;
+    // --- Calendar Functionality ---
 
-function renderCalendar(events) {
-    const calendarEl = document.getElementById('calendar');
-    const calendarEvents = events.map(e => ({
-        title: e.title,
-        start: normalizeDateTime(e.start_time),
-        end: normalizeDateTime(e.end_time),
-        extendedProps: e,
-        backgroundColor: e.my_rsvp_status === 'going' ? '#38a169' : (e.visibility === 'private' ? '#5568d3' : '#667eea'),
-        borderColor: e.my_rsvp_status === 'going' ? '#2f855a' : (e.visibility === 'private' ? '#4a5568' : '#5568d3')
-    }));
-
-    if (!fcCalendar) {
-        fcCalendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-            },
-            height: 'auto',
-            aspectRatio: 1.8,
-            events: calendarEvents,
-            eventClick: function(info) {
-                info.jsEvent.preventDefault();
-                showDetailModal(info.event.extendedProps);
-            }
-        });
-        fcCalendar.render();
-    } else {
-        fcCalendar.removeAllEvents();
-        fcCalendar.addEventSource(calendarEvents);
-    }
-}
-
-// --- Initialization ---
-
-async function loadEvents() {
-    try {
-        const events = await api("/events/", "GET", null, token);
-        if (!Array.isArray(events)) throw new Error("API did not return an array.");
-        
-        // Keep raw list in a basic sort for safety, 
-        // but renderEvents handles the split/sort logic for Grid/List views.
-        // For Filter logic, we just keep them all.
-        allEvents = events; 
-        currentEvents = [...allEvents];
-        
-        // Initial render based on currentView (default 'cards')
-        switchView(currentView); 
-    } catch (err) {
-        console.error("Failed to load events:", err);
-        cardsView.innerHTML = '<p class="error-message">Unable to load events. Please try again later.</p>';
-    }
-}
-
-function applyFilters() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const filterDate = dateFilter.value; // YYYY-MM-DD
-    const filterType = eventFilterSelect.value; // 'all', 'my_rsvps', 'public', 'private'
-
-    currentEvents = allEvents.filter(event => {
-        // 1. Text Match
-        const titleMatch = event.title.toLowerCase().includes(searchTerm);
-        const descMatch = (event.description || "").toLowerCase().includes(searchTerm);
-        const matchesText = !searchTerm || titleMatch || descMatch;
-
-        // 2. Date Match (FIXED: Use local date for comparison)
-        let matchesDate = true;
-        if (filterDate) {
-            // Create Date from ISO string (browser converts to Local)
-            const localDate = new Date(event.start_time);
-            // Format as YYYY-MM-DD in local time to match input value
-            const year = localDate.getFullYear();
-            const month = String(localDate.getMonth() + 1).padStart(2, '0');
-            const day = String(localDate.getDate()).padStart(2, '0');
-            const localDateString = `${year}-${month}-${day}`;
-            
-            matchesDate = localDateString === filterDate;
+    function normalizeDateTime(dt) {
+        if (!dt && dt !== 0) return null;
+        if (dt instanceof Date) return dt.toISOString();
+        if (typeof dt === 'number') {
+            if (String(dt).length <= 10) dt = dt * 1000;
+            return new Date(dt).toISOString();
         }
-        
-        // 3. Type Filter
-        let matchesType = true;
-        if (filterType === 'my_rsvps') {
-            matchesType = (event.my_rsvp_status === 'going' || event.my_rsvp_status === 'maybe');
-        } else if (filterType === 'private') {
-            matchesType = (event.visibility === 'private');
-        } else if (filterType === 'public') {
-            matchesType = (event.visibility !== 'private'); 
+        if (typeof dt === 'string') {
+            const trimmed = dt.trim();
+            // Basic fix for strings; better to rely on API returning ISO with Z
+            if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return `${trimmed}T00:00:00Z`;
+            if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}/.test(trimmed)) return trimmed.replace(' ', 'T') + 'Z';
+            const parsed = new Date(trimmed);
+            if (!isNaN(parsed.getTime())) return parsed.toISOString();
+            return trimmed;
         }
+        return null;
+    }
 
-        return matchesText && matchesDate && matchesType;
-    });
+    let fcCalendar = null; // FullCalendar instance
 
-    switchView(currentView);
-}
+    // --- Render Calendar ---
+    function renderCalendar(events) {
+        const calendarEl = document.getElementById('calendar');
+        const calendarEvents = events.map(e => ({
+            title: e.title,
+            start: normalizeDateTime(e.start_time),
+            end: normalizeDateTime(e.end_time),
+            extendedProps: e,
+            backgroundColor: e.my_rsvp_status === 'going' ? '#38a169' : (e.visibility === 'private' ? '#5568d3' : '#667eea'),
+            borderColor: e.my_rsvp_status === 'going' ? '#2f855a' : (e.visibility === 'private' ? '#4a5568' : '#5568d3')
+        }));
 
-function switchView(viewName) {
-    currentView = viewName;
-    
-    // Update active button state logic
-    viewButtons.forEach(btn => {
-        if (btn.dataset.view === viewName) {
-            btn.classList.add("active");
-            btn.classList.remove("secondary");
-            btn.classList.add("primary");
+        // Initialize or Update FullCalendar
+        if (!fcCalendar) {
+            fcCalendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                },
+                height: 'auto',
+                aspectRatio: 1.8,
+                events: calendarEvents,
+                eventClick: function (info) {
+                    info.jsEvent.preventDefault();
+                    showDetailModal(info.event.extendedProps);
+                }
+            });
+            fcCalendar.render();
         } else {
-            btn.classList.remove("active");
-            btn.classList.remove("primary");
-            btn.classList.add("secondary");
+            fcCalendar.removeAllEvents();
+            fcCalendar.addEventSource(calendarEvents);
         }
-    });
-
-    // Hide all views first
-    cardsView.style.display = "none";
-    listView.style.display = "none";
-    calendarView.style.display = "none";
-
-    if (viewName === "cards") {
-        cardsView.style.display = "grid";
-        renderEvents(currentEvents, false);
-    } else if (viewName === "list") {
-        listView.style.display = "block";
-        renderEvents(currentEvents, true);
-    } else if (viewName === "calendar") {
-        calendarView.style.display = "block";
-        renderCalendar(currentEvents);
-        setTimeout(() => { if(fcCalendar) fcCalendar.updateSize(); }, 100);
     }
-}
 
-// --- Event Listeners ---
+    // --- Initialization ---
 
-searchInput.addEventListener('input', applyFilters);
-dateFilter.addEventListener('change', applyFilters);
-eventFilterSelect.addEventListener('change', applyFilters); // Changed to select change
+    // Load Events from API
+    async function loadEvents() {
+        try {
+            const events = await api("/events/", "GET", null, token);
+            if (!Array.isArray(events)) throw new Error("API did not return an array.");
 
-resetFiltersBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    dateFilter.value = '';
-    eventFilterSelect.value = 'all'; // Reset select
-    currentEvents = [...allEvents];
-    applyFilters();
-});
+            // Keep raw list in a basic sort for safety, 
+            // but renderEvents handles the split/sort logic for Grid/List views.
+            // For Filter logic, we just keep them all.
+            allEvents = events;
+            currentEvents = [...allEvents];
 
-viewButtons.forEach(btn => {
-    btn.addEventListener("click", () => {
-        switchView(btn.dataset.view);
+            // Initial render based on currentView (default 'cards')
+            switchView(currentView);
+        } catch (err) {
+            console.error("Failed to load events:", err);
+            cardsView.innerHTML = '<p class="error-message">Unable to load events. Please try again later.</p>';
+        }
+    }
+
+    // --- Filtering Logic ---
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filterDate = dateFilter.value; // YYYY-MM-DD
+        const filterType = eventFilterSelect.value; // 'all', 'my_rsvps', 'public', 'private'
+
+        currentEvents = allEvents.filter(event => {
+            // 1. Text Match
+            const titleMatch = event.title.toLowerCase().includes(searchTerm);
+            const descMatch = (event.description || "").toLowerCase().includes(searchTerm);
+            const matchesText = !searchTerm || titleMatch || descMatch;
+
+            // 2. Date Match (FIXED: Use local date for comparison)
+            let matchesDate = true;
+            if (filterDate) {
+                // Create Date from ISO string (browser converts to Local)
+                const localDate = new Date(event.start_time);
+                // Format as YYYY-MM-DD in local time to match input value
+                const year = localDate.getFullYear();
+                const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                const day = String(localDate.getDate()).padStart(2, '0');
+                const localDateString = `${year}-${month}-${day}`;
+
+                matchesDate = localDateString === filterDate;
+            }
+
+            // 3. Type Filter
+            let matchesType = true;
+            if (filterType === 'my_rsvps') {
+                matchesType = (event.my_rsvp_status === 'going' || event.my_rsvp_status === 'maybe');
+            } else if (filterType === 'private') {
+                matchesType = (event.visibility === 'private');
+            } else if (filterType === 'public') {
+                matchesType = (event.visibility !== 'private');
+            }
+
+            return matchesText && matchesDate && matchesType;
+        });
+
+        switchView(currentView);
+    }
+
+    // --- View Switching Logic ---
+    function switchView(viewName) {
+        currentView = viewName;
+
+        // Update active button state logic
+        viewButtons.forEach(btn => {
+            if (btn.dataset.view === viewName) {
+                btn.classList.add("active");
+                btn.classList.remove("secondary");
+                btn.classList.add("primary");
+            } else {
+                btn.classList.remove("active");
+                btn.classList.remove("primary");
+                btn.classList.add("secondary");
+            }
+        });
+
+        // Hide all views first
+        cardsView.style.display = "none";
+        listView.style.display = "none";
+        calendarView.style.display = "none";
+
+        // Show selected view
+        if (viewName === "cards") {
+            cardsView.style.display = "grid";
+            renderEvents(currentEvents, false);
+        } else if (viewName === "list") {
+            listView.style.display = "block";
+            renderEvents(currentEvents, true);
+        } else if (viewName === "calendar") {
+            calendarView.style.display = "block";
+            renderCalendar(currentEvents);
+            setTimeout(() => { if (fcCalendar) fcCalendar.updateSize(); }, 100);
+        }
+    }
+
+    // --- Event Listeners ---
+
+    searchInput.addEventListener('input', applyFilters);
+    dateFilter.addEventListener('change', applyFilters);
+    eventFilterSelect.addEventListener('change', applyFilters); // Changed to select change
+
+    // Reset Filters
+    resetFiltersBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        dateFilter.value = '';
+        eventFilterSelect.value = 'all'; // Reset select
+        currentEvents = [...allEvents];
+        applyFilters();
     });
-});
 
-// Start
-loadEvents();
+    // View Buttons
+    viewButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            switchView(btn.dataset.view);
+        });
+    });
+
+    // Start
+    loadEvents();
 
 </script>

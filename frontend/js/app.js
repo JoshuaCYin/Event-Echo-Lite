@@ -104,10 +104,10 @@ export function updateUserInfo() {
   // Fetch full user info for display name
   if (userName) {
     api("/auth/me", "GET", null, token).then(res => {
-      // FIX: If we got a 401 error, api.js handled the redirect. 
-      // Stop execution so we don't show "User ##"
+      // If 401, do not update name
       if (res.status === 401) return; 
 
+      // Prefer full name if available
       if (res.first_name || res.last_name) {
         // Use first and last name
         userName.textContent = `${res.first_name || ''} ${res.last_name || ''}`.trim();
@@ -133,6 +133,7 @@ export async function handleLogin(email, password) {
   try {
     const res = await api("/auth/login", "POST", { email, password });
     
+    // On success, store token
     if (res.token) {
       localStorage.setItem("token", res.token);
       token = res.token;
@@ -148,6 +149,7 @@ export async function handleLogin(email, password) {
       return { success: true, ...res };
     }
     
+    // Handle login errors
     if (res.error) {
       return { success: false, error: res.error };
     }

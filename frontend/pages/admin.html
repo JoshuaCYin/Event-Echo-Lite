@@ -3,7 +3,7 @@
         max-width: 1200px;
         margin: 0 auto;
     }
-    
+
     .admin-header {
         display: flex;
         justify-content: space-between;
@@ -42,7 +42,7 @@
     .tab-content {
         display: none;
     }
-    
+
     .tab-content.active {
         display: block;
         animation: fadeIn 0.3s ease-out;
@@ -63,7 +63,8 @@
         min-width: 600px;
     }
 
-    .data-table th, .data-table td {
+    .data-table th,
+    .data-table td {
         padding: 1rem;
         text-align: left;
         border-bottom: 1px solid var(--border-color, #e0e0e0);
@@ -88,10 +89,21 @@
         font-weight: 600;
         text-transform: uppercase;
     }
-    
-    .role-admin { background: #fee2e2; color: #991b1b; }
-    .role-organizer { background: #dbeafe; color: #1e40af; }
-    .role-attendee { background: #f3f4f6; color: #374151; }
+
+    .role-admin {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .role-organizer {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .role-attendee {
+        background: #f3f4f6;
+        color: #374151;
+    }
 
     /* Actions */
     .action-group {
@@ -117,7 +129,7 @@
         color: #ef4444;
         border-color: #fecaca;
     }
-    
+
     .btn-danger-sm:hover {
         background: #fecaca;
     }
@@ -140,7 +152,6 @@
 </style>
 
 <div class="admin-container page-transition-enter-active">
-    
     <div class="admin-header">
         <div>
             <h2>Admin Console</h2>
@@ -169,7 +180,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td colspan="5" style="text-align: center;">Loading users...</td></tr>
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Loading users...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -177,18 +190,20 @@
 
     <!-- VENUES TAB -->
     <div id="tab-venues" class="tab-content">
-        
+
         <!-- Add Venue Form -->
         <div class="create-card">
             <h4 style="margin-top:0; margin-bottom:1rem;">Add New Venue</h4>
             <form id="addVenueForm" class="form-grid">
                 <div>
                     <label style="display:block; margin-bottom:0.5rem; font-size:0.875rem;">Venue Name*</label>
-                    <input type="text" id="vName" placeholder="e.g. Chapel Auditorium" required style="width:100%; padding:0.5rem;">
+                    <input type="text" id="vName" placeholder="e.g. Chapel Auditorium" required
+                        style="width:100%; padding:0.5rem;">
                 </div>
                 <div>
                     <label style="display:block; margin-bottom:0.5rem; font-size:0.875rem;">Building*</label>
-                    <input type="text" id="vBuilding" placeholder="e.g. Center for Arts" required style="width:100%; padding:0.5rem;">
+                    <input type="text" id="vBuilding" placeholder="e.g. Center for Arts" required
+                        style="width:100%; padding:0.5rem;">
                 </div>
                 <div>
                     <label style="display:block; margin-bottom:0.5rem; font-size:0.875rem;">Room (Optional)</label>
@@ -196,11 +211,13 @@
                 </div>
                 <div>
                     <label style="display:block; margin-bottom:0.5rem; font-size:0.875rem;">Google Maps Link</label>
-                    <input type="url" id="vMapLink" placeholder="https://maps.app.goo.gl/..." style="width:100%; padding:0.5rem;">
+                    <input type="url" id="vMapLink" placeholder="https://maps.app.goo.gl/..."
+                        style="width:100%; padding:0.5rem;">
                 </div>
                 <div>
                     <button type="submit" class="action-btn primary" style="width:100%;">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <circle cx="12" cy="12" r="10"></circle>
                             <line x1="12" y1="8" x2="12" y2="16"></line>
                             <line x1="8" y1="12" x2="16" y2="12"></line>
@@ -223,7 +240,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td colspan="5" style="text-align: center;">Loading venues...</td></tr>
+                    <tr>
+                        <td colspan="5" style="text-align: center;">Loading venues...</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
@@ -250,7 +269,7 @@
             `;
             return;
         }
-        
+
         loadUsers();
         loadVenues();
     }
@@ -259,11 +278,11 @@
     window.switchTab = (tabName) => {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-        
+
         document.getElementById(`tab-${tabName}`).classList.add('active');
         const btns = document.querySelectorAll('.tab-btn');
-        if(tabName === 'users') btns[0].classList.add('active');
-        if(tabName === 'venues') btns[1].classList.add('active');
+        if (tabName === 'users') btns[0].classList.add('active');
+        if (tabName === 'venues') btns[1].classList.add('active');
     };
 
     // --- USERS LOGIC ---
@@ -271,9 +290,9 @@
         try {
             const users = await api('/auth/users', 'GET', null, token);
             const tbody = document.querySelector('#usersTable tbody');
-            
+
             if (users.error) throw new Error(users.error);
-            
+
             tbody.innerHTML = users.map(u => `
                 <tr>
                     <td>
@@ -295,7 +314,7 @@
                     </td>
                 </tr>
             `).join('');
-            
+
         } catch (e) {
             console.error(e);
             showMessage('Failed to load users', 'error');
@@ -303,11 +322,11 @@
     }
 
     window.changeRole = async (userId, newRole) => {
-        if(!confirm(`Are you sure you want to promote/demote this user to ${newRole}?`)) return;
-        
+        if (!confirm(`Are you sure you want to promote/demote this user to ${newRole}?`)) return;
+
         try {
             const res = await api('/auth/set-role', 'POST', { user_id: userId, role: newRole }, token);
-            if(res.error) throw new Error(res.error);
+            if (res.error) throw new Error(res.error);
             showMessage(`User role updated to ${newRole}`, 'success');
             loadUsers(); // Refresh
         } catch (e) {
@@ -320,7 +339,7 @@
         try {
             const venues = await api('/venues/', 'GET', null, token);
             const tbody = document.querySelector('#venuesTable tbody');
-            
+
             if (venues.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">No venues found. Add one above.</td></tr>';
                 return;
@@ -332,16 +351,16 @@
                     <td>${v.building}</td>
                     <td>${v.room_number || '-'}</td>
                     <td>
-                        ${v.google_maps_link 
-                          ? `<a href="${v.google_maps_link}" target="_blank" style="color:var(--primary-color);">View Map</a>` 
-                          : '<span>-</span>'}
+                        ${v.google_maps_link
+                    ? `<a href="${v.google_maps_link}" target="_blank" style="color:var(--primary-color);">View Map</a>`
+                    : '<span>-</span>'}
                     </td>
                     <td>
                         <button onclick="deleteVenue(${v.venue_id})" class="btn-sm btn-danger-sm">Delete</button>
                     </td>
                 </tr>
             `).join('');
-            
+
         } catch (e) {
             console.error(e);
             showMessage('Failed to load venues', 'error');
@@ -359,8 +378,8 @@
 
         try {
             const res = await api('/venues/', 'POST', payload, token);
-            if(res.error) throw new Error(res.error);
-            
+            if (res.error) throw new Error(res.error);
+
             showMessage('Venue created successfully', 'success');
             document.getElementById('addVenueForm').reset();
             loadVenues();
@@ -370,10 +389,10 @@
     });
 
     window.deleteVenue = async (id) => {
-        if(!confirm('Delete this venue? This might affect past events linked to it.')) return;
+        if (!confirm('Delete this venue? This might affect past events linked to it.')) return;
         try {
             const res = await api(`/venues/${id}`, 'DELETE', null, token);
-            if(res.error) throw new Error(res.error);
+            if (res.error) throw new Error(res.error);
             showMessage('Venue deleted', 'success');
             loadVenues();
         } catch (e) {

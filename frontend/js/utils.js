@@ -1,5 +1,4 @@
-// Handles loading page fragments
-
+// Handles loading page fragments into the main app container
 export async function loadPage(url) {
   try {
     const res = await fetch(url);

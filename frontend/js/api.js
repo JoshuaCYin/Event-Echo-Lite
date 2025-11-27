@@ -8,6 +8,7 @@ export async function api(path, method = "GET", data = null, token = null) {
     token = localStorage.getItem("token");
   }
 
+  // Include Authorization header if token exists
   if (token) headers["Authorization"] = `Bearer ${token}`;
   
   const opts = { method, headers };
@@ -16,7 +17,6 @@ export async function api(path, method = "GET", data = null, token = null) {
   try {
     const res = await fetch(API_BASE + path, opts);
 
-    // --- CRITICAL FIX: Handle Token Expiration ---
     if (res.status === 401) {
       console.warn("Session expired (401). Logging out...");
       localStorage.removeItem("token");
@@ -27,7 +27,6 @@ export async function api(path, method = "GET", data = null, token = null) {
       // Return a structured error so the caller knows what happened
       return { error: "Session expired", status: 401 };
     }
-    // ---------------------------------------------
 
     // Handle other non-OK statuses (400, 403, 500)
     if (!res.ok) {

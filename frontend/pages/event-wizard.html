@@ -16,7 +16,6 @@
         border-radius: var(--radius-lg, 12px);
         padding: 2rem;
         box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
-        /* Changed from min-height: 70vh to fit-content */
         height: fit-content;
         display: flex;
         flex-direction: column;
@@ -28,7 +27,7 @@
         max-width: 350px;
     }
 
-    /* --- STEPPER NAVIGATION --- */
+    /* --- Stepper Navigation --- */
     .wizard-stepper {
         display: flex;
         justify-content: space-between;
@@ -103,8 +102,7 @@
         width: 100%;
         height: 3px;
         background: var(--border-color, #e5e7eb);
-        top: 18px;
-        /* Half of dot height */
+        top: 18px; /* Half of dot height */
         right: 50%;
         transform: translateY(-50%);
         z-index: 1;
@@ -216,15 +214,13 @@
     .radio-label {
         display: flex;
         align-items: center;
-        justify-content: center;
-        /* Centering Text */
+        justify-content: center; /* Centering Text */
         gap: 0.5rem;
         padding: 0.75rem 1rem;
         border: 2px solid var(--border-color, #e0e0e0);
         border-radius: var(--radius-md, 8px);
         cursor: pointer;
-        flex: 1;
-        /* Make equal width */
+        flex: 1; /* Make equal width */
     }
 
     /* Hide actual radio button */
@@ -458,15 +454,14 @@
         transform: none;
     }
 
-    /* Error Message Moved to Bottom */
+    /* --- Error Message --- */
     .step-error {
         color: #c53030;
         background: #fff5f5;
         border: 1px solid #f56565;
         padding: 0.75rem 1rem;
         border-radius: var(--radius-md);
-        margin-top: 1.5rem;
-        /* Margin top to separate from buttons */
+        margin-top: 1.5rem; /* Margin top to separate from buttons */
         display: none;
     }
 
@@ -479,6 +474,7 @@
         display: none;
     }
 
+    /* --- Responsive --- */
     @media (max-width: 768px) {
         .wizard-container {
             flex-direction: column;
@@ -707,7 +703,6 @@
                         </svg>
                     </div>
                     <div class="ai-helper-bubble">
-                        <!-- UPDATED: New intro text -->
                         <p id="ai-helper-intro-text">I'm here to help! Ask me to rewrite a description or suggest a
                             title. If you like my suggestion, I'll give you an 'Update' button to apply it directly to
                             the form.</p>
@@ -730,7 +725,7 @@
 
 </div>
 
-<!-- Load marked via script tag to avoid module errors -->
+<!-- Marked.js for Markdown Rendering -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script type="module">
@@ -773,7 +768,8 @@
         }
     };
 
-    if (window.innerWidth <= 768) {
+    // Start collapsed on mobile
+    if (window.innerWidth <= 768) { // Mobile breakpoint
         document.getElementById('aiHelperCard').classList.add('collapsed');
     }
 
@@ -888,12 +884,12 @@
         errorDiv.style.display = 'none';
         let isValid = true;
 
-        if (stepNum === 1) {
+        if (stepNum === 1) { // Title & Description
             if (!document.getElementById('w-title').value) {
                 errorDiv.textContent = 'Event Title is required.'; isValid = false;
             }
         }
-        if (stepNum === 2) {
+        if (stepNum === 2) { // Date & Time
             const start = document.getElementById('w-start').value;
             const end = document.getElementById('w-end').value;
             if (!start || !end) {
@@ -902,7 +898,7 @@
                 errorDiv.textContent = 'End Time must be after Start Time.'; isValid = false;
             }
         }
-        if (stepNum === 3) {
+        if (stepNum === 3) { // Location
             const type = document.querySelector('input[name="w-location_type"]:checked').value;
             if (type === 'venue' && !document.getElementById('w-venue').value) {
                 errorDiv.textContent = 'Please select an On-Campus Venue.'; isValid = false;
@@ -912,43 +908,45 @@
             }
         }
 
-        if (!isValid) errorDiv.style.display = 'block';
+        if (!isValid) errorDiv.style.display = 'block'; // Show error if invalid
         return isValid;
     }
 
     // --- Data Handling ---
     function saveStepData(stepNum) {
-        if (stepNum === 1) {
+        if (stepNum === 1) { // Title & Description
             wizardData.title = document.getElementById('w-title').value;
             wizardData.description = document.getElementById('w-description').value;
         }
-        if (stepNum === 2) {
+        if (stepNum === 2) { // Date & Time
             wizardData.start_time = document.getElementById('w-start').value;
             wizardData.end_time = document.getElementById('w-end').value;
         }
-        if (stepNum === 3) {
+        if (stepNum === 3) { // Location
             wizardData.location_type = document.querySelector('input[name="w-location_type"]:checked').value;
             wizardData.venue_id = document.getElementById('w-venue').value;
             wizardData.custom_location_address = document.getElementById('w-customLocation').value;
             wizardData.google_maps_link = document.getElementById('w-mapsLink').value;
         }
-        if (stepNum === 4) {
+        if (stepNum === 4) { // Settings
             wizardData.visibility = (userRole === 'admin' || userRole === 'organizer')
                 ? document.querySelector('input[name="w-visibility"]:checked').value
                 : 'private';
         }
     }
 
+    // --- Populate Review Step ---
     function populateReviewStep() {
         const container = document.getElementById('reviewStepContainer');
         const venueSelect = document.getElementById('w-venue');
 
-        // --- UPDATED: Ensure wizardData is up-to-date before populating ---
-        // This ensures any AI changes are reflected
+        // Ensure all data is saved
         saveStepData(1); saveStepData(2); saveStepData(3); saveStepData(4);
 
+        // Get venue text
         const venueText = wizardData.venue_id ? (venueSelect.options[venueSelect.selectedIndex]?.text || 'N/A') : 'N/A';
 
+        // Helper function to format each review item
         const f = (label, value, isDesc = false) => {
             let displayValue = value;
             // Format dates
@@ -965,6 +963,8 @@
             const valClass = value ? (isDesc ? 'description' : '') : 'missing';
             return `<div class="review-item"><span class="review-label">${label}</span><span class="review-value ${valClass}">${val}</span></div>`;
         };
+
+        // Inject review items
         container.innerHTML = `
             ${f('Title', wizardData.title)}
             ${f('Start Time', wizardData.start_time)}
@@ -982,11 +982,11 @@
     const aiSendBtn = document.getElementById('ai-helper-send');
     const aiMessages = document.getElementById('ai-helper-messages');
 
-    // --- NEW: History State ---
+    // --- History State ---
     const MAX_HISTORY = 10;
     let chatHistory = [];
 
-    // --- UPDATED: Now reads all fields ---
+    // --- Get Current Step Values for AI Context ---
     function getCurrentStepValues() {
         return {
             title: document.getElementById('w-title').value,
@@ -1000,6 +1000,7 @@
         };
     }
 
+    // AI Form Submit
     aiForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const prompt = aiInput.value.trim();
@@ -1017,13 +1018,13 @@
         aiInput.disabled = true;
         aiSendBtn.disabled = true;
 
-        // --- NEW: Add to history ---
-        chatHistory.push({ role: "user", content: prompt });
+        chatHistory.push({ role: "user", content: prompt }); // Add user message to history
 
         addHelperMessage('user', prompt);
         const loadingMsg = addHelperMessage('is-loading', 'Thinking...');
 
-       try {
+        // --- Send API Request ---
+        try {
             const payload = {
                 prompt,
                 context,
@@ -1051,6 +1052,7 @@
         }
     });
 
+    // --- Add Message to AI Chat ---
     function addHelperMessage(sender, text, actions = null) {
 
         // --- Friendly labels for Wizard & Main Form fields ---
@@ -1084,9 +1086,7 @@
         const bubble = document.createElement('div');
         bubble.className = 'ai-helper-bubble';
 
-        // -------------------------
         // AI or Loading Message
-        // -------------------------
         if (sender === 'ai' || sender === 'is-loading') {
             avatar.innerHTML = `
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
@@ -1099,21 +1099,19 @@
             } else {
                 bubble.innerHTML = window.marked ? window.marked.parse(text) : text;
 
-                // -------------------------
-                // ACTION BUTTONS
-                // -------------------------
+                // --- Add Action Buttons if any ---
                 if (actions && Array.isArray(actions) && actions.length > 0) {
                     actions.forEach(action => {
                         const btn = document.createElement('button');
                         btn.className = 'ai-suggestion-action';
 
-                        // --- Friendly name lookup ---
+                        // Friendly name lookup
                         let friendlyLabel = FIELD_LABELS[action.field];
 
-                        // --- Fallback if unknown or missing ---
+                        // Fallback if unknown or missing
                         if (!friendlyLabel) {
                             if (action.field) {
-                                // Convert "w-customLocation" → "Custom Location"
+                                // Convert "w-customLocation" to "Custom Location"
                                 friendlyLabel = action.field
                                     .replace(/^w-/, "")
                                     .replace(/^ev/, "")
@@ -1140,9 +1138,7 @@
                 }
             }
 
-            // -------------------------
-            // USER Message 
-            // -------------------------
+        // User Message
         } else {
             avatar.innerHTML = `
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
@@ -1166,7 +1162,7 @@
         return msg;
     }
 
-    // --- UPDATED: Handles all field types and updates wizardData + Review Step ---
+    // --- Apply AI Suggested Action to Form ---
     function applyAIAction(fieldId, value, btnElement) {
         let fieldChanged = false;
 
@@ -1232,7 +1228,7 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Submitting...';
 
-        // --- UPDATED: Ensure data is saved before submit ---
+        // --- Ensure data is saved before submit ---
         saveStepData(currentStep); // Save final step (usually 4, but 5 calls this)
 
         const startISO = wizardData.start_time ? new Date(wizardData.start_time).toISOString() : null;

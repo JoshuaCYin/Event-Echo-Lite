@@ -3,462 +3,497 @@
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js'></script>
 
 <style>
-/* ------------------------------------------------------ */
-/* HEADER */
-/* ------------------------------------------------------ */
-.landing-event-hub-container { /* Overrides main.css version */
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 90px 2rem 4rem 2rem;
-}
-.event-hub-header {
-    text-align: center;
-    margin-bottom: 5rem;
-}
-.event-hub-header h1 {
-    font-size: 2.5rem;
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 1rem;
-}
-.event-hub-header p {
-    color: var(--text-secondary);
-    font-size: 1.25rem;
-    max-width: 700px;
-    margin: 0 auto;
-    line-height: 1.6;
-}
-
-/* ------------------------------------------------------ */
-/* FILTERS */
-/* ------------------------------------------------------ */
-.filter-toggle-switch {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    padding: 0.65rem 1rem;
-    border-radius: var(--radius-md);
-    white-space: nowrap;
-}
-.filter-toggle-switch label {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-}
-.filter-toggle-switch input {
-    width: auto;
-    accent-color: var(--primary-color);
-    cursor: pointer;
-}
-
-/* ------------------------------------------------------ */
-/* DIVIDERS FOR PAST EVENTS */
-/* ------------------------------------------------------ */
-.section-divider {
-    grid-column: 1 / -1;
-    margin: 2rem 0 1rem 0;
-    padding-top: 1.5rem;
-    border-top: 2px dashed var(--border-color);
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-}
-.section-divider h3 {
-    font-size: 1.25rem;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    margin: 0;
-}
-.section-divider span {
-    width: 100%;
-    height: 1px;
-    background: var(--border-color);
-}
-
-/* ------------------------------------------------------ */
-/* CONTROL BAR */
-/* ------------------------------------------------------ */
-.event-hub-controls {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-    flex-wrap: nowrap;
-}
-
-/* Normalize control button heights */
-.search-filter-group > input[type="date"],
-.search-filter-group > .action-btn,
-.view-toggle-buttons > .action-btn {
-    padding-top: 0.65rem;
-    padding-bottom: 0.65rem;
-    box-sizing: border-box;
-}
-
-/* Reset button icon centering */
-#resetFiltersBtn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* ------------------------------------------------------ */
-/* RATINGS / REVIEWS STYLES */
-/* ------------------------------------------------------ */
-.event-rating {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-}
-.event-rating .star {
-    color: #F59E0B; /* Amber/Gold */
-}
-.event-rating .count {
-    font-size: 0.8rem;
-    color: var(--text-light);
-}
-
-/* Modal Review List */
-#detailReviewList {
-    margin-top: 1.5rem;
-}
-.review-item {
-    padding: 1rem 0;
-    border-bottom: 1px solid var(--border-color);
-}
-.review-item:last-child {
-    border-bottom: none;
-}
-.review-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-.review-author {
-    font-weight: 600;
-    color: var(--text-primary);
-}
-.review-date {
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-}
-.review-rating .star {
-    color: #F59E0B;
-}
-.review-text {
-    color: var(--text-primary);
-    line-height: 1.6;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* Collapsible Sections */
-.modal-collapsible-section {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-}
-.modal-collapsible-section[open] summary h4 {
-    color: var(--primary-color);
-}
-.modal-collapsible-section summary {
-    cursor: pointer;
-    list-style: none; /* Remove default triangle */
-}
-.modal-collapsible-section summary::-webkit-details-marker {
-    display: none; /* Remove default triangle (Safari) */
-}
-.modal-collapsible-section summary h4 {
-    display: inline-block;
-    margin: 0;
-    font-size: 1.25rem;
-}
-.modal-collapsible-section summary h4::before {
-    content: '►';
-    font-size: 0.8em;
-    margin-right: 0.75rem;
-    color: var(--text-secondary);
-    display: inline-block;
-    transition: transform 0.2s;
-}
-.modal-collapsible-section[open] summary h4::before {
-    transform: rotate(90deg);
-}
-.modal-collapsible-content {
-    padding-top: 1rem;
-}
-
-
-/* ------------------------------------------------------ */
-/* EVENT DETAIL MODAL */
-/* ------------------------------------------------------ */
-#eventDetailModal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 3000;
-    align-items: center;
-    justify-content: center;
-}
-
-#eventDetailModal.open {
-    display: flex;
-}
-
-.event-detail-box {
-    background: var(--bg-primary);
-    padding: 2rem;
-    border-radius: var(--radius-lg);
-    max-width: 700px;
-    width: 90%;
-    max-height: 85vh;
-    overflow-y: auto;
-    box-shadow: var(--shadow-xl);
-    position: relative;
-    animation: modalSlideIn 0.3s ease-out;
-}
-
-@keyframes modalSlideIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-.detail-close {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 1.5rem;
-    color: var(--text-secondary);
-    transition: all 0.2s;
-    z-index: 10;
-    line-height: 1;
-    padding: 0;
-}
-
-.detail-close:hover {
-    background: var(--bg-primary);
-    color: var(--primary-color);
-    transform: rotate(90deg);
-}
-
-.event-detail-box h3 {
-    font-size: 1.75rem;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    padding-right: 2rem;
-}
-
-.modal-meta-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.75rem;
-    color: var(--text-secondary);
-    font-size: 1rem;
-}
-
-.modal-meta-row svg {
-    flex-shrink: 0;
-    color: var(--primary-color);
-}
-
-.modal-meta-row .map-link {
-    margin-left: 0.5rem;
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: 500;
-}
-
-.modal-meta-row .map-link:hover {
-    text-decoration: underline;
-}
-
-#detailDescription {
-    margin: 1.5rem 0;
-    color: var(--text-primary);
-    line-height: 1.6;
-    font-size: 1rem;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-}
-
-#detailActions {
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-color);
-}
-
-/* Mobile responsiveness */
-@media (max-width: 768px) {
-    .event-detail-box {
-        max-width: 95%;
-        max-height: 90vh;
-        padding: 1.5rem;
+    /* ------------------------------------------------------ */
+    /* HEADER */
+    /* ------------------------------------------------------ */
+    .landing-event-hub-container {
+        /* Overrides main.css version */
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 90px 2rem 4rem 2rem;
     }
-    
-    .event-detail-box h3 {
-        font-size: 1.5rem;
+
+    .event-hub-header {
+        text-align: center;
+        margin-bottom: 5rem;
     }
-}
 
-/* ------------------------------------------------------ */
-/* LIST VIEW */
-/* ------------------------------------------------------ */
-#eventListView .app-event-card {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 1rem;
-    position: relative;      
-    overflow: visible;      
-    margin-bottom: 0.7rem;   
-}
+    .event-hub-header h1 {
+        font-size: 2.5rem;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 1rem;
+    }
 
-#eventListView .event-content {
-    flex: 1 1 auto;      
-    min-width: 0;  
-}
+    .event-hub-header p {
+        color: var(--text-secondary);
+        font-size: 1.25rem;
+        max-width: 700px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
 
-/* Buttons container */
-#eventListView .event-actions {
-    display: flex;
-    flex-direction: row;     
-    gap: 0.75rem;            
-    flex-shrink: 0;          
-    align-items: center;     
-}
+    /* ------------------------------------------------------ */
+    /* FILTERS */
+    /* ------------------------------------------------------ */
+    .filter-toggle-switch {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        padding: 0.65rem 1rem;
+        border-radius: var(--radius-md);
+        white-space: nowrap;
+    }
 
-/* Button sizing */
-#eventListView .event-actions .action-btn {
-    width: 140px;
-    height: 42px;
-    line-height: 42px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    white-space: nowrap;
-    flex-shrink: 0;
-    padding: 0 1rem !important;
-}
+    .filter-toggle-switch label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        cursor: pointer;
+    }
 
-/* ------------------------------------------------------ */
-/* GRID VIEW - CARD LAYOUT FIX */
-/* ------------------------------------------------------ */
-#eventCardsView .app-event-card {
-    display: flex;
-    flex-direction: column;
-    height: 100%; /* Ensure card takes full height of grid cell */
-}
+    .filter-toggle-switch input {
+        width: auto;
+        accent-color: var(--primary-color);
+        cursor: pointer;
+    }
 
-#eventCardsView .event-content {
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1; /* Allow content to expand */
-}
+    /* ------------------------------------------------------ */
+    /* DIVIDERS FOR PAST EVENTS */
+    /* ------------------------------------------------------ */
+    .section-divider {
+        grid-column: 1 / -1;
+        margin: 2rem 0 1rem 0;
+        padding-top: 1.5rem;
+        border-top: 2px dashed var(--border-color);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 
-#eventCardsView .event-info-wrapper {
-    flex-grow: 0; /* Don't let this section expand */
-}
+    .section-divider h3 {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        margin: 0;
+    }
 
-#eventCardsView .event-meta-wrapper {
-    flex-grow: 0; /* Don't let this section expand */
-}
+    .section-divider span {
+        width: 100%;
+        height: 1px;
+        background: var(--border-color);
+    }
 
-#eventCardsView .event-actions-wrapper {
-    margin-top: auto; /* Push to bottom */
-    padding-top: 1rem; /* Add some spacing */
-}
-
-#eventCardsView .event-actions {
-    display: flex;
-    gap: 0.75rem;
-    width: 100%;
-}
-
-/* ------------------------------------------------------ */
-/* RESPONSIVE LAYOUT FIXES */
-/* ------------------------------------------------------ */
-@media (max-width: 992px) {
+    /* ------------------------------------------------------ */
+    /* CONTROL BAR */
+    /* ------------------------------------------------------ */
     .event-hub-controls {
-        flex-wrap: wrap;
-        gap: 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        flex-wrap: nowrap;
     }
-    .search-filter-group {
-        min-width: 100% !important;
-        order: 1;
-        flex-wrap: wrap;
+
+    /* Normalize control button heights */
+    .search-filter-group>input[type="date"],
+    .search-filter-group>.action-btn,
+    .view-toggle-buttons>.action-btn {
+        padding-top: 0.65rem;
+        padding-bottom: 0.65rem;
+        box-sizing: border-box;
+    }
+
+    /* Reset button icon centering */
+    #resetFiltersBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* ------------------------------------------------------ */
+    /* RATINGS / REVIEWS STYLES */
+    /* ------------------------------------------------------ */
+    .event-rating {
+        display: flex;
+        align-items: center;
         gap: 0.5rem;
-    }
-    .search-filter-group > input[type="text"] {
-        width: 100%;
-        min-width: 0;
-        order: 1;
-    }
-    .search-filter-group > input[type="date"],
-    .search-filter-group > #resetFiltersBtn,
-    .search-filter-group > .filter-toggle-switch {
-        flex-grow: 1;
-        order: 2;
-    }
-    .view-toggle-buttons {
-        order: 2;
-        width: 100%;
-        justify-content: flex-end;
+        color: var(--text-secondary);
+        font-size: 0.9rem;
         margin-top: 0.5rem;
     }
+
+    .event-rating .star {
+        color: #F59E0B; /* Amber/Gold */
+    }
+
+    .event-rating .count {
+        font-size: 0.8rem;
+        color: var(--text-light);
+    }
+
+    /* Modal Review List */
+    #detailReviewList {
+        margin-top: 1.5rem;
+    }
+
+    .review-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .review-item:last-child {
+        border-bottom: none;
+    }
+
+    .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .review-author {
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    .review-date {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+    }
+
+    .review-rating .star {
+        color: #F59E0B;
+    }
+
+    .review-text {
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    }
+
+    /* Collapsible Sections */
+    .modal-collapsible-section {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .modal-collapsible-section[open] summary h4 {
+        color: var(--primary-color);
+    }
+
+    .modal-collapsible-section summary {
+        cursor: pointer;
+        list-style: none; /* Remove default triangle */
+    }
+
+    .modal-collapsible-section summary::-webkit-details-marker {
+        display: none; /* Remove default triangle (Safari) */
+    }
+
+    .modal-collapsible-section summary h4 {
+        display: inline-block;
+        margin: 0;
+        font-size: 1.25rem;
+    }
+
+    .modal-collapsible-section summary h4::before {
+        content: '►';
+        font-size: 0.8em;
+        margin-right: 0.75rem;
+        color: var(--text-secondary);
+        display: inline-block;
+        transition: transform 0.2s;
+    }
+
+    .modal-collapsible-section[open] summary h4::before {
+        transform: rotate(90deg);
+    }
+
+    .modal-collapsible-content {
+        padding-top: 1rem;
+    }
+
+
+    /* ------------------------------------------------------ */
+    /* EVENT DETAIL MODAL */
+    /* ------------------------------------------------------ */
+    #eventDetailModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 3000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #eventDetailModal.open {
+        display: flex;
+    }
+
+    .event-detail-box {
+        background: var(--bg-primary);
+        padding: 2rem;
+        border-radius: var(--radius-lg);
+        max-width: 700px;
+        width: 90%;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-xl);
+        position: relative;
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .detail-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 50%;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.5rem;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+        z-index: 10;
+        line-height: 1;
+        padding: 0;
+    }
+
+    .detail-close:hover {
+        background: var(--bg-primary);
+        color: var(--primary-color);
+        transform: rotate(90deg);
+    }
+
+    .event-detail-box h3 {
+        font-size: 1.75rem;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        padding-right: 2rem;
+    }
+
+    .modal-meta-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    .modal-meta-row svg {
+        flex-shrink: 0;
+        color: var(--primary-color);
+    }
+
+    .modal-meta-row .map-link {
+        margin-left: 0.5rem;
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .modal-meta-row .map-link:hover {
+        text-decoration: underline;
+    }
+
+    #detailDescription {
+        margin: 1.5rem 0;
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-size: 1rem;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    #detailActions {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .event-detail-box {
+            max-width: 95%;
+            max-height: 90vh;
+            padding: 1.5rem;
+        }
+
+        .event-detail-box h3 {
+            font-size: 1.5rem;
+        }
+    }
+
+    /* ------------------------------------------------------ */
+    /* LIST VIEW */
+    /* ------------------------------------------------------ */
+    #eventListView .app-event-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 1rem;
+        position: relative;
+        overflow: visible;
+        margin-bottom: 0.7rem;
+    }
+
+    #eventListView .event-content {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    /* Buttons container */
+    #eventListView .event-actions {
+        display: flex;
+        flex-direction: row;
+        gap: 0.75rem;
+        flex-shrink: 0;
+        align-items: center;
+    }
+
+    /* Button sizing */
+    #eventListView .event-actions .action-btn {
+        width: 140px;
+        height: 42px;
+        line-height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 0 1rem !important;
+    }
+
+    /* ------------------------------------------------------ */
+    /* GRID VIEW */
+    /* ------------------------------------------------------ */
+    #eventCardsView .app-event-card {
+        display: flex;
+        flex-direction: column;
+        height: 100%; /* Ensure card takes full height of grid cell */
+    }
+
+    #eventCardsView .event-content {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1; /* Allow content to expand */
+    }
+
+    #eventCardsView .event-info-wrapper {
+        flex-grow: 0; /* Don't let this section expand */
+    }
+
+    #eventCardsView .event-meta-wrapper {
+        flex-grow: 0; /* Don't let this section expand */
+    }
+
+    #eventCardsView .event-actions-wrapper {
+        margin-top: auto; /* Push to bottom */
+        padding-top: 1rem; /* Add some spacing */
+    }
+
+    #eventCardsView .event-actions {
+        display: flex;
+        gap: 0.75rem;
+        width: 100%;
+    }
+
+    /* ------------------------------------------------------ */
+    /* RESPONSIVE LAYOUT */
+    /* ------------------------------------------------------ */
+    @media (max-width: 992px) {
+        .event-hub-controls {
+            flex-wrap: wrap;
+            gap: 0;
+        }
+
+        .search-filter-group {
+            min-width: 100% !important;
+            order: 1;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .search-filter-group>input[type="text"] {
+            width: 100%;
+            min-width: 0;
+            order: 1;
+        }
+
+        .search-filter-group>input[type="date"],
+        .search-filter-group>#resetFiltersBtn,
+        .search-filter-group>.filter-toggle-switch {
+            flex-grow: 1;
+            order: 2;
+        }
+
+        .view-toggle-buttons {
+            order: 2;
+            width: 100%;
+            justify-content: flex-end;
+            margin-top: 0.5rem;
+        }
+
         .landing-event-hub-container {
-      padding: 90px 1rem 2rem 1rem; /* Reduce horizontal padding */
-    }
-    .event-hub-header {
-      padding: 0 0.5rem;
-    }
-    
-    .event-hub-header h1 {
-      font-size: 2rem;
-    }
-}
+            padding: 90px 1rem 2rem 1rem; /* Reduce horizontal padding */
+        }
 
-/* FORCE MODAL POSITIONING - Add at the very end of styles */
-#eventDetailModal.modal-overlay.open {
-    display: flex !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    align-items: center !important;
-    justify-content: center !important;
-    z-index: 9999 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-}
+        .event-hub-header {
+            padding: 0 0.5rem;
+        }
 
-.event-detail-box {
-    position: relative !important;
-    margin: auto !important;
-}
+        .event-hub-header h1 {
+            font-size: 2rem;
+        }
+    }
+
+    /* FORCE MODAL POSITIONING - Add at the very end of styles */
+    #eventDetailModal.modal-overlay.open {
+        display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        align-items: center !important;
+        justify-content: center !important;
+        z-index: 9999 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .event-detail-box {
+        position: relative !important;
+        margin: auto !important;
+    }
 </style>
 
 <div class="landing-event-hub-container page-transition-enter-active">
@@ -469,18 +504,30 @@
 
     <div class="event-hub-controls">
         <div class="search-filter-group">
-            <input type="text" id="eventSearchInput" placeholder="Search event titles..." aria-label="Search events by title">
+            <input type="text" id="eventSearchInput" placeholder="Search event titles..."
+                aria-label="Search events by title">
             <input type="date" id="eventDateFilter" aria-label="Filter events by date">
             <button class="action-btn secondary" id="resetFiltersBtn" aria-label="Reset Filters" title="Reset Filters">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2.5 2v6h6M21.5 22v-6h-6"></path><path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M2.5 2v6h6M21.5 22v-6h-6"></path>
+                    <path d="M22 11.5A10 10 0 0 0 3.2 7.2M2 12.5a10 10 0 0 0 18.8 4.3"></path>
+                </svg>
             </button>
         </div>
-        
+
         <div class="view-toggle-buttons">
-            <button class="action-btn primary active" data-view="cards" id="cardsViewBtn" aria-label="Card View" title="Card View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></button>
-            <button class="action-btn secondary" data-view="list" id="listViewBtn" aria-label="List View" title="List View">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <button class="action-btn primary active" data-view="cards" id="cardsViewBtn" aria-label="Card View"
+                title="Card View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg></button>
+            <button class="action-btn secondary" data-view="list" id="listViewBtn" aria-label="List View"
+                title="List View">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round">
                     <line x1="8" y1="6" x2="21" y2="6"></line>
                     <line x1="8" y1="12" x2="21" y2="12"></line>
                     <line x1="8" y1="18" x2="21" y2="18"></line>
@@ -489,30 +536,38 @@
                     <line x1="3" y1="18" x2="3.01" y2="18"></line>
                 </svg>
             </button>
-            <button class="action-btn secondary" data-view="calendar" id="calendarViewBtn" aria-label="Calendar View" title="Calendar View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></button>
+            <button class="action-btn secondary" data-view="calendar" id="calendarViewBtn" aria-label="Calendar View"
+                title="Calendar View"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg></button>
         </div>
     </div>
-    
+
     <div id="eventCardsView" class="app-events-grid"></div>
     <div id="eventListView" class="app-events-list" style="display: none;"></div>
-    <div id="eventCalendarView" class="calendar-view-wrapper" style="display: none; background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
+    <div id="eventCalendarView" class="calendar-view-wrapper"
+        style="display: none; background: var(--bg-secondary); padding: 1.5rem; border-radius: var(--radius-lg); border: 1px solid var(--border-color);">
         <div id="calendar"></div>
     </div>
 </div>
 
 
 <script type="module">
-import { api } from "../js/api.js";
+    import { api } from "../js/api.js";
 
-// --- MODAL CREATION ---
-// We create the modal once and append it to the document body.
-let detailModal = document.getElementById('eventDetailModal');
-if (!detailModal) {
-    detailModal = document.createElement('div');
-    detailModal.id = 'eventDetailModal';
-    detailModal.className = 'modal-overlay';
-    detailModal.style.display = 'none'; 
-    detailModal.innerHTML = `
+    // --- MODAL CREATION ---
+    // We create the modal once and append it to the document body.
+    let detailModal = document.getElementById('eventDetailModal');
+    if (!detailModal) {
+        detailModal = document.createElement('div');
+        detailModal.id = 'eventDetailModal';
+        detailModal.className = 'modal-overlay';
+        detailModal.style.display = 'none';
+        detailModal.innerHTML = `
         <div class="event-detail-box">
             <button class="detail-close" id="closeDetailModalBtn">×</button>
             <h3 id="detailTitle"></h3>
@@ -552,131 +607,131 @@ if (!detailModal) {
             </details>
         </div>
     `;
-    document.body.appendChild(detailModal);
+        document.body.appendChild(detailModal);
 
-    // Attach listeners to the new modal elements
-    document.getElementById('closeDetailModalBtn').addEventListener('click', closeDetailModal);
-    detailModal.addEventListener('click', (e) => {
-        if (e.target.id === 'eventDetailModal') {
-            closeDetailModal();
+        // Attach listeners to the new modal elements
+        document.getElementById('closeDetailModalBtn').addEventListener('click', closeDetailModal);
+        detailModal.addEventListener('click', (e) => {
+            if (e.target.id === 'eventDetailModal') {
+                closeDetailModal();
+            }
+        });
+    }
+
+    // --- CLEANUP LOGIC ---
+    const eventHubContainer = document.querySelector('.landing-events-container');
+    if (eventHubContainer) {
+        const observer = new MutationObserver((mutations) => {
+            if (!document.body.contains(eventHubContainer)) {
+                const dModal = document.getElementById('eventDetailModal');
+                if (dModal) dModal.remove();
+                observer.disconnect();
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    // --- View Elements ---
+    const cardsView = document.getElementById("eventCardsView");
+    const listView = document.getElementById("eventListView");
+    const calendarView = document.getElementById("eventCalendarView");
+    const viewButtons = document.querySelectorAll(".view-toggle-buttons .action-btn");
+
+    // --- Filter Elements ---
+    const searchInput = document.getElementById("eventSearchInput");
+    const dateFilter = document.getElementById("eventDateFilter");
+    const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+
+    let allEvents = [];
+    let currentEvents = [];
+    let currentView = "cards";
+
+    // --- Helper Functions ---
+    function getEventLocation(event) {
+        if (event.location_type === 'custom') {
+            return event.custom_location_address || 'Location TBA';
         }
-    });
-}
+        if (event.location_type === 'venue') {
+            let name = event.venue_name || 'On-Campus Venue';
+            let building = event.venue_building || '';
+            let room = event.venue_room || event.venue_room_number || '';
 
-// --- CLEANUP LOGIC ---
-const eventHubContainer = document.querySelector('.landing-events-container');
-if (eventHubContainer) {
-    const observer = new MutationObserver((mutations) => {
-        if (!document.body.contains(eventHubContainer)) {
-            const dModal = document.getElementById('eventDetailModal');
-            if (dModal) dModal.remove(); 
-            observer.disconnect();
+            if (building && room) return `${name} (${building}, ${room})`;
+            if (building) return `${name} (${building})`;
+            return name;
         }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-}
-
-// --- View Elements ---
-const cardsView = document.getElementById("eventCardsView");
-const listView = document.getElementById("eventListView");
-const calendarView = document.getElementById("eventCalendarView");
-const viewButtons = document.querySelectorAll(".view-toggle-buttons .action-btn");
-
-// --- Filter Elements ---
-const searchInput = document.getElementById("eventSearchInput");
-const dateFilter = document.getElementById("eventDateFilter");
-const resetFiltersBtn = document.getElementById("resetFiltersBtn");
-
-let allEvents = [];
-let currentEvents = [];
-let currentView = "cards";
-
-// --- Helper Functions ---
-function getEventLocation(event) {
-    if (event.location_type === 'custom') {
-        return event.custom_location_address || 'Location TBA';
+        return 'Location TBA';
     }
-    if (event.location_type === 'venue') {
-        let name = event.venue_name || 'On-Campus Venue';
-        let building = event.venue_building || '';
-        let room = event.venue_room || event.venue_room_number || '';
-        
-        if (building && room) return `${name} (${building}, ${room})`;
-        if (building) return `${name} (${building})`;
-        return name;
-    }
-    return 'Location TBA';
-}
 
-function getMapLink(event) {
-    if (event.google_maps_link) {
-        return `<a href="${event.google_maps_link}" target="_blank" class="map-link" onclick="event.stopPropagation()">View Map</a>`;
+    function getMapLink(event) {
+        if (event.google_maps_link) {
+            return `<a href="${event.google_maps_link}" target="_blank" class="map-link" onclick="event.stopPropagation()">View Map</a>`;
+        }
+        const location = getEventLocation(event);
+        if (location && location !== 'Location TBA' && location !== 'On-Campus Venue') {
+            const encodedLocation = encodeURIComponent(location);
+            return `<a href="https://www.google.com/maps/search/?api=1&query=${encodedLocation}" target="_blank" class="map-link" onclick="event.stopPropagation()">Search on Map</a>`;
+        }
+        return '';
     }
-    const location = getEventLocation(event);
-    if (location && location !== 'Location TBA' && location !== 'On-Campus Venue') {
-        const encodedLocation = encodeURIComponent(location);
-        return `<a href="https://www.google.com/maps/search/?api=1&query=${encodedLocation}" target="_blank" class="map-link" onclick="event.stopPropagation()">Search on Map</a>`;
-    }
-    return '';
-}
 
-// --- MODAL LOGIC ---
-async function showDetailModal(event) {
-    if (!event || !detailModal) return;
-    
-    // Populate modal content
-    detailModal.querySelector('#detailTitle').textContent = event.title;
-    
-    // --- Rating Display in Modal Header ---
-    const detailRatingDiv = detailModal.querySelector('#detailRating');
-    if (event.avg_rating) {
-        detailRatingDiv.innerHTML = `
+    // --- MODAL LOGIC ---
+    async function showDetailModal(event) {
+        if (!event || !detailModal) return;
+
+        // Populate modal content
+        detailModal.querySelector('#detailTitle').textContent = event.title;
+
+        // --- Rating Display in Modal Header ---
+        const detailRatingDiv = detailModal.querySelector('#detailRating');
+        if (event.avg_rating) {
+            detailRatingDiv.innerHTML = `
             <span class="star">★</span>
             <strong>${Number(event.avg_rating).toFixed(1)}</strong>
             <span class="count">(${event.review_count} ${event.review_count === 1 ? 'review' : 'reviews'})</span>
         `;
-    } else {
-        detailRatingDiv.innerHTML = `<span class="count">No reviews yet</span>`;
-    }
-    
-    // --- Date Formatting ---
-    const start = new Date(event.start_time);
-    const end = event.end_time ? new Date(event.end_time) : null;
-    
-    const dateStr = start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-    const startTimeStr = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    
-    let timeDisplay = `${dateStr} at ${startTimeStr}`;
-    if (end) {
-        const endDateStr = end.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-        const endTimeStr = end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-        if (dateStr === endDateStr) {
-            timeDisplay = `${dateStr}, ${startTimeStr} – ${endTimeStr}`;
         } else {
-            timeDisplay = `${dateStr}, ${startTimeStr} – ${endDateStr}, ${endTimeStr}`;
+            detailRatingDiv.innerHTML = `<span class="count">No reviews yet</span>`;
         }
-    }
-    detailModal.querySelector('#detailDate').textContent = timeDisplay;
-    detailModal.querySelector('#detailLocation').textContent = getEventLocation(event);
-    detailModal.querySelector('#detailMapLink').innerHTML = getMapLink(event);
-    detailModal.querySelector('#detailDescription').textContent = event.description || 'No description provided.';
 
-    // Show the modal
-    detailModal.classList.add('open');
-    detailModal.style.display = 'flex';
+        // --- Date Formatting ---
+        const start = new Date(event.start_time);
+        const end = event.end_time ? new Date(event.end_time) : null;
 
-    // --- Load Reviews ---
-    const reviewListDiv = detailModal.querySelector('#detailReviewList');
-    reviewListDiv.innerHTML = '<div class="loading">Loading reviews...</div>';
-    
-    try {
-        // Fetch reviews (no token needed if endpoint is public, or check your API logic)
-        const reviews = await api(`/events/${event.event_id}/reviews`, "GET", null, null);
-        
-        if (reviews && reviews.length > 0) {
-            reviewListDiv.innerHTML = reviews.map(rev => {
-                const reviewDate = new Date(rev.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-                return `
+        const dateStr = start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        const startTimeStr = start.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+        let timeDisplay = `${dateStr} at ${startTimeStr}`;
+        if (end) {
+            const endDateStr = end.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            const endTimeStr = end.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+            if (dateStr === endDateStr) {
+                timeDisplay = `${dateStr}, ${startTimeStr} – ${endTimeStr}`;
+            } else {
+                timeDisplay = `${dateStr}, ${startTimeStr} – ${endDateStr}, ${endTimeStr}`;
+            }
+        }
+        detailModal.querySelector('#detailDate').textContent = timeDisplay;
+        detailModal.querySelector('#detailLocation').textContent = getEventLocation(event);
+        detailModal.querySelector('#detailMapLink').innerHTML = getMapLink(event);
+        detailModal.querySelector('#detailDescription').textContent = event.description || 'No description provided.';
+
+        // Show the modal
+        detailModal.classList.add('open');
+        detailModal.style.display = 'flex';
+
+        // --- Load Reviews ---
+        const reviewListDiv = detailModal.querySelector('#detailReviewList');
+        reviewListDiv.innerHTML = '<div class="loading">Loading reviews...</div>';
+
+        try {
+            // Fetch reviews (no token needed if endpoint is public, or check your API logic)
+            const reviews = await api(`/events/${event.event_id}/reviews`, "GET", null, null);
+
+            if (reviews && reviews.length > 0) {
+                reviewListDiv.innerHTML = reviews.map(rev => {
+                    const reviewDate = new Date(rev.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                    return `
                     <div class="review-item">
                         <div class="review-header">
                             <div>
@@ -690,68 +745,68 @@ async function showDetailModal(event) {
                         <p class="review-text">${rev.review_text || '<i>No comment provided.</i>'}</p>
                     </div>
                 `;
-            }).join('');
-        } else {
-            reviewListDiv.innerHTML = '<p>No reviews yet.</p>';
+                }).join('');
+            } else {
+                reviewListDiv.innerHTML = '<p>No reviews yet.</p>';
+            }
+        } catch (err) {
+            reviewListDiv.innerHTML = `<p class="error-message">Could not load reviews. Log in to see more details.</p>`;
         }
-    } catch (err) {
-        reviewListDiv.innerHTML = `<p class="error-message">Could not load reviews. Log in to see more details.</p>`;
     }
-}
 
-function closeDetailModal() {
-    if (detailModal) {
-        detailModal.classList.remove('open');
-        detailModal.style.display = 'none';
+    function closeDetailModal() {
+        if (detailModal) {
+            detailModal.classList.remove('open');
+            detailModal.style.display = 'none';
+        }
     }
-}
 
-// --- Event Rendering ---
-function renderEvents(events, isList = false) {
-    const container = isList ? listView : cardsView;
-    const listClass = isList ? 'list-card-style' : '';
-    
-    if (events.length === 0) {
-        container.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1; ${isList ? 'max-width: 100%;' : ''}">
+    // --- Event Rendering ---
+    function renderEvents(events, isList = false) {
+        const container = isList ? listView : cardsView;
+        const listClass = isList ? 'list-card-style' : '';
+
+        if (events.length === 0) {
+            container.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1; ${isList ? 'max-width: 100%;' : ''}">
             <h3>No Events Found</h3>
             <p>Try adjusting your search or date filters.</p>
         </div>`;
-        return;
-    }
+            return;
+        }
 
-    const now = new Date();
-    const upcoming = events.filter(e => new Date(e.start_time) >= now);
-    const past = events.filter(e => new Date(e.start_time) < now);
-    upcoming.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
-    past.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
+        const now = new Date();
+        const upcoming = events.filter(e => new Date(e.start_time) >= now);
+        const past = events.filter(e => new Date(e.start_time) < now);
+        upcoming.sort((a, b) => new Date(a.start_time) - new Date(b.start_time));
+        past.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
 
-    const renderCard = (event) => {
-        const startDate = new Date(event.start_time);
-        const formattedDate = startDate.toLocaleString('en-US', { 
-            weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
-        });
-        const formattedTime = startDate.toLocaleTimeString('en-US', {
-            hour: 'numeric', minute: '2-digit'
-        });
-        const locationText = getEventLocation(event);
-        const mapLinkHtml = getMapLink(event);
-        const eventId = event.event_id;
+        const renderCard = (event) => {
+            const startDate = new Date(event.start_time);
+            const formattedDate = startDate.toLocaleString('en-US', {
+                weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+            });
+            const formattedTime = startDate.toLocaleTimeString('en-US', {
+                hour: 'numeric', minute: '2-digit'
+            });
+            const locationText = getEventLocation(event);
+            const mapLinkHtml = getMapLink(event);
+            const eventId = event.event_id;
 
-        // --- Rating HTML for Card ---
-        let ratingHtml = '';
-        if (event.avg_rating) {
-            ratingHtml = `
+            // --- Rating HTML for Card ---
+            let ratingHtml = '';
+            if (event.avg_rating) {
+                ratingHtml = `
                 <div class="event-rating">
                     <span class="star">★</span>
                     <strong>${Number(event.avg_rating).toFixed(1)}</strong>
                     <span class="count">(${event.review_count})</span>
                 </div>
             `;
-        }
+            }
 
-        const actionButtons = `<a href="#/login" class="action-btn primary" onclick="event.stopPropagation()">Log in to RSVP</a>`;
+            const actionButtons = `<a href="#/login" class="action-btn primary" onclick="event.stopPropagation()">Log in to RSVP</a>`;
 
-        return `
+            return `
             <article class="app-event-card ${listClass}" data-event-id="${eventId}">
                 <div class="event-image">${event.title.charAt(0)}</div>
                 <div class="event-content">
@@ -786,156 +841,156 @@ function renderEvents(events, isList = false) {
                 </div>
             </article>
         `;
-    };
+        };
 
-    let html = '';
-    if (upcoming.length > 0) {
-        html += upcoming.map(renderCard).join("");
-    } else {
-        html += `<p style="grid-column:1/-1; padding:1rem; color:var(--text-secondary);">No upcoming events found matching your filters.</p>`;
-    }
-
-    if (past.length > 0) {
-        html += `<div class="section-divider"><span></span><h3>Past Events</h3><span></span></div>`;
-        html += past.map(renderCard).join("");
-    }
-
-    container.innerHTML = html;
-
-    // Attach click listeners for the modal
-    container.querySelectorAll('.app-event-card').forEach(card => {
-        card.addEventListener('click', (e) => {
-            if (e.target.closest('a')) return; // Ignore clicks on links
-            const eventId = e.currentTarget.dataset.eventId;
-            const eventData = allEvents.find(e => e.event_id == eventId);
-            showDetailModal(eventData);
-        });
-    });
-}
-
-// --- Calendar Functionality ---
-function normalizeDateTime(dt) {
-    if (!dt) return null;
-    const d = new Date(dt);
-    return isNaN(d.getTime()) ? null : d.toISOString();
-}
-
-let fcCalendar = null;
-function renderCalendar(events) {
-    const calendarEl = document.getElementById('calendar');
-    const calendarEvents = events
-      .map(e => ({
-        title: e.title,
-        start: normalizeDateTime(e.start_time),
-        end: normalizeDateTime(e.end_time),
-        extendedProps: e,
-        backgroundColor: '#667eea', // Default public color
-        borderColor: '#5568d3'
-      }))
-      .filter(e => e.start !== null);
-
-    if (!fcCalendar) {
-        fcCalendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            headerToolbar: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
-            },
-            height: 'auto',
-            aspectRatio: 1.8,
-            events: calendarEvents,
-            eventClick: function(info) {
-                info.jsEvent.preventDefault();
-                showDetailModal(info.event.extendedProps);
-            }
-        });
-        fcCalendar.render();
-    } else {
-        fcCalendar.removeAllEvents();
-        fcCalendar.addEventSource(calendarEvents);
-    }
-}
-
-// --- Initialization and Filtering ---
-async function loadEvents() {
-    try {
-        const events = await api("/events/", "GET", null, null); 
-        if (!Array.isArray(events)) throw new Error("API did not return an array.");
-        
-        allEvents = events.filter(e => e.visibility === 'public');
-        currentEvents = [...allEvents];
-        switchView(currentView);
-    } catch (err) {
-        console.error("Failed to load events:", err);
-        cardsView.innerHTML = '<p class="error-message">Unable to load events. Please try again later.</p>';
-    }
-}
-
-function applyFilters() {
-    const searchTerm = searchInput.value.toLowerCase();
-    const filterDate = dateFilter.value; 
-
-    currentEvents = allEvents.filter(event => {
-        const titleMatch = event.title.toLowerCase().includes(searchTerm);
-        const descMatch = (event.description || "").toLowerCase().includes(searchTerm);
-        const matchesText = !searchTerm || titleMatch || descMatch;
-
-        let matchesDate = true;
-        if (filterDate) {
-            const localDate = new Date(event.start_time);
-            const year = localDate.getFullYear();
-            const month = String(localDate.getMonth() + 1).padStart(2, '0');
-            const day = String(localDate.getDate()).padStart(2, '0');
-            const localDateString = `${year}-${month}-${day}`;
-            matchesDate = localDateString === filterDate;
+        let html = '';
+        if (upcoming.length > 0) {
+            html += upcoming.map(renderCard).join("");
+        } else {
+            html += `<p style="grid-column:1/-1; padding:1rem; color:var(--text-secondary);">No upcoming events found matching your filters.</p>`;
         }
-        
-        return matchesText && matchesDate;
-    });
 
-    switchView(currentView);
-}
+        if (past.length > 0) {
+            html += `<div class="section-divider"><span></span><h3>Past Events</h3><span></span></div>`;
+            html += past.map(renderCard).join("");
+        }
 
-function switchView(viewName) {
-    currentView = viewName;
-    viewButtons.forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.view === viewName);
-        btn.classList.toggle("primary", btn.dataset.view === viewName);
-        btn.classList.toggle("secondary", btn.dataset.view !== viewName);
-    });
+        container.innerHTML = html;
 
-    cardsView.style.display = "none";
-    listView.style.display = "none";
-    calendarView.style.display = "none";
-
-    if (viewName === "cards") {
-        cardsView.style.display = "grid";
-        renderEvents(currentEvents, false);
-    } else if (viewName === "list") {
-        listView.style.display = "block";
-        renderEvents(currentEvents, true);
-    } else if (viewName === "calendar") {
-        calendarView.style.display = "block";
-        renderCalendar(currentEvents);
-        // Add a slight delay to ensure the calendar renders in the now-visible container
-        setTimeout(() => { if(fcCalendar) fcCalendar.updateSize(); }, 50);
+        // Attach click listeners for the modal
+        container.querySelectorAll('.app-event-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('a')) return; // Ignore clicks on links
+                const eventId = e.currentTarget.dataset.eventId;
+                const eventData = allEvents.find(e => e.event_id == eventId);
+                showDetailModal(eventData);
+            });
+        });
     }
-}
 
-// --- Event Listeners ---
-searchInput.addEventListener('input', applyFilters);
-dateFilter.addEventListener('change', applyFilters);
-resetFiltersBtn.addEventListener('click', () => {
-    searchInput.value = '';
-    dateFilter.value = '';
-    currentEvents = [...allEvents];
-    applyFilters();
-});
-viewButtons.forEach(btn => {
-    btn.addEventListener("click", () => switchView(btn.dataset.view));
-});
+    // --- Calendar Functionality ---
+    function normalizeDateTime(dt) {
+        if (!dt) return null;
+        const d = new Date(dt);
+        return isNaN(d.getTime()) ? null : d.toISOString();
+    }
 
-// Start
-loadEvents();
+    let fcCalendar = null;
+    function renderCalendar(events) {
+        const calendarEl = document.getElementById('calendar');
+        const calendarEvents = events
+            .map(e => ({
+                title: e.title,
+                start: normalizeDateTime(e.start_time),
+                end: normalizeDateTime(e.end_time),
+                extendedProps: e,
+                backgroundColor: '#667eea', // Default public color
+                borderColor: '#5568d3'
+            }))
+            .filter(e => e.start !== null);
+
+        if (!fcCalendar) {
+            fcCalendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                },
+                height: 'auto',
+                aspectRatio: 1.8,
+                events: calendarEvents,
+                eventClick: function (info) {
+                    info.jsEvent.preventDefault();
+                    showDetailModal(info.event.extendedProps);
+                }
+            });
+            fcCalendar.render();
+        } else {
+            fcCalendar.removeAllEvents();
+            fcCalendar.addEventSource(calendarEvents);
+        }
+    }
+
+    // --- Initialization and Filtering ---
+    async function loadEvents() {
+        try {
+            const events = await api("/events/", "GET", null, null);
+            if (!Array.isArray(events)) throw new Error("API did not return an array.");
+
+            allEvents = events.filter(e => e.visibility === 'public');
+            currentEvents = [...allEvents];
+            switchView(currentView);
+        } catch (err) {
+            console.error("Failed to load events:", err);
+            cardsView.innerHTML = '<p class="error-message">Unable to load events. Please try again later.</p>';
+        }
+    }
+
+    function applyFilters() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const filterDate = dateFilter.value;
+
+        currentEvents = allEvents.filter(event => {
+            const titleMatch = event.title.toLowerCase().includes(searchTerm);
+            const descMatch = (event.description || "").toLowerCase().includes(searchTerm);
+            const matchesText = !searchTerm || titleMatch || descMatch;
+
+            let matchesDate = true;
+            if (filterDate) {
+                const localDate = new Date(event.start_time);
+                const year = localDate.getFullYear();
+                const month = String(localDate.getMonth() + 1).padStart(2, '0');
+                const day = String(localDate.getDate()).padStart(2, '0');
+                const localDateString = `${year}-${month}-${day}`;
+                matchesDate = localDateString === filterDate;
+            }
+
+            return matchesText && matchesDate;
+        });
+
+        switchView(currentView);
+    }
+
+    function switchView(viewName) {
+        currentView = viewName;
+        viewButtons.forEach(btn => {
+            btn.classList.toggle("active", btn.dataset.view === viewName);
+            btn.classList.toggle("primary", btn.dataset.view === viewName);
+            btn.classList.toggle("secondary", btn.dataset.view !== viewName);
+        });
+
+        cardsView.style.display = "none";
+        listView.style.display = "none";
+        calendarView.style.display = "none";
+
+        if (viewName === "cards") {
+            cardsView.style.display = "grid";
+            renderEvents(currentEvents, false);
+        } else if (viewName === "list") {
+            listView.style.display = "block";
+            renderEvents(currentEvents, true);
+        } else if (viewName === "calendar") {
+            calendarView.style.display = "block";
+            renderCalendar(currentEvents);
+            // Add a slight delay to ensure the calendar renders in the now-visible container
+            setTimeout(() => { if (fcCalendar) fcCalendar.updateSize(); }, 50);
+        }
+    }
+
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', applyFilters);
+    dateFilter.addEventListener('change', applyFilters);
+    resetFiltersBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        dateFilter.value = '';
+        currentEvents = [...allEvents];
+        applyFilters();
+    });
+    viewButtons.forEach(btn => {
+        btn.addEventListener("click", () => switchView(btn.dataset.view));
+    });
+
+    // Start
+    loadEvents();
 </script>

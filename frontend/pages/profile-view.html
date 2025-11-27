@@ -4,6 +4,7 @@
         margin: 2rem auto;
         animation: fadeIn 0.5s ease-out;
     }
+
     .profile-view-card {
         background: var(--bg-primary);
         border-radius: var(--radius-lg);
@@ -15,6 +16,7 @@
         padding: 2.5rem;
         text-align: center;
     }
+
     .profile-avatar {
         width: 120px;
         height: 120px;
@@ -29,6 +31,7 @@
         margin-bottom: 1.5rem;
         position: relative;
     }
+
     .profile-avatar img {
         width: 100%;
         height: 100%;
@@ -37,23 +40,27 @@
         border: 4px solid white;
         box-shadow: var(--shadow-md);
     }
+
     .profile-name {
         font-size: 2rem;
         font-weight: 700;
         color: var(--text-primary);
         margin-bottom: 0.25rem;
     }
+
     .profile-email {
         font-size: 1.1rem;
         color: var(--text-secondary);
         margin-bottom: 1.5rem;
     }
+
     .profile-divider {
         width: 100%;
         height: 1px;
         background: var(--border-color);
         margin: 1rem 0 2rem 0;
     }
+
     .profile-info-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -61,11 +68,13 @@
         text-align: left;
         width: 100%;
     }
+
     .info-item {
         background: var(--bg-secondary);
         padding: 1rem;
         border-radius: var(--radius-md);
     }
+
     .info-item label {
         display: block;
         font-size: 0.875rem;
@@ -74,6 +83,7 @@
         margin-bottom: 0.25rem;
         text-transform: uppercase;
     }
+
     .info-item p {
         font-size: 1rem;
         color: var(--text-primary);
@@ -83,6 +93,7 @@
         white-space: pre-wrap;
         word-break: break-word;
     }
+
     .info-item p.missing {
         font-style: italic;
         color: var(--text-light);
@@ -103,26 +114,29 @@
         const params = new URLSearchParams(window.location.hash.split('?')[1]);
         const userId = params.get('id');
 
+        // Handle missing user ID
         if (!userId) {
             container.innerHTML = '<div class="error-message">No user ID provided.</div>';
             return;
         }
 
+        // Fetch profile data
         try {
             const profile = await api(`/events/users/${userId}/profile`, "GET", null, token);
-            
+
             const firstName = profile.first_name || '';
             const lastName = profile.last_name || '';
             const fullName = `${firstName} ${lastName}`.trim() || 'User';
             const initial = fullName.charAt(0).toUpperCase();
 
+            // Render profile
             container.innerHTML = `
                 <div class="profile-view-card">
                     <div class="profile-avatar">
                         ${profile.profile_picture
-                            ? `<img src="${profile.profile_picture}" alt="Profile picture">`
-                            : `<span>${initial}</span>`
-                        }
+                    ? `<img src="${profile.profile_picture}" alt="Profile picture">`
+                    : `<span>${initial}</span>`
+                }
                     </div>
                     
                     <h1 class="profile-name">${fullName}</h1>
@@ -134,23 +148,23 @@
                         <div class="info-item">
                             <label>Major / Department</label>
                             ${profile.major_department
-                                ? `<p>${profile.major_department}</p>`
-                                : `<p class="missing">Not specified</p>`
-                            }
+                    ? `<p>${profile.major_department}</p>`
+                    : `<p class="missing">Not specified</p>`
+                }
                         </div>
                         <div class="info-item">
                             <label>Bio</label>
                             ${profile.bio
-                                ? `<p>${profile.bio}</p>`
-                                : `<p class="missing">Not specified</p>`
-                            }
+                    ? `<p>${profile.bio}</p>`
+                    : `<p class="missing">Not specified</p>`
+                }
                         </div>
                         <div class="info-item">
                             <label>Hobbies</label>
                             ${profile.hobbies
-                                ? `<p>${profile.hobbies}</p>`
-                                : `<p class="missing">Not specified</p>`
-                            }
+                    ? `<p>${profile.hobbies}</p>`
+                    : `<p class="missing">Not specified</p>`
+                }
                         </div>
                     </div>
                 </div>

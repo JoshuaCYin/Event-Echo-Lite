@@ -158,7 +158,7 @@
         justify-content: center;
     }
 
-    /* --- FIX: Compact pill-style buttons --- */
+    /* --- Compact pill-style buttons --- */
     .smart-start-btn {
         padding: 0.5rem 1rem;
         font-size: 0.875rem;
@@ -166,16 +166,13 @@
         color: var(--text-primary);
         background: var(--bg-tertiary);
         border: 1px solid var(--border-color);
-        border-radius: 20px;
-        /* More rounded */
+        border-radius: 20px; /* More rounded */
         text-align: center;
         transition: var(--transition);
         cursor: pointer;
         line-height: 1.4;
-        white-space: nowrap;
-        /* Prevent wrapping */
-        flex-shrink: 0;
-        /* Prevent shrinking */
+        white-space: nowrap; /* Prevent wrapping */
+        flex-shrink: 0; /* Prevent shrinking */
     }
 
     .smart-start-btn:hover {
@@ -184,15 +181,9 @@
         box-shadow: var(--shadow-sm);
     }
 
-    /* .smart-start-btn strong {
-        color: var(--primary-color);
-        display: block;
-        font-size: 0.9rem;
-    } */
-
     .smart-start-btn strong {
         color: var(--primary-color);
-        margin-right: 7px;           /* Small space between 'For You' and 'Recommend events' */
+        margin-right: 7px; /* Small space between 'For You' and 'Recommend events' */
     }
 
     .ai-draft-button {
@@ -278,7 +269,6 @@
         border-radius: var(--radius-md);
         margin: 0 0.5rem 1rem 0.5rem;
         flex-shrink: 0;
-        /* display: none; <-- This is handled by inline style */
     }
 
     /* Chat Form & Input */
@@ -384,7 +374,7 @@
             <p>Your partner in planning campus events.</p>
         </div>
 
-        <!-- FIX: Added style="display: none;" to hide on load -->
+        <!-- Error message (hidden on load) -->
         <div id="chat-error" class="chat-error" style="display: none;"></div>
 
         <div class="chat-window" id="chat-window">
@@ -402,9 +392,9 @@
 
         </div>
 
+        <!-- Smart start buttons -->
         <div class="smart-start-container" id="smart-start-container">
             <div class="smart-start-grid">
-                <!-- UPDATED: Added Recommendations Button -->
                 <button class="smart-start-btn"
                     data-prompt="Based on my profile (major, interests), what events do you recommend for me?">
                     <strong>For You</strong>
@@ -483,7 +473,7 @@
                 bubble.querySelectorAll('pre code').forEach(block => window.hljs.highlightElement(block));
             }
 
-            // --- This is the Draft Button logic ---
+            // --- EVENT DRAFT BUTTON ---
             if (eventDraft && eventDraft.title) {
                 const draftButton = document.createElement('button');
                 draftButton.className = 'ai-draft-button';
@@ -501,7 +491,6 @@
                 };
                 bubble.appendChild(draftButton);
             }
-            // ---------------------------------------
 
         } else {
             bubble.textContent = message;
@@ -541,7 +530,7 @@
         if (smartStartContainer) smartStartContainer.style.display = 'none';
     }
 
-    // --- UPDATED: This function now strictly filters for upcoming events ---
+    // --- FETCH EVENT CONTEXT FUNCTION ---
     async function getEventContext() {
         try {
             // This API call fetches all events (public, and private-own)
@@ -551,7 +540,7 @@
                 return "No upcoming public or private events found.";
             }
 
-            // --- CRITICAL FIX: Filter to include ONLY FUTURE events ---
+            // --- Filter to include ONLY FUTURE events ---
             const now = new Date();
             const upcomingEvents = events.filter(e => {
                 try {
@@ -600,7 +589,6 @@
         const loadingElement = showLoading();
 
         try {
-            // --- UPDATED: Get context AND profile *before* sending ---
             // Fetch context and profile in parallel
             const [eventContext, userProfile] = await Promise.all([
                 getEventContext(),
@@ -622,7 +610,7 @@
                 user_time: userTime,
                 history: chatHistory.slice(-MAX_HISTORY),
                 event_context: eventContext,
-                user_profile: userProfile // Add this
+                user_profile: userProfile
             };
 
             const result = await api('/ai/chat', 'POST', payload, token);
