@@ -1,32 +1,234 @@
+<link rel="stylesheet" href="css/main.css">
 <style>
-    /* Base form styles */
-    .create-event-form {
-        max-width: 700px;
+    /* --- Layout Wrapper (New) --- */
+    .form-container-wrapper {
+        display: flex;
+        gap: 2rem;
+        max-width: 1200px;
         margin: 0 auto;
+        align-items: flex-start;
     }
+
+    /* --- AI Sidebar Styles (Ported) --- */
+    .wizard-sidebar {
+        flex: 2;
+        min-width: 300px;
+        max-width: 380px;
+        position: sticky;
+        top: 2rem;
+    }
+
+    .ai-helper-card {
+        background: var(--bg-primary, #ffffff);
+        border: 1px solid var(--border-color, #e0e0e0);
+        box-shadow: var(--shadow-sm, 0 1px 2px rgba(0, 0, 0, 0.05));
+        border-radius: var(--radius-lg, 12px);
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 4rem);
+        max-height: 800px;
+        transition: all 0.3s ease;
+    }
+
+    .ai-helper-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color, #e0e0e0);
+        flex-shrink: 0;
+    }
+
+    .ai-helper-header h3 {
+        font-size: 1.25rem;
+        margin: 0;
+        background: var(--gradient-primary, linear-gradient(135deg, #007bff, #0056b3));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .ai-helper-messages {
+        flex-grow: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .ai-helper-msg {
+        display: flex;
+        align-items:
+            flex-end;
+        max-width: 100%;
+    }
+
+    .ai-helper-msg.user {
+        flex-direction: row-reverse;
+    }
+
+    .ai-helper-avatar {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 0.8rem;
+    }
+
+    .ai-helper-msg.ai .ai-helper-avatar,
+    .ai-helper-msg.is-loading .ai-helper-avatar {
+        background: var(--gradient-primary, linear-gradient(135deg, #007bff, #0056b3));
+        color: white;
+        margin-right: 0.5rem;
+    }
+
+    .ai-helper-msg.user .ai-helper-avatar {
+        background: var(--bg-tertiary, #e5e7eb);
+        color: var(--text-primary, #374151);
+        margin-left: 0.5rem;
+    }
+
+    .ai-helper-bubble {
+        padding: 0.75rem 1rem;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        width: fit-content;
+        max-width: 85%;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .ai-helper-msg.ai .ai-helper-bubble,
+    .ai-helper-msg.is-loading .ai-helper-bubble {
+        background: var(--bg-tertiary, #f3f4f6);
+        color: var(--text-primary, #1f2937);
+        border-bottom-left-radius: 2px;
+    }
+
+    .ai-helper-msg.user .ai-helper-bubble {
+        background: var(--gradient-primary, #007bff);
+        color: white;
+        border-bottom-right-radius: 2px;
+    }
+
+    .ai-suggestion-action {
+        display: block;
+        margin-top: 0.75rem;
+        padding: 0.5rem 0.75rem;
+        background: white;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        color: var(--primary-color, #007bff);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+        width: 100%;
+    }
+
+    .ai-suggestion-action:hover {
+        background: #f9fafb;
+        border-color: var(--primary-color, #007bff);
+    }
+
+    .ai-helper-form {
+        flex-shrink: 0;
+        margin-top: 1rem;
+    }
+
+    .ai-helper-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--bg-tertiary, #f3f4f6);
+        border: 1px solid var(--border-color, #e5e7eb);
+        border-radius: 24px;
+        padding: 0.25rem 0.5rem 0.25rem 1rem;
+        transition: border-color 0.2s;
+    }
+
+    .ai-helper-input-wrapper:focus-within {
+        border-color: var(--primary-color, #007bff);
+        background: white;
+    }
+
+    .ai-helper-input-wrapper input {
+        flex-grow: 1;
+        border: none;
+        background: transparent;
+        font-size: 0.9rem;
+        padding: 0.6rem 0;
+        font-family: inherit;
+    }
+
+    .ai-helper-input-wrapper input:focus {
+        outline: none;
+    }
+
+    .ai-helper-input-wrapper button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        background: var(--gradient-primary, #007bff);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .ai-helper-input-wrapper button:hover {
+        transform: scale(1.05);
+    }
+
+    .ai-helper-input-wrapper button:disabled {
+        background: var(--text-light, #ccc);
+        transform: none;
+    }
+
+    .ai-toggle-icon {
+        display: none;
+    }
+
+    /* --- Existing Form Styles --- */
     .form-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 1rem;
     }
+
     .form-section {
         margin-bottom: 1.5rem;
         padding-bottom: 1.5rem;
         border-bottom: 1px solid var(--border-color, #e0e0e0);
     }
+
     .form-section:last-child {
         border-bottom: none;
         margin-bottom: 0;
         padding-bottom: 0;
     }
+
     .form-section h3 {
-        font-size: 1.125rem; /* 18px */
+        font-size: 1.125rem;
+        /* 18px */
         color: var(--text-secondary, #555);
         margin-bottom: 1rem;
     }
-    
-    /* Back link */
+
     .back-link {
         display: inline-flex;
         align-items: center;
@@ -36,18 +238,20 @@
         text-decoration: none;
         font-weight: 500;
     }
+
     .back-link:hover {
         text-decoration: underline;
     }
 
-    /* Form field styles */
     label {
-        display: block; 
-        margin-bottom: 0.5rem; 
-        color: var(--text-secondary, #555); 
-        font-size: 0.875rem; /* 14px */
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--text-secondary, #555);
+        font-size: 0.875rem;
+        /* 14px */
         font-weight: 500;
     }
+
     input[type="text"],
     input[type="url"],
     input[type="datetime-local"],
@@ -58,34 +262,38 @@
         border: 1px solid var(--border-color, #ccc);
         border-radius: var(--radius-md, 8px);
         background-color: var(--bg-secondary, #f9f9f9);
-        box-sizing: border-box; 
+        box-sizing: border-box;
     }
-    input:focus, textarea:focus, select:focus {
+
+    input:focus,
+    textarea:focus,
+    select:focus {
         outline: 2px solid var(--primary-color, #007bff);
         border-color: var(--primary-color, #007bff);
         background-color: var(--bg-primary, #fff);
     }
+
     textarea {
         resize: vertical;
     }
-    
-    /* Date/Time flex layout */
+
     .date-time-group {
         display: flex;
         gap: 1rem;
         flex-wrap: wrap;
     }
-    .date-time-group > div {
+
+    .date-time-group>div {
         flex: 1;
         min-width: 200px;
     }
 
-    /* Custom Radio Buttons */
     .radio-group {
         display: flex;
         gap: 1rem;
         margin-bottom: 1rem;
     }
+
     .radio-label {
         display: flex;
         align-items: center;
@@ -97,17 +305,20 @@
         transition: all 0.2s ease-in-out;
         flex: 1;
     }
-    /* Hide actual radio button */
+
     .radio-label input[type="radio"] {
         display: none;
     }
+
     .radio-label:has(input:checked) {
         background: var(--bg-tertiary, #f0f7ff);
         border-color: var(--primary-color, #007bff);
     }
-    
-    #venueSelectContainer { display: none; }
-    
+
+    #venueSelectContainer {
+        display: none;
+    }
+
     .form-section a {
         font-size: 0.875rem;
         color: var(--primary-color, #007bff);
@@ -115,8 +326,11 @@
         display: inline-block;
         margin-top: 0.5rem;
     }
-    .form-section a:hover { text-decoration: underline; }
-    
+
+    .form-section a:hover {
+        text-decoration: underline;
+    }
+
     .ai-draft-applied {
         padding: 1rem;
         background: #e6f3ff;
@@ -129,13 +343,13 @@
         gap: 0.75rem;
     }
 
-    /* Action Buttons */
     .form-actions {
         display: flex;
         gap: 1rem;
         align-items: center;
         margin-top: 1.5rem;
     }
+
     .form-actions button {
         padding: 0.75rem 1.5rem;
         border-radius: var(--radius-md, 8px);
@@ -143,430 +357,689 @@
         cursor: pointer;
         border: none;
     }
+
     #saveBtn {
         background: var(--primary-color, #007bff);
         color: white;
         flex: 2;
     }
 
-    /* --- AI Assist Button Styles --- */
-    .label-with-ai {
-        display: flex; justify-content: space-between; align-items: center;
+    /* Responsive Logic */
+    @media (max-width: 900px) {
+        .form-container-wrapper {
+            flex-direction: column;
+        }
+
+        .wizard-sidebar {
+            max-width: 100%;
+            position: static;
+            width: 100%;
+        }
+
+        .ai-helper-card {
+            padding: 1rem;
+            height: auto;
+            max-height: 500px;
+        }
+
+        .ai-helper-header {
+            cursor: pointer;
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .ai-toggle-icon {
+            display: block;
+            transform: rotate(0deg);
+            transition: transform 0.3s;
+        }
+
+        /* Mobile Toggle States */
+        .ai-helper-card.collapsed .ai-helper-messages,
+        .ai-helper-card.collapsed .ai-helper-form {
+            display: none;
+        }
+
+        .ai-helper-card.expanded .ai-helper-header {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .ai-helper-card.expanded .ai-toggle-icon {
+            transform: rotate(180deg);
+        }
     }
-    .ai-assist-btn {
-        background: none; border: 1px solid var(--primary-color);
-        color: var(--primary-color); padding: 2px 8px; border-radius: 12px;
-        font-size: 0.75rem; cursor: pointer; display: flex; align-items: center; gap: 4px;
-        transition: all 0.2s;
-        flex-shrink: 0; /* Add this to prevent shrinking/wrapping */
-    }
-    .ai-assist-btn:hover { background: var(--bg-tertiary); transform: translateY(-1px); }
-    .ai-assist-btn.loading { opacity: 0.7; cursor: wait; }
 </style>
 
-<div class="create-event-form page-transition-enter-active">
-    
-    <!-- Back Navigation -->
-    <a href="#/create-event" class="back-link" id="backLink">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
-        <span>Back to options</span>
-    </a>
-    
-    <div class="form-header">
-        <h2 id="pageTitle">New Event Details</h2>
+<div class="page-transition-enter-active">
+
+    <!-- Wrapper for Sidebar Layout -->
+    <div class="form-container-wrapper">
+
+        <!-- MAIN FORM -->
+        <div class="create-event-form">
+            <!-- Back Navigation -->
+            <a href="#/create-event" class="back-link" id="backLink">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+                <span>Back to options</span>
+            </a>
+
+            <div class="form-header">
+                <h2 id="pageTitle">New Event Details</h2>
+            </div>
+
+            <div id="aiDraftMessage" style="display: none;"></div>
+            <div id="topErrorMessage" class="error-message" style="display: none; margin-bottom: 1rem;"></div>
+
+            <form id="eventForm">
+
+                <!-- Basic Info Section -->
+                <div class="form-section">
+                    <label for="evTitle">Event Title*</label>
+                    <input id="evTitle" type="text" placeholder="e.g. Spring Hackathon" required>
+
+                    <div style="margin-top: 1rem;">
+                        <label for="evDescription">Description</label>
+                    </div>
+                    <textarea id="evDescription" placeholder="Tell attendees about your event..." rows="5"></textarea>
+                </div>
+
+                <!-- Date & Time Section -->
+                <div class="form-section">
+                    <h3>Date & Time*</h3>
+                    <div class="date-time-group">
+                        <div>
+                            <label for="evStart">Start Time</label>
+                            <input id="evStart" type="datetime-local" required>
+                        </div>
+                        <div>
+                            <label for="evEnd">End Time</label>
+                            <input id="evEnd" type="datetime-local" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location Section -->
+                <div class="form-section">
+                    <h3>Location</h3>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="location_type" value="custom" checked>
+                            Custom Address
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="location_type" value="venue">
+                            On-Campus Venue
+                        </label>
+                    </div>
+
+                    <div id="customLocationContainer">
+                        <label for="evCustomLocation">Custom Address</label>
+                        <input id="evCustomLocation" type="text" placeholder="e.g. 123 Main St, Marion, IN">
+                    </div>
+
+                    <div id="venueSelectContainer">
+                        <label for="evVenue">Select a Venue</label>
+                        <select id="evVenue">
+                            <option value="">Loading venues...</option>
+                        </select>
+                        <a href="#/dashboard" id="manageVenuesLink" style="display: none;">Manage Venues</a>
+                    </div>
+
+                    <label for="evMapsLink">Google Maps Link (Optional)</label>
+                    <input id="evMapsLink" type="url" placeholder="https://maps.app.goo.gl/...">
+                </div>
+
+                <!-- Settings Section -->
+                <div class="form-section" id="visibilityContainer" style="display: none;">
+                    <h3>Settings</h3>
+                    <label>Visibility*</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="visibility" value="public" checked>
+                            Public (Visible to everyone)
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="visibility" value="private">
+                            Private (Only visible to you)
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="form-actions">
+                    <button type="submit" id="saveBtn">Create Event</button>
+                </div>
+            </form>
+
+            <div id="formMessage" style="display: none; margin-top: 1rem;"></div>
+        </div>
+
+        <!-- AI SIDEBAR (New) -->
+        <aside class="wizard-sidebar">
+            <div class="ai-helper-card" id="aiHelperCard">
+                <div class="ai-helper-header" onclick="toggleMobileAI()">
+                    <h3>AI Co-Pilot</h3>
+                    <div class="ai-toggle-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="ai-helper-messages" id="ai-helper-messages">
+                    <div class="ai-helper-msg ai">
+                        <div class="ai-helper-avatar">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z" />
+                            </svg>
+                        </div>
+                        <div class="ai-helper-bubble">
+                            <p>I'm here to help! Need a catchy title or help refining the description? Just ask.</p>
+                        </div>
+                    </div>
+                </div>
+                <form class="ai-helper-form" id="ai-helper-form">
+                    <div class="ai-helper-input-wrapper">
+                        <input type="text" id="ai-helper-input" placeholder="Ask for suggestions..."
+                            aria-label="AI Assistant Input">
+                        <button type="submit" id="ai-helper-send" aria-label="Send">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M2 3L22 12L2 21L5 13L15 12L5 11L2 3Z" />
+                            </svg>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </aside>
+
     </div>
-    
-    <div id="aiDraftMessage" style="display: none;"></div>
-    <div id="topErrorMessage" class="error-message" style="display: none; margin-bottom: 1rem;"></div>
-    
-    <form id="eventForm">
-        
-        <!-- Basic Info Section -->
-        <div class="form-section">
-            <label for="evTitle">Event Title*</label>
-            <input id="evTitle" type="text" placeholder="e.g. Spring Hackathon" required>
-            
-            <div class="label-with-ai">
-                <label for="evDescription">Description</label>
-            </div>
-            <textarea id="evDescription" placeholder="Tell attendees about your event..." rows="5"></textarea>
-        </div>
-        
-        <!-- Date & Time Section -->
-        <div class="form-section">
-            <h3>Date & Time*</h3>
-            <div class="date-time-group">
-                <div>
-                    <label for="evStart">Start Time</label>
-                    <input id="evStart" type="datetime-local" required>
-                </div>
-                <div>
-                    <label for="evEnd">End Time</label>
-                    <input id="evEnd" type="datetime-local" required>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Location Section -->
-        <div class="form-section">
-            <h3>Location</h3>
-            <div class="radio-group">
-                <label class="radio-label">
-                    <input type="radio" name="location_type" value="custom" checked>
-                    Custom Address
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="location_type" value="venue">
-                    On-Campus Venue
-                </label>
-            </div>
-            
-            <div id="customLocationContainer">
-                <label for="evCustomLocation">Custom Address</label>
-                <input id="evCustomLocation" type="text" placeholder="e.g. 123 Main St, Marion, IN">
-            </div>
-            
-            <div id="venueSelectContainer">
-                <label for="evVenue">Select a Venue</label>
-                <select id="evVenue">
-                    <option value="">Loading venues...</option>
-                </select>
-                <a href="#/dashboard" id="manageVenuesLink" style="display: none;">Manage Venues</a>
-            </div>
-            
-            <label for="evMapsLink">Google Maps Link (Optional)</label>
-            <input id="evMapsLink" type="url" placeholder="https://maps.app.goo.gl/...">
-        </div>
-        
-        <!-- Settings Section -->
-        <div class="form-section" id="visibilityContainer" style="display: none;">
-            <h3>Settings</h3>
-            <label>Visibility*</label>
-            <div class="radio-group">
-                <label class="radio-label">
-                    <input type="radio" name="visibility" value="public" checked>
-                    Public (Visible to everyone)
-                </label>
-                <label class="radio-label">
-                    <input type="radio" name="visibility" value="private">
-                    Private (Only visible to you)
-                </label>
-            </div>
-        </div>
-        
-        <!-- Actions -->
-        <div class="form-actions">
-            <button type="submit" id="saveBtn">Create Event</button>
-        </div>
-    </form>
-    
-    <div id="formMessage" style="display: none; margin-top: 1rem;"></div>
 </div>
 
+<!-- Load marked via script tag to avoid module errors (same as wizard) -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
 <script type="module">
-import { api } from "../js/api.js";
-import { getRoleFromToken } from "../js/app.js";
+    import { api } from "../js/api.js";
+    import { getRoleFromToken } from "../js/app.js";
 
-// --- State & elements ---
-const form = document.getElementById("eventForm");
-const messageDiv = document.getElementById("formMessage");
-const topErrorDiv = document.getElementById("topErrorMessage");
-const saveBtn = document.getElementById("saveBtn");
-const token = localStorage.getItem("token");
-const userRole = getRoleFromToken();
+    // --- State & elements ---
+    const form = document.getElementById("eventForm");
+    const messageDiv = document.getElementById("formMessage");
+    const topErrorDiv = document.getElementById("topErrorMessage");
+    const saveBtn = document.getElementById("saveBtn");
+    const token = localStorage.getItem("token");
+    const userRole = getRoleFromToken();
 
-// Fields
-const evTitle = document.getElementById("evTitle");
-const evDescription = document.getElementById("evDescription");
-const evStart = document.getElementById("evStart");
-const evEnd = document.getElementById("evEnd");
-const evCustomLocation = document.getElementById("evCustomLocation");
-const evMapsLink = document.getElementById("evMapsLink");
-const venueSelect = document.getElementById("evVenue");
-const venueSelectContainer = document.getElementById("venueSelectContainer");
-const customLocationContainer = document.getElementById("customLocationContainer");
-const locationTypeRadios = document.querySelectorAll('input[name="location_type"]');
-const visibilityContainer = document.getElementById("visibilityContainer");
-const manageVenuesLink = document.getElementById("manageVenuesLink");
+    // Fields
+    const evTitle = document.getElementById("evTitle");
+    const evDescription = document.getElementById("evDescription");
+    const evStart = document.getElementById("evStart");
+    const evEnd = document.getElementById("evEnd");
+    const evCustomLocation = document.getElementById("evCustomLocation");
+    const evMapsLink = document.getElementById("evMapsLink");
+    const venueSelect = document.getElementById("evVenue");
+    const venueSelectContainer = document.getElementById("venueSelectContainer");
+    const customLocationContainer = document.getElementById("customLocationContainer");
+    const locationTypeRadios = document.querySelectorAll('input[name="location_type"]');
+    const visibilityContainer = document.getElementById("visibilityContainer");
+    const manageVenuesLink = document.getElementById("manageVenuesLink");
 
-// Detect Edit Mode
-const hashParts = window.location.hash.split('?');
-const params = new URLSearchParams(hashParts[1]);
-const eventId = params.get('id');
-const isEditMode = !!eventId;
+    // Detect Edit Mode
+    const hashParts = window.location.hash.split('?');
+    const params = new URLSearchParams(hashParts[1]);
+    const eventId = params.get('id');
+    const isEditMode = !!eventId;
 
-// --- Initialization Logic ---
+    // --- Initialization Logic ---
 
-async function init() {
-    // Role UI setup
-    if (userRole === 'admin' || userRole === 'organizer') {
-        visibilityContainer.style.display = 'block';
-        manageVenuesLink.style.display = 'block';
-    } else {
-        visibilityContainer.style.display = 'none';
+    async function init() {
+        // Role UI setup
+        if (userRole === 'admin' || userRole === 'organizer') {
+            visibilityContainer.style.display = 'block';
+            manageVenuesLink.style.display = 'block';
+        } else {
+            visibilityContainer.style.display = 'none';
+            // Force private for regular users
+            const privateRadio = document.querySelector('input[name="visibility"][value="private"]');
+            if (privateRadio) privateRadio.checked = true;
+        }
+
+        // Load venues first
+        await loadVenues();
+
+        // Setup Logic based on Mode
+        if (isEditMode) {
+            setupEditMode();
+        } else {
+            setupCreateMode(); // Also handles draft application
+        }
+
+        // Initialize Location Logic
+        handleLocationTypeChange();
+
+        // Initialize Mobile Logic (if on mobile)
+        if (window.innerWidth <= 900) {
+            document.getElementById('aiHelperCard').classList.add('collapsed');
+        }
     }
 
-    // Load venues first
-    await loadVenues();
+    // --- Create vs Edit Setup ---
 
-    // Setup Logic based on Mode
-    if (isEditMode) {
-        setupEditMode();
+    function setupCreateMode() {
+        document.getElementById("pageTitle").textContent = "New Event Details";
+        saveBtn.textContent = "Create Event";
+        applyAIDraft(); // ONLY apply drafts in create mode
     }
 
-    // ALWAYS try to apply the AI draft
-    applyAIDraft();
+    async function setupEditMode() {
+        document.getElementById("pageTitle").textContent = "Edit Event";
+        saveBtn.textContent = "Update Event";
 
-    // Initialize Location Logic
-    handleLocationTypeChange();
-}
+        const backLink = document.getElementById("backLink");
+        backLink.href = "#/calendar";
+        backLink.querySelector("span").textContent = "Back to Calendar";
 
-// --- Create vs Edit Setup ---
+        try {
+            const event = await api(`/events/${eventId}`, "GET", null, token);
+            if (event.error) {
+                showTopError(event.error);
+                return;
+            }
 
-function setupCreateMode() {
-    document.getElementById("pageTitle").textContent = "New Event Details";
-    saveBtn.textContent = "Create Event";
-    
-    // Apply AI Draft if available
-    applyAIDraft();
-}
+            evTitle.value = event.title || "";
+            evDescription.value = event.description || "";
+            evMapsLink.value = event.google_maps_link || "";
 
-async function setupEditMode() {
-    document.getElementById("pageTitle").textContent = "Edit Event";
-    saveBtn.textContent = "Update Event";
-    
-    // Update back link to just go to calendar/list, not the "Create Options" page
-    const backLink = document.getElementById("backLink");
-    backLink.href = "#/calendar";
-    backLink.querySelector("span").textContent = "Back to Calendar";
+            evStart.value = formatDateTimeForInput(event.start_time);
+            evEnd.value = formatDateTimeForInput(event.end_time);
 
-    // Fetch Data
-    try {
-        const event = await api(`/events/${eventId}`, "GET", null, token);
-        
-        if (event.error) {
-            showTopError(event.error);
+            if (event.location_type === 'venue') {
+                document.querySelector(`input[name="location_type"][value="venue"]`).checked = true;
+                if (venueSelect.options.length > 1) {
+                    venueSelect.value = event.venue_id;
+                }
+            } else {
+                document.querySelector(`input[name="location_type"][value="custom"]`).checked = true;
+                evCustomLocation.value = event.custom_location_address || "";
+            }
+
+            if (event.visibility) {
+                const visRadio = document.querySelector(`input[name="visibility"][value="${event.visibility}"]`);
+                if (visRadio) visRadio.checked = true;
+            }
+
+            handleLocationTypeChange();
+
+        } catch (err) {
+            console.error(err);
+            showTopError("Failed to load event details.");
+        }
+    }
+
+    // --- Helper Functions ---
+
+    function showTopError(msg) {
+        topErrorDiv.textContent = msg;
+        topErrorDiv.style.display = 'block';
+        form.style.opacity = '0.5';
+        form.style.pointerEvents = 'none';
+    }
+
+    function showMessage(msg, typeClass) {
+        messageDiv.className = typeClass;
+        messageDiv.textContent = msg;
+        messageDiv.style.display = "block";
+    }
+
+    function formatDateTimeForInput(isoString) {
+        if (!isoString) return "";
+        try {
+            const date = new Date(isoString);
+            if (isNaN(date.getTime())) return "";
+
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        } catch (e) {
+            console.error("Error formatting date:", e);
+            return "";
+        }
+    }
+
+    async function loadVenues() {
+        try {
+            const venues = await api("/venues/", "GET", null, token);
+            if (venues && venues.length > 0) {
+                venueSelect.innerHTML = '<option value="">-- Select a venue --</option>';
+                venues.forEach(venue => {
+                    const option = document.createElement('option');
+                    option.value = venue.venue_id;
+                    option.textContent = `${venue.name} ${venue.building ? `(${venue.building}${venue.room_number ? `, ${venue.room_number}` : ''})` : ''}`;
+                    venueSelect.appendChild(option);
+                });
+            } else {
+                venueSelect.innerHTML = '<option value="">No on-campus venues found</option>';
+            }
+        } catch (error) {
+            console.error("Failed to load venues:", error);
+        }
+    }
+
+    function handleLocationTypeChange() {
+        const type = document.querySelector('input[name="location_type"]:checked').value;
+        if (type === 'venue') {
+            venueSelectContainer.style.display = 'block';
+            customLocationContainer.style.display = 'none';
+        } else {
+            venueSelectContainer.style.display = 'none';
+            customLocationContainer.style.display = 'block';
+        }
+    }
+
+    locationTypeRadios.forEach(radio => radio.addEventListener('change', handleLocationTypeChange));
+
+    // --- Main AI Draft Logic (Preserved) ---
+    function applyAIDraft() {
+        const draftString = localStorage.getItem('aiEventDraft');
+        if (!draftString) return;
+        try {
+            const draft = JSON.parse(draftString);
+            if (draft.title) evTitle.value = draft.title;
+            if (draft.description) evDescription.value = draft.description;
+            if (draft.location) {
+                evCustomLocation.value = draft.location;
+                document.querySelector('input[name="location_type"][value="custom"]').checked = true;
+                handleLocationTypeChange();
+            }
+            if (draft.start_time) evStart.value = formatDateTimeForInput(draft.start_time);
+            if (draft.end_time) evEnd.value = formatDateTimeForInput(draft.end_time);
+
+            const aiDraftMessage = document.getElementById("aiDraftMessage");
+            aiDraftMessage.innerHTML = `<div class="ai-draft-applied"><span>✨ AI Draft applied! Review details and save.</span></div>`;
+            aiDraftMessage.style.display = 'block';
+        } catch (e) { console.error(e); }
+        localStorage.removeItem('aiEventDraft');
+    }
+
+    // --- Sidebar AI Co-Pilot Logic (New Integration) ---
+
+    // Mobile Toggle
+    window.toggleMobileAI = () => {
+        const card = document.getElementById('aiHelperCard');
+        if (card.classList.contains('expanded')) {
+            card.classList.remove('expanded');
+            card.classList.add('collapsed');
+        } else {
+            card.classList.remove('collapsed');
+            card.classList.add('expanded');
+        }
+    };
+
+    const aiForm = document.getElementById('ai-helper-form');
+    const aiInput = document.getElementById('ai-helper-input');
+    const aiSendBtn = document.getElementById('ai-helper-send');
+    const aiMessages = document.getElementById('ai-helper-messages');
+
+    function getFormValuesForAI() {
+        return {
+            evTitle: evTitle.value,
+            evDescription: evDescription.value,
+            evStart: evStart.value,
+            evEnd: evEnd.value,
+            location_type: document.querySelector('input[name="location_type"]:checked')?.value,
+            evVenue: venueSelect.value,
+            evCustomLocation: evCustomLocation.value,
+            visibility: document.querySelector('input[name="visibility"]:checked')?.value
+        };
+    }
+
+    aiForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const prompt = aiInput.value.trim();
+        if (!prompt) return;
+
+        aiInput.value = '';
+        aiInput.disabled = true;
+        aiSendBtn.disabled = true;
+
+        addHelperMessage('user', prompt);
+        const loadingMsg = addHelperMessage('is-loading', 'Thinking...');
+
+        try {
+            const payload = {
+                prompt,
+                context: "Standard Event Form - Editing Details", // Context for backend
+                user_time: new Date().toISOString(),
+                current_values: getFormValuesForAI()
+            };
+            const result = await api('/ai/wizard-helper', 'POST', payload, token);
+            loadingMsg.remove();
+
+            if (result.response) {
+                addHelperMessage('ai', result.response, result.actions);
+            } else {
+                addHelperMessage('ai', `Error: ${result.error || 'No response'}`);
+            }
+        } catch (err) {
+            loadingMsg.remove();
+            // console.log(err);
+            addHelperMessage('ai', 'Error connecting to AI helper.');
+        } finally {
+            aiInput.disabled = false;
+            aiSendBtn.disabled = false;
+            aiInput.focus();
+        }
+    });
+
+    function addHelperMessage(sender, text, actions = null) {
+        // Friendly labels for Standard Form IDs
+        const FIELD_LABELS = {
+            "evTitle": "Title",
+            "evDescription": "Description",
+            "evStart": "Start Time",
+            "evEnd": "End Time",
+            "location_type": "Location Type",
+            "evVenue": "Venue",
+            "evCustomLocation": "Custom Address",
+            "visibility": "Visibility",
+            "evMapsLink": "Maps Link"
+        };
+
+        const msg = document.createElement('div');
+        msg.className = `ai-helper-msg ${sender === 'is-loading' ? 'ai is-loading' : sender}`;
+
+        const avatar = document.createElement('div');
+        avatar.className = 'ai-helper-avatar';
+
+        // Avatar Logic
+        if (sender === 'ai' || sender === 'is-loading') {
+            avatar.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L10 9L3 11L10 13L12 20L14 13L21 11L14 9L12 2Z"/></svg>`;
+        } else {
+            avatar.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+        }
+
+        const bubble = document.createElement('div');
+        bubble.className = 'ai-helper-bubble';
+
+        if (sender === 'is-loading') {
+            bubble.innerHTML = `<span class="loading-dots">...</span>`;
+        } else {
+            bubble.innerHTML = window.marked ? window.marked.parse(text) : text;
+
+            // Add Action Buttons
+            if (actions && Array.isArray(actions) && actions.length > 0) {
+                actions.forEach(action => {
+                    const btn = document.createElement('button');
+                    btn.className = 'ai-suggestion-action';
+
+                    let friendlyLabel = FIELD_LABELS[action.field];
+                    // Fallback for naming
+                    if (!friendlyLabel) {
+                        // Try to convert ID to Readable
+                        friendlyLabel = action.field
+                            .replace(/^ev/, "")
+                            .replace(/([A-Z])/g, " $1")
+                            .trim();
+                    }
+
+                    // Truncate long values for button text
+                    const displayValue = (action.value && action.value.length > 40)
+                        ? action.value.substring(0, 38) + "..."
+                        : (action.value || "");
+
+                    btn.innerHTML = `<strong>Update ${friendlyLabel}</strong> "${displayValue}"`;
+                    btn.onclick = () => applyAIAction(action.field, action.value, btn);
+                    bubble.appendChild(btn);
+                });
+            }
+        }
+
+        msg.appendChild(avatar);
+        msg.appendChild(bubble);
+        aiMessages.appendChild(msg);
+        aiMessages.scrollTop = aiMessages.scrollHeight;
+
+        return msg;
+    }
+
+    function applyAIAction(fieldId, value, btnElement) {
+        // Map wizard IDs (which the AI might suggest if confused) to Standard Form IDs
+        // This is a safety net in case the AI returns 'w-title' instead of 'evTitle'
+        const ID_MAP = {
+            'w-title': 'evTitle',
+            'w-description': 'evDescription',
+            'w-start': 'evStart',
+            'w-end': 'evEnd',
+            'w-location_type': 'location_type', // Radio name
+            'w-venue': 'evVenue',
+            'w-customLocation': 'evCustomLocation',
+            'w-mapsLink': 'evMapsLink',
+            'w-visibility': 'visibility' // Radio name
+        };
+
+        const targetId = ID_MAP[fieldId] || fieldId;
+        let fieldChanged = false;
+
+        // Handle Radios (Name based)
+        if (targetId === 'location_type' || targetId === 'visibility') {
+            const radio = document.querySelector(`input[name="${targetId}"][value="${value}"]`);
+            if (radio) {
+                radio.checked = true;
+                fieldChanged = true;
+                if (targetId === 'location_type') handleLocationTypeChange();
+            }
+        }
+        // Handle Standard Inputs
+        else {
+            const field = document.getElementById(targetId);
+            if (field) {
+                field.value = value;
+                field.style.transition = "background-color 0.3s";
+                field.style.backgroundColor = "#e6f3ff";
+                setTimeout(() => { field.style.backgroundColor = ""; }, 1000);
+                fieldChanged = true;
+            }
+        }
+
+        if (fieldChanged) {
+            btnElement.innerHTML = `<strong>Updated!</strong>`;
+            btnElement.style.background = "#d4edda";
+            btnElement.style.color = "#155724";
+            btnElement.style.borderColor = "#c3e6cb";
+            btnElement.disabled = true;
+            btnElement.style.cursor = "default";
+        }
+    }
+
+    // --- Submit Handler ---
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        messageDiv.style.display = "none";
+        messageDiv.className = "";
+
+        const title = evTitle.value;
+        const startLocal = evStart.value;
+        const endLocal = evEnd.value;
+        const location_type = document.querySelector('input[name="location_type"]:checked').value;
+
+        // --- Validation ---
+        if (!title || !startLocal || !endLocal) {
+            showMessage("Title, Start Time, and End Time are required.", "error-message");
+            return;
+        }
+        if (new Date(startLocal) >= new Date(endLocal)) {
+            showMessage("End time must be after start time.", "error-message");
+            return;
+        }
+        const venueId = (location_type === 'venue' && venueSelect.value) ? venueSelect.value : null;
+        const customAddress = (location_type === 'custom' && evCustomLocation.value) ? evCustomLocation.value : null;
+
+        if (location_type === 'venue' && !venueId) {
+            showMessage("Please select an on-campus venue.", "error-message");
+            return;
+        }
+        if (location_type === 'custom' && !customAddress) {
+            showMessage("Please enter a custom address.", "error-message");
             return;
         }
 
-        // Populate Fields
-        evTitle.value = event.title || "";
-        evDescription.value = event.description || "";
-        evMapsLink.value = event.google_maps_link || "";
+        const startISO = startLocal ? new Date(startLocal).toISOString() : null;
+        const endISO = endLocal ? new Date(endLocal).toISOString() : null;
 
-        // --- TIMEZONE FIX FOR EDITING ---
-        let startStr = event.start_time;
-        let endStr = event.end_time;
-        
-        // This handles UTC 'Z' or offset '+00:00' strings
-        evStart.value = formatDateTimeForInput(startStr);
-        evEnd.value = formatDateTimeForInput(endStr);
-        // --------------------------------
-        
-        // Location Logic
-        if (event.location_type === 'venue') {
-            document.querySelector(`input[name="location_type"][value="venue"]`).checked = true;
-            // Wait for venues to load, then select
-            if (venueSelect.options.length > 1) {
-                venueSelect.value = event.venue_id;
+        // Get Visibility (safe check for admin vs normal user)
+        let visibility = 'private';
+        const visInput = document.querySelector('input[name="visibility"]:checked');
+        if (visInput) visibility = visInput.value;
+
+        const payload = {
+            title,
+            description: evDescription.value,
+            start_time: startISO,
+            end_time: endISO,
+            location_type,
+            google_maps_link: evMapsLink.value || null,
+            visibility: visibility,
+            venue_id: venueId,
+            custom_location_address: customAddress,
+        };
+
+        saveBtn.disabled = true;
+        saveBtn.textContent = isEditMode ? "Updating..." : "Creating...";
+
+        try {
+            let res;
+            if (isEditMode) {
+                res = await api(`/events/${eventId}`, "PUT", payload, token);
+            } else {
+                res = await api("/events/", "POST", payload, token);
             }
-        } else {
-            document.querySelector(`input[name="location_type"][value="custom"]`).checked = true;
-            evCustomLocation.value = event.custom_location_address || "";
+
+            if (res.error) {
+                throw new Error(res.error);
+            } else {
+                showMessage(isEditMode ? "Event updated! Redirecting..." : "Event created! Redirecting...", "success-message");
+                setTimeout(() => { window.location.hash = "#/calendar"; }, 1500);
+            }
+        } catch (error) {
+            console.error("Submit error:", error);
+            showMessage(error.message || "A network error occurred.", "error-message");
+            saveBtn.disabled = false;
+            saveBtn.textContent = isEditMode ? "Update Event" : "Create Event";
         }
-        
-        // Visibility Logic
-        if (event.visibility) {
-            const visRadio = document.querySelector(`input[name="visibility"][value="${event.visibility}"]`);
-            if (visRadio) visRadio.checked = true;
-        }
+    });
 
-        // Trigger UI update for location
-        handleLocationTypeChange();
-
-    } catch (err) {
-        console.error(err);
-        showTopError("Failed to load event details.");
-    }
-}
-
-// --- Helper Functions ---
-
-function showTopError(msg) {
-    topErrorDiv.textContent = msg;
-    topErrorDiv.style.display = 'block';
-    form.style.opacity = '0.5';
-    form.style.pointerEvents = 'none';
-}
-
-function showMessage(msg, typeClass) {
-    messageDiv.className = typeClass; // "success-message" or "error-message"
-    messageDiv.textContent = msg;
-    messageDiv.style.display = "block";
-}
-
-function formatDateTimeForInput(isoString) {
-    if (!isoString) return "";
-    try {
-        // Create a Date object from the ISO string
-        const date = new Date(isoString);
-        
-        // Check if valid date
-        if (isNaN(date.getTime())) return "";
-        
-        // Format to YYYY-MM-DDTHH:MM (local time)
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const hours = String(date.getHours()).padStart(2, '0');
-        const minutes = String(date.getMinutes()).padStart(2, '0');
-        
-        return `${year}-${month}-${day}T${hours}:${minutes}`;
-    } catch (e) {
-        console.error("Error formatting date:", e);
-        return "";
-    }
-}
-
-async function loadVenues() {
-    try {
-        const venues = await api("/venues/", "GET", null, token);
-        if (venues && venues.length > 0) {
-            venueSelect.innerHTML = '<option value="">-- Select a venue --</option>';
-            venues.forEach(venue => {
-                const option = document.createElement('option');
-                option.value = venue.venue_id;
-                option.textContent = `${venue.name} ${venue.building ? `(${venue.building}${venue.room_number ? `, ${venue.room_number}` : ''})` : ''}`;
-                venueSelect.appendChild(option);
-            });
-        } else {
-            venueSelect.innerHTML = '<option value="">No on-campus venues found</option>';
-        }
-    } catch (error) {
-        console.error("Failed to load venues:", error);
-    }
-}
-
-function handleLocationTypeChange() {
-    const type = document.querySelector('input[name="location_type"]:checked').value;
-    if (type === 'venue') {
-        venueSelectContainer.style.display = 'block';
-        customLocationContainer.style.display = 'none';
-    } else {
-        venueSelectContainer.style.display = 'none';
-        customLocationContainer.style.display = 'block';
-    }
-    // --- Validation logic moved to submit handler ---
-}
-
-locationTypeRadios.forEach(radio => radio.addEventListener('change', handleLocationTypeChange));
-
-function applyAIDraft() {
-    const draftString = localStorage.getItem('aiEventDraft');
-    if (!draftString) return;
-    try {
-        const draft = JSON.parse(draftString);
-        if (draft.title) evTitle.value = draft.title;
-        if (draft.description) evDescription.value = draft.description;
-        if (draft.location) {
-            evCustomLocation.value = draft.location;
-            document.querySelector('input[name="location_type"][value="custom"]').checked = true;
-            handleLocationTypeChange();
-        }
-        // Handle date/time fields
-        if (draft.start_time) {
-            // AI returns full ISO, format it for the input
-            evStart.value = formatDateTimeForInput(draft.start_time);
-        }
-        if (draft.end_time) {
-            // AI returns full ISO, format it for the input
-            evEnd.value = formatDateTimeForInput(draft.end_time);
-        }
-        
-        const aiDraftMessage = document.getElementById("aiDraftMessage");
-        aiDraftMessage.innerHTML = `<div class="ai-draft-applied"><span>✨ AI Draft applied! Review details and save.</span></div>`;
-        aiDraftMessage.style.display = 'block';
-    } catch (e) { console.error(e); }
-    localStorage.removeItem('aiEventDraft');
-}
-
-// --- Submit Handler (Create & Update) ---
-
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    messageDiv.style.display = "none";
-    messageDiv.className = "";
-    
-    const title = evTitle.value;
-    const startLocal = evStart.value; // "YYYY-MM-DDTHH:MM"
-    const endLocal = evEnd.value;
-    const location_type = document.querySelector('input[name="location_type"]:checked').value;
-    
-    // --- Validation ---
-    if (!title || !startLocal || !endLocal) {
-        showMessage("Title, Start Time, and End Time are required.", "error-message");
-        return;
-    }
-    if (new Date(startLocal) >= new Date(endLocal)) {
-        showMessage("End time must be after start time.", "error-message");
-        return;
-    }
-    const venueId = (location_type === 'venue' && venueSelect.value) ? venueSelect.value : null;
-    const customAddress = (location_type === 'custom' && evCustomLocation.value) ? evCustomLocation.value : null;
-
-    if (location_type === 'venue' && !venueId) {
-        showMessage("Please select an on-campus venue.", "error-message");
-        return;
-    }
-    if (location_type === 'custom' && !customAddress) {
-        showMessage("Please enter a custom address.", "error-message");
-        return;
-    }
-    // --- End Validation ---
-
-    const startISO = startLocal ? new Date(startLocal).toISOString() : null;
-    const endISO = endLocal ? new Date(endLocal).toISOString() : null;
-
-    const payload = {
-        title,
-        description: evDescription.value,
-        start_time: startISO,
-        end_time: endISO,
-        location_type,
-        google_maps_link: evMapsLink.value || null,
-        visibility: (userRole === 'admin' || userRole === 'organizer') 
-            ? document.querySelector('input[name="visibility"]:checked').value 
-            : 'private',
-        venue_id: venueId,
-        custom_location_address: customAddress,
-    };
-
-    saveBtn.disabled = true;
-    saveBtn.textContent = isEditMode ? "Updating..." : "Creating...";
-
-    try {
-        let res;
-        if (isEditMode) {
-            res = await api(`/events/${eventId}`, "PUT", payload, token);
-        } else {
-            res = await api("/events/", "POST", payload, token);
-        }
-        
-        if (res.error) {
-            throw new Error(res.error);
-        } else {
-            showMessage(isEditMode ? "Event updated! Redirecting..." : "Event created! Redirecting...", "success-message");
-            setTimeout(() => { window.location.hash = "#/calendar"; }, 1500);
-        }
-    } catch (error) {
-        console.error("Submit error:", error);
-        showMessage(error.message || "A network error occurred.", "error-message");
-        saveBtn.disabled = false;
-        saveBtn.textContent = isEditMode ? "Update Event" : "Create Event";
-    }
-});
-
-// Start
-init();
+    // Start
+    init();
 
 </script>
