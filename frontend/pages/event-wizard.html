@@ -262,8 +262,6 @@
 
     #reviewStepContainer .review-value.description {
         white-space: pre-wrap;
-        padding: 0.75rem;
-        background: var(--bg-tertiary, #f9fafb);
         border-radius: var(--radius-sm, 6px);
         line-height: 1.6;
         font-size: 0.95rem;
@@ -745,11 +743,13 @@
     let currentStep = 1;
     let maxStepCompleted = 1;
     const wizardData = {};
+    let allVenues = [];
 
     // --- DOM Elements ---
     const steps = document.querySelectorAll('.wizard-step');
     const stepperItems = document.querySelectorAll('.stepper-item');
     const venueSelect = document.getElementById('w-venue');
+    const mapLinkInput = document.getElementById('w-mapsLink');
     const locationTypeRadios = document.querySelectorAll('input[name="w-location_type"]');
     const visibilityContainer = document.getElementById('w-visibilityContainer');
     const visibilityWarning = document.getElementById('w-visibilityWarning');
@@ -789,6 +789,8 @@
     async function loadVenues() {
         try {
             const venues = await api("/venues/", "GET", null, token);
+            allVenues = venues || []; // Store globally for autofill
+            
             if (venues && venues.length > 0) {
                 venueSelect.innerHTML = '<option value="">-- Select a venue --</option>';
                 venues.forEach(venue => {
@@ -800,6 +802,29 @@
             }
         } catch (error) { console.error("Failed to load venues:", error); }
     }
+    
+    // Autofill venue link logic
+    venueSelect.addEventListener('change', () => {
+        const selectedId = venueSelect.value;
+        if (selectedId && allVenues.length > 0) {
+            const venue = allVenues.find(v => v.venue_id == selectedId);
+            if (venue) {
+                if (venue.google_maps_link) {
+                    // Only autofill if the Maps input is empty
+                    if (!mapLinkInput.value) {
+                        mapLinkInput.value = venue.google_maps_link;
+                        // Subtle visual cue (background color change)
+                        mapLinkInput.style.transition = "background-color 0.3s";
+                        mapLinkInput.style.backgroundColor = "#e6f3ff";
+                        setTimeout(() => mapLinkInput.style.backgroundColor = "", 1000);
+                    }
+                } else {
+                    // If no Google Maps link is available, set it to an empty string
+                    mapLinkInput.value = "";
+                }
+            }
+        }
+    });
 
     // --- Wizard Navigation ---
     window.navigateWizard = (stepNum, direction) => {

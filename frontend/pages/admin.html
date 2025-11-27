@@ -114,7 +114,7 @@
 
     .btn-danger-sm {
         background: #fee2e2;
-        color: #bf0000;
+        color: #ef4444;
         border-color: #fecaca;
     }
     
@@ -146,7 +146,6 @@
             <h2>Admin Console</h2>
             <p style="color: var(--text-secondary);">Manage users, roles, and campus infrastructure.</p>
         </div>
-        <a href="#/dashboard" class="action-btn secondary">Back to Dashboard</a>
     </div>
 
     <div id="adminMessage" style="display: none; margin-bottom: 1rem; padding: 1rem; border-radius: 8px;"></div>
@@ -192,8 +191,12 @@
                     <input type="text" id="vBuilding" placeholder="e.g. Center for Arts" required style="width:100%; padding:0.5rem;">
                 </div>
                 <div>
-                    <label style="display:block; margin-bottom:0.5rem; font-size:0.875rem;">Room (optional)</label>
+                    <label style="display:block; margin-bottom:0.5rem; font-size:0.875rem;">Room (Optional)</label>
                     <input type="text" id="vRoom" placeholder="e.g. 101" style="width:100%; padding:0.5rem;">
+                </div>
+                <div>
+                    <label style="display:block; margin-bottom:0.5rem; font-size:0.875rem;">Google Maps Link</label>
+                    <input type="url" id="vMapLink" placeholder="https://maps.app.goo.gl/..." style="width:100%; padding:0.5rem;">
                 </div>
                 <div>
                     <button type="submit" class="action-btn primary" style="width:100%;">
@@ -215,11 +218,12 @@
                         <th>Name</th>
                         <th>Building</th>
                         <th>Room</th>
+                        <th>Map Link</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td colspan="4" style="text-align: center;">Loading venues...</td></tr>
+                    <tr><td colspan="5" style="text-align: center;">Loading venues...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -257,7 +261,6 @@
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         
         document.getElementById(`tab-${tabName}`).classList.add('active');
-        // Find button by text roughly or index, simpler to querySelector logic:
         const btns = document.querySelectorAll('.tab-btn');
         if(tabName === 'users') btns[0].classList.add('active');
         if(tabName === 'venues') btns[1].classList.add('active');
@@ -319,7 +322,7 @@
             const tbody = document.querySelector('#venuesTable tbody');
             
             if (venues.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:2rem;">No venues found. Add one above.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:2rem;">No venues found. Add one above.</td></tr>';
                 return;
             }
 
@@ -328,6 +331,11 @@
                     <td style="font-weight:600;">${v.name}</td>
                     <td>${v.building}</td>
                     <td>${v.room_number || '-'}</td>
+                    <td>
+                        ${v.google_maps_link 
+                          ? `<a href="${v.google_maps_link}" target="_blank" style="color:var(--primary-color);">View Map</a>` 
+                          : '<span>-</span>'}
+                    </td>
                     <td>
                         <button onclick="deleteVenue(${v.venue_id})" class="btn-sm btn-danger-sm">Delete</button>
                     </td>
@@ -345,7 +353,8 @@
         const payload = {
             name: document.getElementById('vName').value,
             building: document.getElementById('vBuilding').value,
-            room_number: document.getElementById('vRoom').value
+            room_number: document.getElementById('vRoom').value,
+            google_maps_link: document.getElementById('vMapLink').value
         };
 
         try {
