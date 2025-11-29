@@ -27,7 +27,7 @@ git clone https://github.com/JoshuaCYin/Event-Echo-Lite.git
 cd Event-Echo-Lite
 ```
 
-2. Follow the instructions in [README.md](./README.md) to install dependencies and run the project.
+2. Follow the instructions in [SETUP.md](./SETUP.md) to install dependencies and run the project.
 
 If you have trouble setting up, feel free to contact a team member listed below.
 
@@ -122,10 +122,10 @@ We expect all contributors to be respectful, supportive, and professional. Every
 
 If you have any questions or need help, you can reach out through GitHub or contact:
 
-- Josh Y.:  josh.yin@myemail.indwes.edu
-- Josh H.:
-- Nick: 
-- Cooper: 
+- Josh Y.: josh.yin@myemail.indwes.edu
+- Josh H.: joshua.hughs@myemail.indwes.edu
+- Nick: nick.wiley@myemail.indwes.edu
+- Cooper: cooper.chinn@myemail.indwes.edu
 
 ## Credits and Acknowledgments
 
