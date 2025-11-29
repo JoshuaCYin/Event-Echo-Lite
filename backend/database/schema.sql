@@ -1,86 +1,153 @@
--- Deletes old tables to start fresh
-DROP TABLE IF EXISTS rsvps, event_category_map, event_ratings, media_documents, saved_reports, audit_log, notifications, events, users, venues, event_categories CASCADE;
+-- === public.event_categories definition ===
+-- Drop table:
+-- DROP TABLE public.event_categories;
 
--- Stores user accounts
-CREATE TABLE users (
-    user_id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash TEXT NOT NULL,
-    first_name VARCHAR(100),
-    last_name VARCHAR(100),
-    role VARCHAR(50) DEFAULT 'attendee',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    major_department VARCHAR(100),
-    phone_number VARCHAR(20),
-    hobbies TEXT,
-    bio TEXT,
-    profile_picture TEXT
+CREATE TABLE public.event_categories (
+	category_id serial4 NOT NULL,
+	"name" varchar(100) NOT NULL,
+	CONSTRAINT event_categories_pkey PRIMARY KEY (category_id)
 );
 
--- Stores physical locations (on-campus)
-CREATE TABLE venues (
-    venue_id SERIAL PRIMARY KEY,
-    name VARCHAR(100),
-    building VARCHAR(100),
-    room_number VARCHAR(50),
-    google_maps_link TEXT
+-- === public.users definition ===
+-- Drop table:
+-- DROP TABLE public.users;
+
+CREATE TABLE public.users (
+	user_id serial4 NOT NULL,
+	email varchar(255) NOT NULL,
+	password_hash text NOT NULL,
+	first_name varchar(100) NULL,
+	last_name varchar(100) NULL,
+	"role" varchar(50) DEFAULT 'attendee'::character varying NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	updated_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	major_department varchar(100) NULL,
+	phone_number varchar(20) NULL,
+	hobbies text NULL,
+	bio text NULL,
+	profile_picture text NULL,
+	CONSTRAINT users_email_key UNIQUE (email),
+	CONSTRAINT users_pkey PRIMARY KEY (user_id)
 );
 
--- Stores event types (e.g., "Workshop", "Social")
-CREATE TABLE event_categories (
-    category_id SERIAL PRIMARY KEY,
-    name VARCHAR(100) NOT NULL
+-- === public.venues definition ===
+-- Drop table:
+-- DROP TABLE public.venues;
+
+CREATE TABLE public.venues (
+	venue_id serial4 NOT NULL,
+	"name" varchar(100) NULL,
+	building varchar(100) NULL,
+	room_number varchar(50) NULL,
+	google_maps_link text NULL,
+	CONSTRAINT venues_pkey PRIMARY KEY (venue_id)
 );
 
--- Stores all event information
-CREATE TABLE events (
-    event_id SERIAL PRIMARY KEY,
-    title VARCHAR(200) NOT NULL,
-    description TEXT,
-    start_time TIMESTAMP NOT NULL,
-    end_time TIMESTAMP NOT NULL,
-    
-    -- Hybrid location solution
-    location_type VARCHAR(20) DEFAULT 'venue', -- 'venue' or 'custom'
-    venue_id INT REFERENCES venues(venue_id) ON DELETE SET NULL, -- For on-campus
-    custom_location_address TEXT, -- For off-campus
-    google_maps_link TEXT, -- User-provided link
-    
-    -- Personal calendar solution
-    visibility VARCHAR(20) DEFAULT 'public', -- 'public' or 'private'
-    
-    -- Links and status
-    organizer_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-    status VARCHAR(50) DEFAULT 'upcoming', -- e.g., upcoming, cancelled
-    
-    -- Timestamps
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    created_by INT REFERENCES users(user_id) ON DELETE CASCADE
+-- === public.audit_log definition ===
+-- Drop table:
+-- DROP TABLE public.audit_log;
+
+CREATE TABLE public.audit_log (
+	log_id serial4 NOT NULL,
+	user_id int4 NULL,
+	"action" varchar(255) NOT NULL,
+	target_type varchar(50) NULL,
+	target_id int4 NULL,
+	log_time timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	CONSTRAINT audit_log_pkey PRIMARY KEY (log_id),
+	CONSTRAINT audit_log_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE SET NULL
 );
 
--- Stores who is going to what event
-CREATE TABLE rsvps (
-    user_id INT REFERENCES users(user_id) ON DELETE CASCADE,
-    event_id INT REFERENCES events(event_id) ON DELETE CASCADE,
-    rsvp_status VARCHAR(50), -- 'going', 'maybe', 'canceled'
-    PRIMARY KEY (user_id, event_id) -- Ensures one RSVP per user/event
+-- === public.events definition ===
+-- Drop table:
+-- DROP TABLE public.events;
+
+CREATE TABLE public.events (
+	event_id serial4 NOT NULL,
+	title varchar(200) NOT NULL,
+	description text NULL,
+	start_time timestamp NOT NULL,
+	end_time timestamp NOT NULL,
+	location_type varchar(20) DEFAULT 'venue'::character varying NULL,
+	venue_id int4 NULL,
+	custom_location_address text NULL,
+	google_maps_link text NULL,
+	visibility varchar(20) DEFAULT 'public'::character varying NULL,
+	organizer_id int4 NULL,
+	status varchar(50) DEFAULT 'upcoming'::character varying NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	updated_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	created_by int4 NULL,
+	CONSTRAINT events_pkey PRIMARY KEY (event_id),
+	CONSTRAINT events_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id) ON DELETE CASCADE,
+	CONSTRAINT events_organizer_id_fkey FOREIGN KEY (organizer_id) REFERENCES public.users(user_id) ON DELETE CASCADE,
+	CONSTRAINT events_venue_id_fkey FOREIGN KEY (venue_id) REFERENCES public.venues(venue_id) ON DELETE SET NULL
 );
 
--- Links events to one or more categories
-CREATE TABLE event_category_map (
-    event_id INT REFERENCES events(event_id) ON DELETE CASCADE,
-    category_id INT REFERENCES event_categories(category_id) ON DELETE CASCADE,
-    PRIMARY KEY (event_id, category_id)
+-- === public.planning_tasks definition ===
+-- Drop table:
+-- DROP TABLE public.planning_tasks;
+
+CREATE TABLE public.planning_tasks (
+	task_id serial4 NOT NULL,
+	event_id int4 NULL,
+	title varchar(200) NOT NULL,
+	description text NULL,
+	status varchar(50) DEFAULT 'todo'::character varying NULL,
+	priority varchar(20) DEFAULT 'medium'::character varying NULL,
+	due_date timestamp NULL,
+	assigned_to int4 NULL,
+	created_by int4 NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	updated_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	"position" float8 DEFAULT 0 NULL,
+	CONSTRAINT planning_tasks_pkey PRIMARY KEY (task_id),
+	CONSTRAINT planning_tasks_assigned_to_fkey FOREIGN KEY (assigned_to) REFERENCES public.users(user_id) ON DELETE SET NULL,
+	CONSTRAINT planning_tasks_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(user_id) ON DELETE SET NULL,
+	CONSTRAINT planning_tasks_event_id_fkey FOREIGN KEY (event_id) REFERENCES public.events(event_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_planning_event_id ON public.planning_tasks USING btree (event_id);
+CREATE INDEX idx_planning_position ON public.planning_tasks USING btree ("position");
+
+-- === public.rsvps definition ===
+-- Drop table:
+-- DROP TABLE public.rsvps;
+
+CREATE TABLE public.rsvps (
+	user_id int4 NOT NULL,
+	event_id int4 NOT NULL,
+	rsvp_status varchar(50) NULL,
+	CONSTRAINT rsvps_pkey PRIMARY KEY (user_id, event_id),
+	CONSTRAINT rsvps_event_id_fkey FOREIGN KEY (event_id) REFERENCES public.events(event_id) ON DELETE CASCADE,
+	CONSTRAINT rsvps_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE
 );
 
--- Basic audit logging
-CREATE TABLE audit_log (
-    log_id SERIAL PRIMARY KEY,
-    user_id INT REFERENCES users(user_id) ON DELETE SET NULL,
-    action VARCHAR(255) NOT NULL, -- e.g., 'user_login', 'event_create'
-    target_type VARCHAR(50), -- e.g., 'event', 'user'
-    target_id INT,
-    log_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- === public.event_category_map definition ===
+-- Drop table:
+-- DROP TABLE public.event_category_map;
+
+CREATE TABLE public.event_category_map (
+	event_id int4 NOT NULL,
+	category_id int4 NOT NULL,
+	CONSTRAINT event_category_map_pkey PRIMARY KEY (event_id, category_id),
+	CONSTRAINT event_category_map_category_id_fkey FOREIGN KEY (category_id) REFERENCES public.event_categories(category_id) ON DELETE CASCADE,
+	CONSTRAINT event_category_map_event_id_fkey FOREIGN KEY (event_id) REFERENCES public.events(event_id) ON DELETE CASCADE
 );
+
+-- === public.event_reviews definition ===
+-- Drop table:
+-- DROP TABLE public.event_reviews;
+
+CREATE TABLE public.event_reviews (
+	review_id serial4 NOT NULL,
+	event_id int4 NOT NULL,
+	user_id int4 NOT NULL,
+	rating int4 NOT NULL,
+	review_text text NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	CONSTRAINT event_reviews_pkey PRIMARY KEY (review_id),
+	CONSTRAINT event_reviews_user_event_ukey UNIQUE (user_id, event_id),
+	CONSTRAINT event_reviews_event_id_fkey FOREIGN KEY (event_id) REFERENCES public.events(event_id) ON DELETE CASCADE,
+	CONSTRAINT event_reviews_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(user_id) ON DELETE CASCADE
+);
+CREATE INDEX idx_event_reviews_event_id ON public.event_reviews USING btree (event_id);
