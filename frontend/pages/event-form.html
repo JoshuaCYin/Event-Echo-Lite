@@ -794,6 +794,9 @@
     // --- Main AI Draft Logic ---
     function applyAIDraft() {
         const draftString = localStorage.getItem('aiEventDraft');
+
+        // console.log("AI DRAFT PAYLOAD:", draftString);
+
         if (!draftString) return;
         try {
             const draft = JSON.parse(draftString);

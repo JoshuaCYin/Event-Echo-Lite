@@ -39,11 +39,25 @@ ACTIVE_AI_SERVICE = None
 EVENT_DRAFT_SCHEMA = {
     "type": "object",
     "properties": {
-        "title": {"type": "string", "description": "A creative and descriptive event title."},
-        "description": {"type": "string", "description": "A 1-2 paragraph event description, formatted with markdown (e.g., line breaks)."},
-        "location": {"type": "string", "description": "A suggested physical location, building name, or address. (e.g., 'Chapel Auditorium' or '123 Main St')"},
-        "start_time": {"type": "string", "description": "Suggested start date and time in ISO 8601 format (e.g., '2025-11-25T14:00:00'). If user doesn't specify, suggest a reasonable future date/time."},
-        "end_time": {"type": "string", "description": "Suggested end date and time in ISO 8601 format (e.g., '2025-11-25T16:00:00'). Should be after start_time."}
+        "title": {
+            "type": "string",
+            "description": "A creative and descriptive event title."
+        },
+        "description": {
+            "type": "string",
+            "description": "A 1-2 paragraph event description, formatted with markdown (e.g., line breaks)."
+        },
+        "location": {
+            "type": "string",
+            "description": "A suggested physical location, building name, or address. (e.g., 'Chapel Auditorium' or '123 Main St')"
+        },
+        "start_time": {
+            "type": "string",
+            "description": "The ISO 8601 formatted start date and time for the event, **MUST END IN 'Z'** to denote UTC (e.g., 2024-10-25T10:00:00Z)."
+        },
+        "end_time": {
+            "type": "string",
+            "description": "The ISO 8601 formatted end date and time for the event, **MUST END IN 'Z'** to denote UTC (e.g., 2024-10-25T10:00:00Z). Should be after start_time"}
     },
     "required": ["title", "description"]
 }
@@ -285,9 +299,33 @@ def handle_chat():
             tool_call = response.choices[0].message.tool_calls[0]
             if tool_call.function.name == "submit_chat_response":
                 result_json = json.loads(tool_call.function.arguments)
+
+                # --- START CORRECTED PATCH LOGIC ---
+                draft = result_json.get('eventDraft')
+
+                if draft:
+                    # PATCH to enforce UTC format (YYYY-MM-DDTHH:MM:SSZ)
+                    for key in ['start_time', 'end_time']:
+                        time_str = draft.get(key)
+                        # Check for the 19-character non-Z format (e.g., "2025-12-10T15:00:00")
+                        # We also check that it doesn't already have an offset (like +01:00 or -05:00)
+                        if (time_str and 
+                            len(time_str) == 19 and 
+                            time_str.count(':') == 2 and 
+                            time_str.count('-') >= 2 and 
+                            'T' in time_str and 
+                            not (time_str.endswith('Z') or time_str[-6] in ('+', '-'))):
+                            
+                            draft[key] = time_str + 'Z'
+                    
+                    # Ensure the fixed draft is put back into the result
+                    result_json['eventDraft'] = draft
+                # --- END CORRECTED PATCH LOGIC ---
+                
                 # --- This key is now 'eventDraft' from the schema ---
                 if "eventDraft" in result_json and result_json["eventDraft"]:
                     result_json["eventDraft"] = result_json["eventDraft"] 
+
                 return jsonify(result_json)
             else:
                 raise Exception("AI did not use the correct tool.")
@@ -329,6 +367,28 @@ def handle_chat():
                 )
             )
             result_json = json.loads(response.text)
+
+            # --- START PATCH FOR GEMINI ---
+            draft = result_json.get('eventDraft')
+
+            if draft:
+                # PATCH to enforce UTC format (YYYY-MM-DDTHH:MM:SSZ)
+                for key in ['start_time', 'end_time']:
+                    time_str = draft.get(key)
+                    # Check for the 19-character non-Z format
+                    if (time_str and 
+                        len(time_str) == 19 and 
+                        time_str.count(':') == 2 and 
+                        time_str.count('-') >= 2 and 
+                        'T' in time_str and 
+                        not (time_str.endswith('Z') or time_str[-6] in ('+', '-'))):
+                        
+                        draft[key] = time_str + 'Z'
+                
+                # Ensure the fixed draft is put back into the result
+                result_json['eventDraft'] = draft
+            # --- END PATCH FOR GEMINI ---
+
             if "eventDraft" in result_json and result_json["eventDraft"]:
                  result_json["eventDraft"] = result_json["eventDraft"]
             return jsonify(result_json)
