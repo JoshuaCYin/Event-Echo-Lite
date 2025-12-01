@@ -102,7 +102,8 @@
         width: 100%;
         height: 3px;
         background: var(--border-color, #e5e7eb);
-        top: 18px; /* Half of dot height */
+        top: 18px;
+        /* Half of dot height */
         right: 50%;
         transform: translateY(-50%);
         z-index: 1;
@@ -203,6 +204,103 @@
     .form-section select:focus {
         outline: none;
         border-color: var(--primary-color, #007bff);
+    }
+
+    /* --- Date & Time Picker Styling (Wizard Fix) --- */
+    .date-time-group {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-top: 0.5rem;
+    }
+
+    .dt-pair {
+        flex: 1;
+        min-width: 240px;
+    }
+
+    .dt-inputs {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center; /* Aligns date and time vertically */
+    }
+
+    .date-input-wrapper {
+        flex: 3 !important;
+    }
+
+
+    .date-input-wrapper input[type="date"] {
+        width: 100% !important;
+        padding: 0.875rem 1rem !important;
+        border: 2px solid var(--border-color, #e0e0e0) !important;
+        border-radius: var(--radius-md, 8px) !important;
+        font-size: 1rem !important;
+        font-family: inherit !important;
+        box-sizing: border-box !important;
+        background-color: white !important;
+        cursor: pointer !important;
+    }
+
+    .date-input-wrapper input[type="date"]:focus {
+        outline: none !important;
+        border-color: var(--primary-color, #007bff) !important;
+    }
+
+    /* Force time picker styling */
+    .time-picker-wrapper {
+        position: relative !important;
+        flex: 2 !important;
+        min-width: 100px !important;
+    }
+
+    .time-picker-wrapper input {
+        width: 100% !important;
+        padding: 0.875rem 1rem !important;
+        border: 2px solid var(--border-color, #e0e0e0) !important;
+        border-radius: var(--radius-md, 8px) !important;
+        font-size: 1rem !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Force inputs in this group to fit the flex container */
+    .dt-inputs input {
+        width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* Dropdown Styling */
+    .time-options-dropdown {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        max-height: 200px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        display: none;
+        list-style: none;
+        padding: 0;
+        margin: 4px 0 0 0;
+    }
+
+    .time-options-dropdown.show {
+        display: block;
+    }
+
+    .time-options-dropdown li {
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .time-options-dropdown li:hover {
+        background-color: #f0f7ff;
+        color: #007bff;
     }
 
     .radio-group {
@@ -537,7 +635,6 @@
 
 <div class="wizard-container page-transition-enter-active">
 
-    <!-- Left Side: Wizard Steps -->
     <div class="wizard-content">
 
         <ol class="wizard-stepper" id="wizard-stepper">
@@ -563,7 +660,6 @@
             </li>
         </ol>
 
-        <!-- Step 1: Basics -->
         <div class="wizard-step active" data-step="1" data-context="Event Title and Description">
             <h2>Step 1: The Basics</h2>
             <p class="step-intro">Let's start with the "what" and "why." A great title and clear description are key.
@@ -586,19 +682,35 @@
             <div class="step-error" id="error-1"></div>
         </div>
 
-        <!-- Step 2: Date & Time -->
         <div class="wizard-step" data-step="2" data-context="Event Date and Time">
             <h2>Step 2: Date & Time</h2>
             <p class="step-intro">When is your event happening? Be sure to check for conflicts.</p>
             <div class="step-content">
-                <div class="form-section" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 200px;">
-                        <label for="w-start">Start Time*</label>
-                        <input id="w-start" type="datetime-local" required>
+                <div class="date-time-group">
+                    <div class="dt-pair">
+                        <label>Start*</label>
+                        <div class="dt-inputs">
+                            <div class="date-input-wrapper">
+                                <input id="w-startDate" type="date" required>
+                            </div>
+                            <div class="time-picker-wrapper">
+                                <input type="text" id="w-startTime" placeholder="Time" autocomplete="off" required>
+                                <ul class="time-options-dropdown" id="w-startTimeList"></ul>
+                            </div>
+                        </div>
                     </div>
-                    <div style="flex: 1; min-width: 200px;">
-                        <label for="w-end">End Time*</label>
-                        <input id="w-end" type="datetime-local" required>
+
+                    <div class="dt-pair">
+                        <label>End*</label>
+                        <div class="dt-inputs">
+                            <div class="date-input-wrapper">
+                                <input id="w-endDate" type="date" required>
+                            </div>
+                            <div class="time-picker-wrapper">
+                                <input type="text" id="w-endTime" placeholder="Time" autocomplete="off" required>
+                                <ul class="time-options-dropdown" id="w-endTimeList"></ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -609,7 +721,6 @@
             <div class="step-error" id="error-2"></div>
         </div>
 
-        <!-- Step 3: Location -->
         <div class="wizard-step" data-step="3" data-context="Event Location">
             <h2>Step 3: Location</h2>
             <p class="step-intro">Where will your event be held? On-campus or a custom address.</p>
@@ -644,7 +755,6 @@
             <div class="step-error" id="error-3"></div>
         </div>
 
-        <!-- Step 4: Settings -->
         <div class="wizard-step" data-step="4" data-context="Event Visibility Settings">
             <h2>Step 4: Settings</h2>
             <p class="step-intro">Who should be able to see this event?</p>
@@ -669,12 +779,11 @@
             <div class="step-error" id="error-4"></div>
         </div>
 
-        <!-- Step 5: Review & Submit -->
         <div class="wizard-step" data-step="5" data-context="Reviewing Event Details">
             <h2>Step 5: Review & Submit</h2>
             <p class="step-intro">One final look. If everything is correct, submit your event!</p>
             <div class="step-content">
-                <div id="reviewStepContainer"> <!-- Review content injected by JS --> </div>
+                <div id="reviewStepContainer"> </div>
                 <div id="wizardSubmitMessage"></div>
             </div>
             <div class="step-navigation">
@@ -684,7 +793,6 @@
         </div>
     </div>
 
-    <!-- Right Side: AI Helper -->
     <aside class="wizard-sidebar">
         <div class="ai-helper-card" id="aiHelperCard">
             <div class="ai-helper-header" onclick="toggleMobileAI()">
@@ -725,7 +833,6 @@
 
 </div>
 
-<!-- Marked.js for Markdown Rendering -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script type="module">
@@ -748,6 +855,12 @@
     const locationTypeRadios = document.querySelectorAll('input[name="w-location_type"]');
     const visibilityContainer = document.getElementById('w-visibilityContainer');
     const visibilityWarning = document.getElementById('w-visibilityWarning');
+
+    // Date/Time Elements
+    const wStartDate = document.getElementById('w-startDate');
+    const wStartTime = document.getElementById('w-startTime');
+    const wEndDate = document.getElementById('w-endDate');
+    const wEndTime = document.getElementById('w-endTime');
 
     // --- Role-Based UI ---
     if (userRole !== 'admin' && userRole !== 'organizer') {
@@ -773,6 +886,155 @@
         document.getElementById('aiHelperCard').classList.add('collapsed');
     }
 
+    // --- Time Picker Logic (Ported from Event Form) ---
+
+    // Generate time slots (15 min increments)
+    function generateTimeSlots() {
+        const slots = [];
+        const periods = ['AM', 'PM'];
+        for (let i = 0; i < 24 * 4; i++) { // 15 min chunks
+            const totalMinutes = i * 15;
+            const hours24 = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            const period = hours24 >= 12 ? 'PM' : 'AM';
+            let hours12 = hours24 % 12;
+            if (hours12 === 0) hours12 = 12;
+
+            const timeString = `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+            slots.push({ display: timeString, value24: `${hours24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}` });
+        }
+        return slots;
+    }
+
+    const timeSlots = generateTimeSlots();
+
+    function setupTimePicker(inputId, listId) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
+
+        // Populate list
+        function renderList(filter = '') {
+            list.innerHTML = '';
+            const normalizedFilter = filter.toLowerCase().replace(/\s/g, ''); // e.g. "500pm" -> "500pm"
+
+            const filtered = timeSlots.filter(slot => {
+                const searchStr = slot.display.toLowerCase().replace(/\s/g, '');
+                return searchStr.startsWith(normalizedFilter) || slot.display.toLowerCase().includes(filter.toLowerCase());
+            });
+
+            if (filtered.length === 0) return;
+
+            filtered.forEach(slot => {
+                const li = document.createElement('li');
+                li.textContent = slot.display;
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Prevent blur
+                    input.value = slot.display;
+                    list.classList.remove('show');
+                });
+                list.appendChild(li);
+            });
+        }
+
+        input.addEventListener('focus', () => {
+            renderList();
+            list.classList.add('show');
+        });
+
+        input.addEventListener('input', (e) => {
+            renderList(e.target.value);
+            list.classList.add('show');
+        });
+
+        // Blur: Try to parse loose input (e.g., "5" -> "5:00 PM", "13" -> "1:00 PM")
+        input.addEventListener('blur', () => {
+            setTimeout(() => list.classList.remove('show'), 150);
+
+            let val = input.value.trim();
+            if (!val) return;
+
+            // Simple parser logic
+            const exactMatch = timeSlots.find(s => s.display.toLowerCase() === val.toLowerCase());
+            if (exactMatch) {
+                input.value = exactMatch.display;
+                return;
+            }
+
+            // Regex for 1-2 digits, optional minutes, optional am/pm
+            const match = val.match(/^(\d{1,2})(?::?(\d{2}))?\s*([ap]m?)?$/i);
+            if (match) {
+                let h = parseInt(match[1]);
+                let m = match[2] ? parseInt(match[2]) : 0;
+                let mer = match[3] ? match[3].toLowerCase() : null;
+
+                if (h > 24) return;
+                if (m > 59) return;
+
+                if (!mer) {
+                    if (h === 12) mer = 'pm';
+                    else if (h < 7) mer = 'pm';
+                    else if (h >= 7 && h <= 11) mer = 'am';
+                }
+
+                if (mer && (mer.startsWith('p')) && h < 12) h += 12;
+                if (mer && (mer.startsWith('a')) && h === 12) h = 0;
+
+                const hours24 = h;
+                let hours12 = hours24 % 12;
+                if (hours12 === 0) hours12 = 12;
+                if (hours24 > 23) hours12 = 12;
+                const period = hours24 >= 12 && hours24 < 24 ? 'PM' : 'AM';
+
+                input.value = `${hours12}:${m.toString().padStart(2, '0')} ${period}`;
+            }
+        });
+    }
+
+    // Initialize Time Pickers
+    setupTimePicker('w-startTime', 'w-startTimeList');
+    setupTimePicker('w-endTime', 'w-endTimeList');
+
+    // Helper to get ISO string from Date + Time inputs
+    function getISOFromInputs(dateInput, timeInput) {
+        if (!dateInput.value || !timeInput.value) return null;
+
+        const timeStr = timeInput.value;
+        const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+
+        let h = 0, m = 0;
+        if (match) {
+            h = parseInt(match[1]);
+            m = parseInt(match[2]);
+            const mer = match[3].toUpperCase();
+            if (mer === 'PM' && h < 12) h += 12;
+            if (mer === 'AM' && h === 12) h = 0;
+        } else {
+            return new Date(`${dateInput.value}T00:00`).toISOString();
+        }
+
+        const d = new Date(`${dateInput.value}T${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:00`);
+        return d.toISOString();
+    }
+
+    // Helper to set inputs from ISO string
+    function setInputsFromISO(isoString, dateEl, timeEl) {
+        if (!isoString) return;
+        const d = new Date(isoString);
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dateEl.value = `${year}-${month}-${day}`;
+
+        let h = d.getHours();
+        const m = d.getMinutes();
+        const mer = h >= 12 ? 'PM' : 'AM';
+        let h12 = h % 12;
+        if (h12 === 0) h12 = 12;
+
+        timeEl.value = `${h12}:${m.toString().padStart(2, '0')} ${mer}`;
+    }
+
     // --- Location Toggle Logic ---
     function handleLocationTypeChange() {
         const type = document.querySelector('input[name="w-location_type"]:checked').value;
@@ -786,7 +1048,7 @@
         try {
             const venues = await api("/venues/", "GET", null, token);
             allVenues = venues || []; // Store globally for autofill
-            
+
             if (venues && venues.length > 0) {
                 venueSelect.innerHTML = '<option value="">-- Select a venue --</option>';
                 venues.forEach(venue => {
@@ -798,7 +1060,7 @@
             }
         } catch (error) { console.error("Failed to load venues:", error); }
     }
-    
+
     // Autofill venue link logic
     venueSelect.addEventListener('change', () => {
         const selectedId = venueSelect.value;
@@ -806,16 +1068,13 @@
             const venue = allVenues.find(v => v.venue_id == selectedId);
             if (venue) {
                 if (venue.google_maps_link) {
-                    // Only autofill if the Maps input is empty
                     if (!mapLinkInput.value) {
                         mapLinkInput.value = venue.google_maps_link;
-                        // Subtle visual cue (background color change)
                         mapLinkInput.style.transition = "background-color 0.3s";
                         mapLinkInput.style.backgroundColor = "#e6f3ff";
                         setTimeout(() => mapLinkInput.style.backgroundColor = "", 1000);
                     }
                 } else {
-                    // If no Google Maps link is available, set it to an empty string
                     mapLinkInput.value = "";
                 }
             }
@@ -830,7 +1089,6 @@
             currentStep++;
             maxStepCompleted = Math.max(maxStepCompleted, currentStep);
         } else {
-            // Save current step data even when going back to preserve edits
             saveStepData(stepNum);
             currentStep--;
         }
@@ -838,7 +1096,6 @@
     }
 
     window.goToStep = (stepNum) => {
-        // Can always go back to completed steps
         if (stepNum <= maxStepCompleted) {
             saveStepData(currentStep); // Save current progress before jump
             currentStep = stepNum;
@@ -856,7 +1113,6 @@
             item.classList.toggle('active', step === currentStep);
             item.classList.toggle('completed', step < currentStep); // Strictly less than current
 
-            // Allow clicking previous steps or current step
             if (step <= maxStepCompleted) {
                 item.onclick = () => goToStep(step);
                 item.style.cursor = 'pointer';
@@ -878,7 +1134,7 @@
         }
     }
 
-    // --- Step Validation ---
+    // --- Step Validation (Updated for Split Date/Time) ---
     function validateStep(stepNum) {
         const errorDiv = document.getElementById(`error-${stepNum}`);
         errorDiv.style.display = 'none';
@@ -890,12 +1146,17 @@
             }
         }
         if (stepNum === 2) { // Date & Time
-            const start = document.getElementById('w-start').value;
-            const end = document.getElementById('w-end').value;
-            if (!start || !end) {
-                errorDiv.textContent = 'Start Time and End Time are required.'; isValid = false;
-            } else if (new Date(start) >= new Date(end)) {
-                errorDiv.textContent = 'End Time must be after Start Time.'; isValid = false;
+            // Check that all sub-inputs have values
+            if (!wStartDate.value || !wStartTime.value || !wEndDate.value || !wEndTime.value) {
+                errorDiv.textContent = 'Start Date, Start Time, End Date, and End Time are required.';
+                isValid = false;
+            } else {
+                // Construct ISO to check range logic
+                const startISO = getISOFromInputs(wStartDate, wStartTime);
+                const endISO = getISOFromInputs(wEndDate, wEndTime);
+                if (new Date(startISO) >= new Date(endISO)) {
+                    errorDiv.textContent = 'End Time must be after Start Time.'; isValid = false;
+                }
             }
         }
         if (stepNum === 3) { // Location
@@ -912,15 +1173,16 @@
         return isValid;
     }
 
-    // --- Data Handling ---
+    // --- Data Handling (Updated for Split Date/Time) ---
     function saveStepData(stepNum) {
         if (stepNum === 1) { // Title & Description
             wizardData.title = document.getElementById('w-title').value;
             wizardData.description = document.getElementById('w-description').value;
         }
         if (stepNum === 2) { // Date & Time
-            wizardData.start_time = document.getElementById('w-start').value;
-            wizardData.end_time = document.getElementById('w-end').value;
+            // Save as ISO strings for backend compatibility
+            wizardData.start_time = getISOFromInputs(wStartDate, wStartTime);
+            wizardData.end_time = getISOFromInputs(wEndDate, wEndTime);
         }
         if (stepNum === 3) { // Location
             wizardData.location_type = document.querySelector('input[name="w-location_type"]:checked').value;
@@ -986,13 +1248,14 @@
     const MAX_HISTORY = 10;
     let chatHistory = [];
 
-    // --- Get Current Step Values for AI Context ---
+    // --- Get Current Step Values for AI Context (Updated) ---
     function getCurrentStepValues() {
         return {
             title: document.getElementById('w-title').value,
             description: document.getElementById('w-description').value,
-            start_time: document.getElementById('w-start').value,
-            end_time: document.getElementById('w-end').value,
+            // Send ISOs to AI (it understands ISO better than split)
+            start_time: getISOFromInputs(wStartDate, wStartTime),
+            end_time: getISOFromInputs(wEndDate, wEndTime),
             location_type: document.querySelector('input[name="w-location_type"]:checked').value,
             venue: document.getElementById('w-venue').value,
             customLocation: document.getElementById('w-customLocation').value,
@@ -1018,7 +1281,7 @@
         aiInput.disabled = true;
         aiSendBtn.disabled = true;
 
-        chatHistory.push({ role: "user", content: prompt }); // Add user message to history
+        chatHistory.push({ role: "user", content: prompt });
 
         addHelperMessage('user', prompt);
         const loadingMsg = addHelperMessage('is-loading', 'Thinking...');
@@ -1030,13 +1293,12 @@
                 context,
                 user_time: new Date().toISOString(),
                 current_values: getCurrentStepValues(),
-                history: chatHistory.slice(-MAX_HISTORY) // --- NEW: Send History
+                history: chatHistory.slice(-MAX_HISTORY)
             };
             const result = await api('/ai/wizard-helper', 'POST', payload, token);
             loadingMsg.remove();
 
             if (result.response) {
-                // --- NEW: Add response to history ---
                 chatHistory.push({ role: "ai", content: result.response });
                 addHelperMessage('ai', result.response, result.actions);
             } else {
@@ -1066,8 +1328,6 @@
             "w-customLocation": "Custom Address",
             "w-visibility": "Visibility",
             "w-mapsLink": "Google Maps Link",
-
-            // Main Form fields (fallback)
             "evTitle": "Title",
             "evDescription": "Description",
             "evStart": "Start Time",
@@ -1107,21 +1367,17 @@
 
                         // Friendly name lookup
                         let friendlyLabel = FIELD_LABELS[action.field];
-
-                        // Fallback if unknown or missing
                         if (!friendlyLabel) {
                             if (action.field) {
-                                // Convert "w-customLocation" to "Custom Location"
                                 friendlyLabel = action.field
                                     .replace(/^w-/, "")
                                     .replace(/^ev/, "")
                                     .replace(/[-_]/g, " ")
                                     .replace(/([A-Z])/g, " $1")
                                     .trim();
-                                // Capitalize first letter
                                 friendlyLabel = friendlyLabel.charAt(0).toUpperCase() + friendlyLabel.slice(1);
                             } else {
-                                friendlyLabel = "Field"; // Safe fallback
+                                friendlyLabel = "Field";
                             }
                         }
 
@@ -1138,7 +1394,7 @@
                 }
             }
 
-        // User Message
+            // User Message
         } else {
             avatar.innerHTML = `
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" 
@@ -1162,12 +1418,22 @@
         return msg;
     }
 
-    // --- Apply AI Suggested Action to Form ---
+    // --- Apply AI Suggested Action to Form (UPDATED for Split Time) ---
     function applyAIAction(fieldId, value, btnElement) {
         let fieldChanged = false;
 
+        // Handle Date/Time Splits (AI sends ISO string, we fill split fields)
+        if (fieldId === 'w-start' || fieldId === 'evStart') {
+            setInputsFromISO(value, wStartDate, wStartTime);
+            fieldChanged = true;
+        }
+        else if (fieldId === 'w-end' || fieldId === 'evEnd') {
+            setInputsFromISO(value, wEndDate, wEndTime);
+            fieldChanged = true;
+        }
+
         // Handle Radio Buttons
-        if (fieldId === 'w-location_type' || fieldId === 'w-visibility') {
+        else if (fieldId === 'w-location_type' || fieldId === 'w-visibility') {
             const radio = document.querySelector(`input[name="${fieldId}"][value="${value}"]`);
             if (radio) {
                 radio.checked = true;
@@ -1191,8 +1457,6 @@
                 // Map field IDs to wizardData keys
                 if (fieldId === 'w-title') wizardData.title = value;
                 if (fieldId === 'w-description') wizardData.description = value;
-                if (fieldId === 'w-start') wizardData.start_time = value;
-                if (fieldId === 'w-end') wizardData.end_time = value;
                 if (fieldId === 'w-venue') wizardData.venue_id = value;
                 if (fieldId === 'w-customLocation') wizardData.custom_location_address = value;
                 if (fieldId === 'w-mapsLink') wizardData.google_maps_link = value;
@@ -1212,7 +1476,7 @@
             btnElement.disabled = true;
             btnElement.style.cursor = "default";
 
-            // --- KEY FIX: If we are on the Review Step (5), re-render it ---
+            // If we are on the Review Step (5), re-render it
             if (currentStep === 5) {
                 populateReviewStep();
             }
@@ -1229,16 +1493,13 @@
         submitBtn.textContent = 'Submitting...';
 
         // --- Ensure data is saved before submit ---
-        saveStepData(currentStep); // Save final step (usually 4, but 5 calls this)
-
-        const startISO = wizardData.start_time ? new Date(wizardData.start_time).toISOString() : null;
-        const endISO = wizardData.end_time ? new Date(wizardData.end_time).toISOString() : null;
+        saveStepData(currentStep);
 
         const payload = {
             title: wizardData.title,
             description: wizardData.description,
-            start_time: startISO,
-            end_time: endISO,
+            start_time: wizardData.start_time, // already ISO from saveStepData
+            end_time: wizardData.end_time,     // already ISO from saveStepData
             location_type: wizardData.location_type,
             google_maps_link: wizardData.google_maps_link || null,
             visibility: wizardData.visibility,

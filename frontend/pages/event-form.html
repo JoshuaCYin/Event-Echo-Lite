@@ -151,53 +151,55 @@
         margin-top: 1rem;
     }
 
-    .ai-helper-input-wrapper {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: var(--bg-tertiary, #f3f4f6);
-        border: 1px solid var(--border-color, #e5e7eb);
-        border-radius: 24px;
-        padding: 0.25rem 0.5rem 0.25rem 1rem;
-        transition: border-color 0.2s;
-    }
+/* --- Updated Copilot UI (Matches Wizard) --- */
+.ai-helper-input-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--bg-tertiary, #f3f4f6);
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 24px; /* Creates the pill shape */
+    padding: 0.25rem 0.5rem 0.25rem 1rem;
+    transition: border-color 0.2s;
+}
 
-    .ai-helper-input-wrapper:focus-within {
-        border-color: var(--primary-color, #007bff);
-        background: white;
-    }
+.ai-helper-input-wrapper:focus-within {
+    border-color: var(--primary-color, #007bff);
+    background: white;
+}
 
-    .ai-helper-input-wrapper input {
-        flex-grow: 1;
-        border: none;
-        background: transparent;
-        font-size: 0.9rem;
-        padding: 0.6rem 0;
-        font-family: inherit;
-    }
+.ai-helper-input-wrapper input {
+    flex-grow: 1;
+    border: none !important; /* Removes default box border */
+    background: transparent !important;
+    font-size: 0.9rem;
+    padding: 0.6rem 0;
+    box-shadow: none !important;
+}
 
-    .ai-helper-input-wrapper input:focus {
-        outline: none;
-    }
+.ai-helper-input-wrapper input:focus {
+    outline: none;
+}
 
-    .ai-helper-input-wrapper button {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-shrink: 0;
-        width: 36px;
-        height: 36px;
-        background: var(--gradient-primary, #007bff);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        cursor: pointer;
-        transition: transform 0.2s;
-    }
+.ai-helper-input-wrapper button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    background: var(--gradient-primary, #007bff);
+    color: white;
+    border: none;
+    border-radius: 50%; /* Circular button */
+    cursor: pointer;
+    transition: transform 0.2s;
+    padding: 0;
+}
 
-    .ai-helper-input-wrapper button:hover {
-        transform: scale(1.05);
-    }
+.ai-helper-input-wrapper button:hover {
+    transform: scale(1.05);
+}
 
     .ai-helper-input-wrapper button:disabled {
         background: var(--text-light, #ccc);
@@ -254,19 +256,24 @@
 
     input[type="text"],
     input[type="url"],
-    input[type="datetime-local"],
+    input[type="date"],
     textarea,
     select {
         width: 100%;
         padding-top: 0.75rem;
         padding-bottom: 0.75rem;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
         box-sizing: border-box;
+        border: 2px solid var(--border-color, #e0e0e0);
+        border-radius: var(--radius-md, 8px);
+        font-size: 1rem;
     }
 
     input:focus,
     textarea:focus,
     select:focus {
-        outline: 2px solid var(--primary-color, #007bff);
+        outline: none;
         border-color: var(--primary-color, #007bff);
         background-color: var(--bg-primary, #fff);
     }
@@ -275,16 +282,79 @@
         resize: vertical;
     }
 
+    /* --- NEW Date Time Styling --- */
     .date-time-group {
         display: flex;
-        gap: 1rem;
+        gap: 1.5rem;
         flex-wrap: wrap;
     }
 
-    .date-time-group>div {
+    .dt-pair {
         flex: 1;
-        min-width: 200px;
+        min-width: 250px;
     }
+
+    .dt-inputs {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .date-input-wrapper {
+        flex: 3;
+    }
+
+    /* Custom Time Picker Styles */
+    .time-picker-wrapper {
+        position: relative;
+        flex: 2;
+        min-width: 110px;
+    }
+
+    .time-picker-wrapper input {
+        cursor: text;
+    }
+
+    .time-options-dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        width: 100%;
+        max-height: 250px;
+        overflow-y: auto;
+        background: white;
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: var(--radius-md, 8px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 100;
+        display: none;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .time-options-dropdown.show {
+        display: block;
+    }
+
+    .time-options-dropdown li {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        font-size: 0.95rem;
+        color: var(--text-primary, #333);
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .time-options-dropdown li:last-child {
+        border-bottom: none;
+    }
+
+    .time-options-dropdown li:hover,
+    .time-options-dropdown li.highlighted {
+        background-color: var(--bg-tertiary, #f0f7ff);
+        color: var(--primary-color, #007bff);
+    }
+
+    /* --- End Date Time Styling --- */
 
     .radio-group {
         display: flex;
@@ -447,18 +517,39 @@
                     <textarea id="evDescription" placeholder="Tell attendees about your event..." rows="5"></textarea>
                 </div>
 
-                <!-- Date & Time Section -->
+                <!-- Date & Time Section (OVERHAULED) -->
                 <div class="form-section">
                     <h3>Date & Time*</h3>
                     <div class="date-time-group">
-                        <div>
-                            <label for="evStart">Start Time</label>
-                            <input id="evStart" type="datetime-local" required>
+                        
+                        <!-- Start Pair -->
+                        <div class="dt-pair">
+                            <label>Start</label>
+                            <div class="dt-inputs">
+                                <div class="date-input-wrapper">
+                                    <input id="evStartDate" type="date" required>
+                                </div>
+                                <div class="time-picker-wrapper">
+                                    <input type="text" id="evStartTime" placeholder="Time" autocomplete="off" required>
+                                    <ul class="time-options-dropdown" id="evStartTimeList"></ul>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label for="evEnd">End Time</label>
-                            <input id="evEnd" type="datetime-local" required>
+
+                        <!-- End Pair -->
+                        <div class="dt-pair">
+                            <label>End</label>
+                            <div class="dt-inputs">
+                                <div class="date-input-wrapper">
+                                    <input id="evEndDate" type="date" required>
+                                </div>
+                                <div class="time-picker-wrapper">
+                                    <input type="text" id="evEndTime" placeholder="Time" autocomplete="off" required>
+                                    <ul class="time-options-dropdown" id="evEndTimeList"></ul>
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -575,8 +666,13 @@
     // Fields
     const evTitle = document.getElementById("evTitle");
     const evDescription = document.getElementById("evDescription");
-    const evStart = document.getElementById("evStart");
-    const evEnd = document.getElementById("evEnd");
+    
+    // Date & Time Fields (Split)
+    const evStartDate = document.getElementById("evStartDate");
+    const evStartTime = document.getElementById("evStartTime");
+    const evEndDate = document.getElementById("evEndDate");
+    const evEndTime = document.getElementById("evEndTime");
+
     const evCustomLocation = document.getElementById("evCustomLocation");
     const evMapsLink = document.getElementById("evMapsLink");
     const venueSelect = document.getElementById("evVenue");
@@ -592,6 +688,182 @@
     const isEditMode = !!eventId;
 
     let allVenues = [];
+
+    // --- Time Picker Logic ---
+
+    // Generate time slots (15 min increments)
+    function generateTimeSlots() {
+        const slots = [];
+        const periods = ['AM', 'PM'];
+        for (let i = 0; i < 24 * 4; i++) { // 15 min chunks
+            const totalMinutes = i * 15;
+            const hours24 = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            const period = hours24 >= 12 ? 'PM' : 'AM';
+            let hours12 = hours24 % 12;
+            if (hours12 === 0) hours12 = 12;
+            
+            const timeString = `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+            slots.push({ display: timeString, value24: `${hours24.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}` });
+        }
+        return slots;
+    }
+
+    const timeSlots = generateTimeSlots();
+
+    function setupTimePicker(inputId, listId) {
+        const input = document.getElementById(inputId);
+        const list = document.getElementById(listId);
+
+        // Populate list
+        function renderList(filter = '') {
+            list.innerHTML = '';
+            const normalizedFilter = filter.toLowerCase().replace(/\s/g, ''); // e.g. "500pm" -> "500pm"
+            
+            const filtered = timeSlots.filter(slot => {
+                const searchStr = slot.display.toLowerCase().replace(/\s/g, '');
+                return searchStr.startsWith(normalizedFilter) || slot.display.toLowerCase().includes(filter.toLowerCase());
+            });
+
+            if (filtered.length === 0) {
+                 // Allow free typing, but maybe show "No standard time found" or just empty
+                 return;
+            }
+
+            filtered.forEach(slot => {
+                const li = document.createElement('li');
+                li.textContent = slot.display;
+                li.addEventListener('mousedown', (e) => {
+                    e.preventDefault(); // Prevent blur
+                    input.value = slot.display;
+                    list.classList.remove('show');
+                });
+                list.appendChild(li);
+            });
+        }
+
+        input.addEventListener('focus', () => {
+            renderList();
+            list.classList.add('show');
+        });
+
+        input.addEventListener('input', (e) => {
+            renderList(e.target.value);
+            list.classList.add('show');
+        });
+
+        // Blur: Try to parse loose input (e.g., "5" -> "5:00 PM", "13" -> "1:00 PM")
+        input.addEventListener('blur', () => {
+            setTimeout(() => list.classList.remove('show'), 150);
+            
+            let val = input.value.trim();
+            if(!val) return;
+
+            // Simple parser logic
+            // 1. Check if it matches existing slot
+            const exactMatch = timeSlots.find(s => s.display.toLowerCase() === val.toLowerCase());
+            if (exactMatch) {
+                input.value = exactMatch.display;
+                return;
+            }
+
+            // 2. Try to parse logic like "5p", "17", "530"
+            // Regex for 1-2 digits, optional minutes, optional am/pm
+            const match = val.match(/^(\d{1,2})(?::?(\d{2}))?\s*([ap]m?)?$/i);
+            if (match) {
+                let h = parseInt(match[1]);
+                let m = match[2] ? parseInt(match[2]) : 0;
+                let mer = match[3] ? match[3].toLowerCase() : null;
+
+                if (h > 24) return; // Invalid
+                if (m > 59) return; // Invalid
+
+                // Guess AM/PM if missing
+                if (!mer) {
+                    if (h === 12) mer = 'pm'; // 12 -> 12pm
+                    else if (h < 7) mer = 'pm'; // 1-6 -> 1pm-6pm (heuristic)
+                    else if (h >= 7 && h <= 11) mer = 'am'; // 7-11 -> 7am-11am
+                    // 13+ is 24hr, no meridiem needed
+                }
+
+                if (mer && (mer.startsWith('p')) && h < 12) h += 12;
+                if (mer && (mer.startsWith('a')) && h === 12) h = 0;
+
+                // Format back to display
+                const hours24 = h;
+                const minutes = m;
+                const period = hours24 >= 12 && hours24 < 24 ? 'PM' : 'AM'; // simplistic
+                
+                let hours12 = hours24 % 12;
+                if (hours12 === 0) hours12 = 12;
+                if (hours24 > 23) hours12 = 12; // Handle 24 edge case loosely
+
+                input.value = `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+            }
+        });
+
+        // Keyboard navigation
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const first = list.querySelector('li');
+                if (first) {
+                    // In a real app, we'd manage active index. For now, simple.
+                    // input.value = first.textContent; 
+                }
+            }
+        });
+    }
+
+    setupTimePicker('evStartTime', 'evStartTimeList');
+    setupTimePicker('evEndTime', 'evEndTimeList');
+
+    // Helper to get ISO string from Date + Time inputs
+    function getISOFromInputs(dateInput, timeInput) {
+        if (!dateInput.value || !timeInput.value) return null;
+        
+        // Parse time input value (Expected "hh:mm AM/PM") back to 24h
+        const timeStr = timeInput.value;
+        const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        
+        let h = 0, m = 0;
+        if (match) {
+            h = parseInt(match[1]);
+            m = parseInt(match[2]);
+            const mer = match[3].toUpperCase();
+            if (mer === 'PM' && h < 12) h += 12;
+            if (mer === 'AM' && h === 12) h = 0;
+        } else {
+            // Fallback for direct 24h input if regex fails
+             // (Though blur handler tries to force format)
+             return new Date(`${dateInput.value}T00:00`).toISOString();
+        }
+
+        const d = new Date(`${dateInput.value}T${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:00`);
+        return d.toISOString();
+    }
+
+    // Helper to set inputs from ISO string
+    function setInputsFromISO(isoString, dateEl, timeEl) {
+        if (!isoString) return;
+        const d = new Date(isoString);
+        
+        // Date: YYYY-MM-DD
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        dateEl.value = `${year}-${month}-${day}`;
+
+        // Time: hh:mm AM/PM
+        let h = d.getHours();
+        const m = d.getMinutes();
+        const mer = h >= 12 ? 'PM' : 'AM';
+        let h12 = h % 12;
+        if (h12 === 0) h12 = 12;
+        
+        timeEl.value = `${h12}:${m.toString().padStart(2, '0')} ${mer}`;
+    }
+
 
     // --- Initialization Logic ---
 
@@ -656,8 +928,9 @@
             evDescription.value = event.description || "";
             evMapsLink.value = event.google_maps_link || "";
 
-            evStart.value = formatDateTimeForInput(event.start_time);
-            evEnd.value = formatDateTimeForInput(event.end_time);
+            // Set Split Date/Time
+            setInputsFromISO(event.start_time, evStartDate, evStartTime);
+            setInputsFromISO(event.end_time, evEndDate, evEndTime);
 
             // Location
             if (event.location_type === 'venue') {
@@ -699,26 +972,6 @@
         messageDiv.className = typeClass;
         messageDiv.textContent = msg;
         messageDiv.style.display = "block";
-    }
-
-    // Format ISO date string to 'YYYY-MM-DDTHH:MM' for datetime-local input
-    function formatDateTimeForInput(isoString) {
-        if (!isoString) return "";
-        try {
-            const date = new Date(isoString);
-            if (isNaN(date.getTime())) return "";
-
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-
-            return `${year}-${month}-${day}T${hours}:${minutes}`;
-        } catch (e) {
-            console.error("Error formatting date:", e);
-            return "";
-        }
     }
 
     // Load venues into the select dropdown
@@ -795,8 +1048,6 @@
     function applyAIDraft() {
         const draftString = localStorage.getItem('aiEventDraft');
 
-        // console.log("AI DRAFT PAYLOAD:", draftString);
-
         if (!draftString) return;
         try {
             const draft = JSON.parse(draftString);
@@ -807,8 +1058,9 @@
                 document.querySelector('input[name="location_type"][value="custom"]').checked = true;
                 handleLocationTypeChange();
             }
-            if (draft.start_time) evStart.value = formatDateTimeForInput(draft.start_time);
-            if (draft.end_time) evEnd.value = formatDateTimeForInput(draft.end_time);
+            // Draft usually has ISO strings, so use our helper
+            if (draft.start_time) setInputsFromISO(draft.start_time, evStartDate, evStartTime);
+            if (draft.end_time) setInputsFromISO(draft.end_time, evEndDate, evEndTime);
 
             const aiDraftMessage = document.getElementById("aiDraftMessage");
             aiDraftMessage.innerHTML = `<div class="ai-draft-applied"><span>✨ AI Draft applied! Review details and save.</span></div>`;
@@ -846,8 +1098,9 @@
         return {
             evTitle: evTitle.value,
             evDescription: evDescription.value,
-            evStart: evStart.value,
-            evEnd: evEnd.value,
+            // Reconstruct pseudo-ISO for AI context
+            evStart: getISOFromInputs(evStartDate, evStartTime) || "",
+            evEnd: getISOFromInputs(evEndDate, evEndTime) || "",
             location_type: document.querySelector('input[name="location_type"]:checked')?.value,
             evVenue: venueSelect.value,
             evCustomLocation: evCustomLocation.value,
@@ -974,12 +1227,11 @@
     // Apply AI Suggested Action to Form
     function applyAIAction(fieldId, value, btnElement) {
         // Map wizard IDs (which the AI might suggest if confused) to Standard Form IDs
-        // This is a safety net in case the AI returns 'w-title' instead of 'evTitle'
         const ID_MAP = {
             'w-title': 'evTitle',
             'w-description': 'evDescription',
-            'w-start': 'evStart',
-            'w-end': 'evEnd',
+            'w-start': 'evStart', // Map to composite start
+            'w-end': 'evEnd',     // Map to composite end
             'w-location_type': 'location_type', // Radio name
             'w-venue': 'evVenue',
             'w-customLocation': 'evCustomLocation',
@@ -990,8 +1242,17 @@
         const targetId = ID_MAP[fieldId] || fieldId;
         let fieldChanged = false;
 
+        // Special handling for Date/Time Split
+        if (targetId === 'evStart') {
+            setInputsFromISO(value, evStartDate, evStartTime);
+            fieldChanged = true;
+        }
+        else if (targetId === 'evEnd') {
+            setInputsFromISO(value, evEndDate, evEndTime);
+            fieldChanged = true;
+        }
         // Handle Radios (Name based)
-        if (targetId === 'location_type' || targetId === 'visibility') {
+        else if (targetId === 'location_type' || targetId === 'visibility') {
             const radio = document.querySelector(`input[name="${targetId}"][value="${value}"]`);
             if (radio) {
                 radio.checked = true;
@@ -1031,16 +1292,18 @@
         messageDiv.className = "";
 
         const title = evTitle.value;
-        const startLocal = evStart.value;
-        const endLocal = evEnd.value;
         const location_type = document.querySelector('input[name="location_type"]:checked').value;
 
+        // Construct ISO strings
+        const startISO = getISOFromInputs(evStartDate, evStartTime);
+        const endISO = getISOFromInputs(evEndDate, evEndTime);
+
         // Validation
-        if (!title || !startLocal || !endLocal) {
+        if (!title || !startISO || !endISO) {
             showMessage("Title, Start Time, and End Time are required.", "error-message");
             return;
         }
-        if (new Date(startLocal) >= new Date(endLocal)) {
+        if (new Date(startISO) >= new Date(endISO)) {
             showMessage("End time must be after start time.", "error-message");
             return;
         }
@@ -1056,11 +1319,7 @@
             return;
         }
 
-        // Convert times to ISO strings
-        const startISO = startLocal ? new Date(startLocal).toISOString() : null;
-        const endISO = endLocal ? new Date(endLocal).toISOString() : null;
-
-        // Get Visibility (safe check for admin vs normal user)
+        // Get Visibility
         let visibility = 'private';
         const visInput = document.querySelector('input[name="visibility"]:checked');
         if (visInput) visibility = visInput.value;
