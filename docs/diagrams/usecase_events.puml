@@ -1,0 +1,35 @@
+@startuml
+!theme plain
+title Event Echo Lite - Event Management Use Cases
+
+left to right direction
+actor "Attendee" as attendee
+actor "Organizer" as organizer
+actor "Admin" as admin
+
+package "Event System" {
+  usecase "Browse Events" as UC_Browse
+  usecase "View Event Details" as UC_View
+  usecase "RSVP to Event" as UC_RSVP
+  usecase "Create Event" as UC_Create
+  usecase "Update Event" as UC_Update
+  usecase "Cancel Event" as UC_Cancel
+  usecase "Write Review" as UC_Review
+}
+
+attendee --> UC_Browse
+attendee --> UC_View
+attendee --> UC_RSVP
+attendee --> UC_Review
+
+organizer --> UC_Browse
+organizer --> UC_View
+organizer --> UC_Create
+organizer --> UC_Update
+organizer --> UC_Cancel
+
+admin --> UC_Create
+admin --> UC_Update
+admin --> UC_Cancel
+
+@enduml

@@ -1,0 +1,48 @@
+@startuml
+!theme plain
+title Event Echo Lite - Create Event Sequence
+
+actor Organizer
+participant "Frontend UI" as UI
+participant "API Gateway" as API
+participant "Events Service" as Events
+database "Database" as DB
+
+Organizer -> UI : Fills Event Form & Submits
+UI -> API : POST /events/ (Bearer Token)
+activate API
+
+API -> Events : Create Event Request
+activate Events
+
+Events -> Events : Verify Token & Role
+
+alt Authorized
+    Events -> DB : Check Venue Availability (if venue selected)
+    activate DB
+    DB --> Events : Availability Status
+    deactivate DB
+    
+    alt Venue Available
+        Events -> DB : INSERT INTO events
+        activate DB
+        DB --> Events : New Event ID
+        deactivate DB
+        
+        Events --> API : Event Created
+        API --> UI : 201 Created (Event ID)
+        UI -> Organizer : Show Success & Redirect
+    else Conflict Detected
+        Events --> API : Conflict Error
+        API --> UI : 409 Conflict
+        UI -> Organizer : Show Scheduling Conflict Error
+    end
+else Unauthorized
+    Events --> API : Permission Denied
+    API --> UI : 403 Forbidden
+end
+
+deactivate Events
+deactivate API
+
+@enduml

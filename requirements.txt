@@ -11,3 +11,5 @@ psycopg2-binary
 openai
 google-genai
 pytz
+pytest
+pytest-mock

@@ -1,0 +1,46 @@
+@startuml
+!theme plain
+title Event Echo Lite - Service Layer
+
+package "Backend Services" {
+    
+    class "AuthService" as Auth {
+        + register(email, password, ...)
+        + login(email, password)
+        + get_current_user()
+        + update_user_profile()
+    }
+    
+    class "EventsService" as Events {
+        + list_events()
+        + create_event(data)
+        + get_event(id)
+        + update_event(id, data)
+        + delete_event(id)
+        + rsvp(event_id, status)
+    }
+    
+    class "AIService" as AI {
+        + chat(message)
+        + generate_event_description(prompt)
+    }
+    
+    class "DatabaseConnection" as DB {
+        + get_db()
+    }
+    
+    class "AuthUtils" as Utils {
+        + create_token(user_id, role)
+        + verify_token(token)
+        + hash_password(password)
+    }
+}
+
+Auth ..> DB : uses
+Events ..> DB : uses
+AI ..> DB : uses
+
+Auth ..> Utils : uses
+Events ..> Utils : uses
+
+@enduml

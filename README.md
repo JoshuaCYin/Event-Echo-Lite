@@ -1,7 +1,7 @@
 # Event Echo Lite
 
 ## Project Vision Statement
-For university students, faculty, and staff who want to easily plan, discover, organize, and attend campus events without scheduling conflicts, EventEcho is a digital event management software application that enables easy event discovery, streamlines event planning, and uses generative artificial intelligence (AI) to increase engagement via conversational assistance. Unlike scattered emails or bulletin board flyers, our software offers a more interactive platform that simplifies logistics, improves communication, and unites the people of the Indiana Wesleyan University (IWU) community.
+For university students, faculty, and staff who want to easily plan, discover, organize, and attend campus events without scheduling conflicts, EventEcho is a digital event management web application that enables easy event discovery, streamlines event planning, and uses generative artificial intelligence (AI) to increase engagement via conversational assistance. Unlike scattered emails or bulletin board flyers, our software offers a more interactive platform that simplifies logistics, improves communication, and unites the people of the Indiana Wesleyan University (IWU) community.
 
 ## Features
 - **Event Discovery**: Browse and search for campus events by category, date, and location.
@@ -24,3 +24,14 @@ For detailed setup instructions, please refer to [SETUP.md](./SETUP.md).
 2. **Set up the backend** (Virtual env, dependencies, database)
 3. **Set up the frontend** (Simple HTTP server)
 4. **Access the application** at `http://localhost:8080`
+
+## Running Tests
+
+To run the backend unit tests, navigate to the `backend` directory and run:
+
+```bash
+cd backend
+python -m pytest
+```
+
+This will discover and run all tests in the `tests` directory.

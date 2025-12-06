@@ -1,0 +1,39 @@
+@startuml
+!theme plain
+title Event Echo Lite - High Level System Architecture
+
+package "Frontend" {
+  [Web Client] as Client
+  note right of Client
+    HTML/CSS/JS
+    Hosted via HTTP Server
+  end note
+}
+
+package "Backend API" {
+  [API Gateway] as API
+  [Auth Service] as Auth
+  [Events Service] as Events
+  [AI Service] as AI
+  
+  API --> Auth : Routes /auth
+  API --> Events : Routes /events
+  API --> AI : Routes /ai
+}
+
+database "PostgreSQL" as DB {
+  [Users Table]
+  [Events Table]
+  [Venues Table]
+}
+
+cloud "External Services" {
+  [OpenAI / Gemini] as AIProvider
+}
+
+Client --> API : HTTP/REST
+Auth --> DB : Read/Write
+Events --> DB : Read/Write
+AI --> AIProvider : API Calls
+
+@enduml

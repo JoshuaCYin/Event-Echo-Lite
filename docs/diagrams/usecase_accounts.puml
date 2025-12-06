@@ -1,0 +1,28 @@
+@startuml
+!theme plain
+title Event Echo Lite - Account Management Use Cases
+
+left to right direction
+actor "User" as user
+actor "Admin" as admin
+
+package "Account System" {
+  usecase "Register Account" as UC1
+  usecase "Login" as UC2
+  usecase "View Profile" as UC3
+  usecase "Update Profile" as UC4
+  usecase "Delete Account" as UC5
+  usecase "Manage Users" as UC6
+}
+
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+user --> UC5
+
+admin --> UC2
+admin --> UC6
+admin --> UC5
+
+@enduml

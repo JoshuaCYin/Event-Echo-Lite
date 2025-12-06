@@ -1,0 +1,32 @@
+@startuml
+!theme plain
+title Event Echo - Deployment Diagram
+
+node "User Device" {
+    component "Web Browser" as Browser
+}
+
+node "Application Server" {
+    component "Flask Application" as FlaskApp {
+        [Auth Blueprint]
+        [Events Blueprint]
+        [AI Blueprint]
+    }
+    
+    component "Gunicorn / WSGI" as WSGI
+}
+
+node "Database Server" {
+    database "PostgreSQL" as Postgres
+}
+
+cloud "AI Provider" {
+    [LLM API] as LLM
+}
+
+Browser -- WSGI : HTTP (Port 8080)
+WSGI -- FlaskApp
+FlaskApp -- Postgres : TCP/IP (Port 5432)
+FlaskApp -- LLM : HTTPS
+
+@enduml

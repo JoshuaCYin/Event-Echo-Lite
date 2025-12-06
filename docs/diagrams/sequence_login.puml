@@ -1,0 +1,39 @@
+@startuml
+!theme plain
+title Event Echo Lite - User Login Sequence
+
+actor User
+participant "Frontend UI" as UI
+participant "API Gateway" as API
+participant "Auth Service" as Auth
+database "Database" as DB
+
+User -> UI : Enters Email & Password
+UI -> API : POST /auth/login
+activate API
+
+API -> Auth : Validate Credentials
+activate Auth
+
+Auth -> DB : SELECT * FROM users WHERE email = ?
+activate DB
+DB --> Auth : User Record (Hash)
+deactivate DB
+
+Auth -> Auth : Verify Password Hash
+
+alt Valid Credentials
+    Auth -> Auth : Generate JWT Token
+    Auth --> API : Token & User Info
+    API --> UI : 200 OK (Token)
+    UI -> User : Redirect to Dashboard
+else Invalid Credentials
+    Auth --> API : Error
+    API --> UI : 401 Unauthorized
+    UI -> User : Show Error Message
+end
+
+deactivate Auth
+deactivate API
+
+@enduml

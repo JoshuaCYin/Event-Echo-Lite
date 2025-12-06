@@ -1,0 +1,32 @@
+@startuml
+!theme plain
+title Event Echo Lite - RSVP Sequence
+
+actor User
+participant "Frontend UI" as UI
+participant "API Gateway" as API
+participant "Events Service" as Events
+database "Database" as DB
+
+User -> UI : Clicks "RSVP" (Going/Maybe)
+UI -> API : POST /events/{id}/rsvp
+activate API
+
+API -> Events : Process RSVP
+activate Events
+
+Events -> Events : Verify Token
+
+Events -> DB : INSERT/UPDATE rsvps
+activate DB
+DB --> Events : Success
+deactivate DB
+
+Events --> API : RSVP Updated
+API --> UI : 200 OK
+UI -> User : Update Button State
+
+deactivate Events
+deactivate API
+
+@enduml
