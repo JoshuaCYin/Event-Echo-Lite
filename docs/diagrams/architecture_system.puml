@@ -1,6 +1,6 @@
 @startuml
 !theme plain
-title Event Echo Lite - High Level System Architecture
+title Event Echo - High Level System Architecture
 
 package "Frontend" {
   [Web Client] as Client

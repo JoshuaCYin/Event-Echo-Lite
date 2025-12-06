@@ -1,6 +1,6 @@
 @startuml
 !theme plain
-title Event Echo Lite - Event Management Use Cases
+title Event Echo - Event Management Use Cases
 
 left to right direction
 actor "Attendee" as attendee
@@ -12,7 +12,7 @@ package "Event System" {
   usecase "View Event Details" as UC_View
   usecase "RSVP to Event" as UC_RSVP
   usecase "Create Event" as UC_Create
-  usecase "Update Event" as UC_Update
+  usecase "Update Event" as
   usecase "Cancel Event" as UC_Cancel
   usecase "Write Review" as UC_Review
 }

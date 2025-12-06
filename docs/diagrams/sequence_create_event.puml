@@ -1,6 +1,6 @@
 @startuml
 !theme plain
-title Event Echo Lite - Create Event Sequence
+title Event Echo - Create Event Sequence
 
 actor Organizer
 participant "Frontend UI" as UI

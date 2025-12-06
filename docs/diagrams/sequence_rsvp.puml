@@ -1,6 +1,6 @@
 @startuml
 !theme plain
-title Event Echo Lite - RSVP Sequence
+title Event Echo - RSVP Sequence
 
 actor User
 participant "Frontend UI" as UI

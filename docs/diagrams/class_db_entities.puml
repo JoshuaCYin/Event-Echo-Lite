@@ -1,6 +1,6 @@
 @startuml
 !theme plain
-title Event Echo Lite - Database Entities
+title Event Echo - Database Entities
 
 entity "users" as users {
   *user_id : serial <<PK>>

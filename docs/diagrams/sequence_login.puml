@@ -1,6 +1,6 @@
 @startuml
 !theme plain
-title Event Echo Lite - User Login Sequence
+title Event Echo - User Login Sequence
 
 actor User
 participant "Frontend UI" as UI

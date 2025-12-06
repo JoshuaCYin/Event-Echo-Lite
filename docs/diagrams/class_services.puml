@@ -1,6 +1,6 @@
 @startuml
 !theme plain
-title Event Echo Lite - Service Layer
+title Event Echo  - Service Layer
 
 package "Backend Services" {
     
