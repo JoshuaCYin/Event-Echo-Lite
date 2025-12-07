@@ -1,0 +1,39 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+title Event Echo - Use Case: Plan Event with AI Assistant
+
+actor "Event Organizer" as Organizer
+
+rectangle "Event Echo" {
+    usecase "Chat with AI Assistant" as ChatAI
+    usecase "Generate Event Draft" as GenDraft
+    usecase "Refine Event Details" as Refine
+    usecase "Review Event Draft" as Review
+    usecase "Auto-fill Event Form" as AutoFill
+    usecase "Publish Event" as PublishEvent
+
+    Organizer --> ChatAI : Initiates conversation
+    ChatAI <.. GenDraft : <<extend>>
+    GenDraft <.. Refine : <<extend>>
+    GenDraft ..> Review : <<include>>
+    Review ..> AutoFill : <<include>>
+    AutoFill --> PublishEvent
+    
+    note top of ChatAI
+        Organizer asks for ideas
+        or provides rough details
+    end note
+
+    note top of GenDraft
+        AI suggests title, description,
+        time, and location
+    end note
+
+    note top of AutoFill
+        System populates the
+        creation form with
+        AI-generated data
+    end note
+}
+@enduml

@@ -1,0 +1,72 @@
+@startuml
+!theme plain
+title Event Echo - User Viewing and RSVPing to Event Sequence
+
+actor User
+participant "EventsPage\n(Frontend)" as Page
+participant "RsvpBtn\n(Component)" as Btn
+participant "API Wrapper" as API
+participant "EventsController\n(Backend)" as Backend
+database "Database" as DB
+
+== Viewing Events ==
+
+User -> Page : Opens Events Page
+activate Page
+
+Page -> Page : loadEvents()
+Page -> API : GET /events/
+activate API
+
+API -> Backend : Request Event List
+activate Backend
+Backend -> Backend : Verify Token (Optional)
+Backend -> DB : SELECT events + my_rsvp_status
+activate DB
+DB --> Backend : Return Data
+deactivate DB
+
+Backend --> API : JSON List of Events
+deactivate Backend
+
+API --> Page : Events Array
+deactivate API
+
+Page -> Page : renderEvents()
+note over Page : Events rendered with\ncurrent RSVP status
+deactivate Page
+
+== RSVPing to an Event ==
+
+User -> Btn : Clicks RSVP Button
+activate Btn
+
+Btn -> Btn : Selects Status\n(Using Dropdown/Toggle)
+
+Btn -> API : POST /events/{id}/rsvp\n{ status: 'going' }
+activate API
+
+API -> Backend : Request RSVP Update
+activate Backend
+
+Backend -> Backend : verify_token_from_request()
+Backend -> DB : INSERT ... ON CONFLICT UPDATE
+activate DB
+DB --> Backend : Success
+deactivate DB
+
+Backend --> API : { status: 'going' }
+deactivate Backend
+
+API --> Btn : Result Data
+deactivate API
+
+Btn -> Btn : Update Button UI\n(Color/Text Change)
+Btn -> Page : Trigger Callback (refresh view/filter)
+activate Page
+Page -> Page : re-apply filters / update view
+deactivate Page
+
+deactivate Btn
+
+@enduml

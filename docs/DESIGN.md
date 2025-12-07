@@ -18,3 +18,4 @@ The system design diagrams have been moved to the `docs/diagrams/` directory and
 ## Use Case Diagrams
 - **[Account Management](diagrams/usecase_accounts.puml)**: User registration, login, and profile management.
 - **[Event Management](diagrams/usecase_events.puml)**: Browsing, creating, and managing events.
+- **[Plan Event with AI](diagrams/usecase_plan_event_ai.puml)**: Deep dive into AI-assisted event planning.

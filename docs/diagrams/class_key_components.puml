@@ -1,0 +1,136 @@
+@startuml
+!theme plain
+title Event Echo - Class Diagram
+hide circle
+skinparam classAttributeIconSize 0
+
+' Base User Class
+class "User" {
+    + userId: int
+    + email: string
+    + firstName: string
+    + lastName: string
+    - passwordHash: string
+    + role: string
+    + major: string
+    + hobbies: string
+    + bio: string
+    + profilePicture: string
+    --
+    + createAccount()
+    + deleteAccount()
+    + login()
+    + logout()
+    + getProfile()
+    + updateProfile()
+}
+
+' Subclasses based on Role
+class "Administrator/IT" as Admin {
+    + manageUsers()
+    + setUserRole()
+    + deleteAnyEvent()
+}
+
+class "Attendee (Student)" as Student {
+    + rsvpToEvent()
+    + cancelRsvp()
+    + postReview()
+}
+
+class "Organizer" as Organizer {
+    + createEvent()
+    + editEvent()
+    + deleteEvent()
+    + viewEventStats()
+}
+
+User <|-- Admin
+User <|-- Student
+User <|-- Organizer
+
+' Event Class
+class "Event" {
+    + eventId: int
+    + title: string
+    + description: string
+    + startTime: datetime
+    + endTime: datetime
+    + locationType: enum
+    + customLocation: string
+    + mapLink: string
+    + visibility: enum
+    + status: enum
+    + organizerId: int
+    --
+    + getDetails()
+    + update()
+    + delete()
+    + addRsvp()
+    + addReview()
+}
+
+' Associations
+Organizer "1" --> "*" Event : creates >
+Student "*" --> "*" Event : rsvps >
+Admin --> "*" User : manages >
+
+' RSVP Entity (Association Class or Link)
+class "RSVP" {
+    + userId: int
+    + eventId: int
+    + status: enum {going, maybe}
+    --
+    + updateStatus()
+}
+
+Event "1" *-- "*" RSVP
+User "1" *-- "*" RSVP
+
+' Reviews
+class "EventReview" {
+    + reviewId: int
+    + userId: int
+    + eventId: int
+    + rating: int
+    + text: string
+    + createdAt: datetime
+}
+
+Event "1" *-- "*" EventReview
+User "1" --> "*" EventReview : writes >
+
+' Venue
+class "Venue" {
+    + venueId: int
+    + name: string
+    + building: string
+    + roomNumber: string
+    + capacity: int
+}
+
+Event "*" --> "0..1" Venue : located at >
+
+' Notification Service (Conceptual)
+class "Notification" {
+    + notificationId: int
+    + recipientId: int
+    + message: string
+    + type: enum
+    + timestamp: datetime
+    --
+    + send()
+}
+
+' AI Service
+class "AIChatbot" {
+    + services: [OpenAI, Gemini]
+    --
+    + handleChat(prompt, context)
+    + assistForm(prompt, currentValues)
+    + generateEventDraft()
+}
+
+User ..> AIChatbot : interacts with >
+
+@enduml

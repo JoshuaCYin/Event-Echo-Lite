@@ -15,16 +15,22 @@ package "Backend API" {
   [Auth Service] as Auth
   [Events Service] as Events
   [AI Service] as AI
+  [Planning Service] as Planning
+  [Venues Service] as Venues
   
   API --> Auth : Routes /auth
   API --> Events : Routes /events
   API --> AI : Routes /ai
+  API --> Planning : Routes /planning
+  API --> Venues : Routes /venues
 }
 
 database "PostgreSQL" as DB {
   [Users Table]
   [Events Table]
+  [Events RSVPS Table]
   [Venues Table]
+  [Planning Tasks Table]
 }
 
 cloud "External Services" {
