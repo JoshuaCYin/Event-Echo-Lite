@@ -1,7 +1,4 @@
 # System Design & Architecture
-
-The system design diagrams have been moved to the `docs/diagrams/` directory and converted to PlantUML format.
-
 ## Architecture
 - **[System Architecture](diagrams/architecture_system.puml)**: High-level overview of system components.
 - **[Deployment Diagram](diagrams/architecture_deployment.puml)**: Docker/Server deployment view.
