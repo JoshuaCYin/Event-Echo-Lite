@@ -10,6 +10,16 @@ os.environ["JWT_SECRET"] = "test_secret"
 def app():
     app = Flask(__name__)
     app.register_blueprint(auth_bp, url_prefix="/auth")
+    
+    from backend.events_service.routes import events_bp
+    app.register_blueprint(events_bp, url_prefix="/events")
+
+    from backend.ai_service.routes import ai_blueprint
+    app.register_blueprint(ai_blueprint, url_prefix="/ai")
+
+    from backend.planning_service.routes import planning_bp
+    app.register_blueprint(planning_bp, url_prefix="/planning")
+
     app.config["TESTING"] = True
     return app
 
