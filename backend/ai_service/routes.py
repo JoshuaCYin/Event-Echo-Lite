@@ -1,41 +1,37 @@
 import os
 from datetime import datetime
-import pytz
-from flask import Blueprint, request, jsonify
 import json
+from typing import Dict, Any, Optional, Union, Tuple
 
-# --- Database Import ---
+from flask import Blueprint, request, jsonify, Response
+
+# --- DATABASE IMPORT ---
 try:
     from backend.database.db_connection import get_db
 except ImportError:
     print("WARNING: Could not import get_db. AI service will not have live DB access.")
     get_db = None
 
-# --- OpenAI Imports ---
+# --- OPENAI IMPORTS ---
 from openai import OpenAI
-from openai import APIError as OpenAIAPIError
-from openai import APIConnectionError as OpenAIConnectionError
-from openai import AuthenticationError as OpenAIAuthError
-from openai import RateLimitError as OpenAIRateLimitError
 
-# --- Gemini Imports ---
+# --- GEMINI IMPORTS ---
 import google.genai as genai
 from google.genai import types
-from google.genai.errors import APIError as GeminiAPIError
 
-# --- Blueprint Setup ---
+# --- BLUEPRINT SETUP ---
 ai_blueprint = Blueprint('ai', __name__)
 
-# --- API Key Retrieval ---
+# --- API KEY RETRIEVAL ---
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 
-# --- Client Initialization ---
+# --- CLIENT INITIALIZATION ---
 openai_client = None
 gemini_model = None
 ACTIVE_AI_SERVICE = None
 
-# --- JSON Schema Definitions ---
+# --- JSON SCHEMA DEFINITIONS ---
 EVENT_DRAFT_SCHEMA = {
     "type": "object",
     "properties": {
@@ -62,7 +58,6 @@ EVENT_DRAFT_SCHEMA = {
     "required": ["title", "description"]
 }
 
-# --- NEW: Schema for the main chat response (for OpenAI tool use) ---
 CHAT_RESPONSE_SCHEMA = {
     "type": "object",
     "properties": {
@@ -78,37 +73,6 @@ CHAT_RESPONSE_SCHEMA = {
                 "start_time": {"type": "string"},
                 "end_time": {"type": "string"}
             }
-        }
-    },
-    "required": ["response"]
-}
-
-
-# Used for the Side-Car Wizard Helper
-# --- UPDATED: Added all form fields to the schema enum ---
-WIZARD_ACTION_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "response": {"type": "string", "description": "Helpful, concise text response to the user."},
-        "actions": {
-            "type": "array",
-            "description": "List of actions to populate form fields.",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "field": {
-                        "type": "string", 
-                        "enum": [
-                            "w-title", "w-description", "w-start", "w-end", "w-location_type", "w-venue", "w-customLocation", "w-visibility",
-                            "evTitle", "evDescription", "evStart", "evEnd", "evCustomLocation", "location_type", "visibility"
-                        ],
-                        "description": "The specific HTML ID or name of the input field to populate."
-                    },
-                    "value": {"type": "string", "description": "The text value to put into the field."}
-                },
-                "required": ["field", "value"]
-            },
-            "nullable": True
         }
     },
     "required": ["response"]
@@ -139,9 +103,7 @@ if ACTIVE_AI_SERVICE is None and GEMINI_API_KEY:
         print(f"WARNING: Gemini client initialization failed: {e}.")
 
 
-# --- System Prompts ---
-
-# --- UPDATED: Added User Profile Context and Recommendation Rules ---
+# --- SYSTEM PROMPTS ---
 MAIN_SYSTEM_PROMPT = f"""
 You are the "EventEcho AI Assistant".
 Your goal is to be a helpful event planning assistant.
@@ -185,7 +147,6 @@ IMPORTANT: User Time is the *only* correct current time.
     * `start_time` and `end_time` MUST be in future ISO 8601 format ('YYYY-MM-DDTHH:MM:SS').
 """
 
-# --- UPDATED: Added rule to prevent duplicate buttons ---
 WIZARD_SYSTEM_PROMPT = """
 You are an AI Co-Pilot for an event creation form.
 **CRITICAL:** You MUST reply in JSON format.
@@ -214,32 +175,43 @@ Your Goal: Help the user fill out the form fields based on their request and the
 - Keep `response` brief (under 100 words).
 """
 
-# --- Routes ---
+# --- ROUTES ---
 
 @ai_blueprint.route('/chat', methods=['POST'])
-def handle_chat():
+def handle_chat() -> Tuple[Response, int]:
+    """
+    Handle chat interactions with OpenAI or Gemini.
+    
+    Expects:
+    - prompt (str)
+    - history (list)
+    - event_context (str)
+    - user_profile (dict)
+    - user_time (str or dict)
+    
+    Returns:
+        200: JSON response from AI.
+        500: Server/AI error.
+    """
     if ACTIVE_AI_SERVICE is None:
         return jsonify({"error": "AI service is not configured."}), 500
 
-    data = request.json or {}
+    data: Dict[str, Any] = request.json or {}
     user_prompt = data.get("prompt")
     history = data.get("history", [])
     event_context = data.get("event_context", "No live event data provided.")
-    user_profile_data = data.get("user_profile", {}) # --- NEW: Get Profile Data
+    user_profile_data = data.get("user_profile", {}) 
 
     # Normalize user_time into a readable string for the system prompt
     raw_user_time = data.get("user_time")
+    user_time = "Unknown"
 
     if isinstance(raw_user_time, dict):
-        # New structured format from frontend
         iso = raw_user_time.get("iso")
         offset = raw_user_time.get("offset")
         local = raw_user_time.get("local")
-
-        # Build a clear unified sentence for AI
         user_time = f"{local} (ISO={iso}, UTC offset={offset} minutes)"
     else:
-        # Old format or missing
         if raw_user_time:
             user_time = str(raw_user_time)
         else:
@@ -248,8 +220,8 @@ def handle_chat():
     if not user_prompt:
         return jsonify({"error": "No prompt provided."}), 400
         
-    # --- NEW: Format User Profile for Prompt ---
-    if user_profile_data and not "error" in user_profile_data:
+    # --- Format User Profile for Prompt ---
+    if user_profile_data and "error" not in user_profile_data:
         profile_str = (
             f"- Name: {user_profile_data.get('first_name')} {user_profile_data.get('last_name')}\n"
             f"- Major: {user_profile_data.get('major_department', 'Undeclared')}\n"
@@ -259,7 +231,7 @@ def handle_chat():
     else:
         profile_str = "No specific user profile data available (User might be guest or has empty profile)."
 
-    # --- UPDATED: Pass current user time AND profile to system prompt ---
+    # --- Insert dynamic data into the system prompt ---
     system_prompt = MAIN_SYSTEM_PROMPT.replace(
         "{user_time_placeholder}", 
         user_time
@@ -278,7 +250,7 @@ def handle_chat():
             messages.append({"role": "user", "content": user_prompt})
             messages.append({"role": "system", "content": f"--- EVENTS ---\n{event_context}"})
 
-            # --- UPDATED: Use tool calling to enforce JSON schema ---
+            # --- Use tool calling with schema ---
             response = openai_client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=messages,
@@ -300,15 +272,12 @@ def handle_chat():
             if tool_call.function.name == "submit_chat_response":
                 result_json = json.loads(tool_call.function.arguments)
 
-                # --- START CORRECTED PATCH LOGIC ---
                 draft = result_json.get('eventDraft')
 
                 if draft:
                     # PATCH to enforce UTC format (YYYY-MM-DDTHH:MM:SSZ)
                     for key in ['start_time', 'end_time']:
                         time_str = draft.get(key)
-                        # Check for the 19-character non-Z format (e.g., "2025-12-10T15:00:00")
-                        # We also check that it doesn't already have an offset (like +01:00 or -05:00)
                         if (time_str and 
                             len(time_str) == 19 and 
                             time_str.count(':') == 2 and 
@@ -318,18 +287,14 @@ def handle_chat():
                             
                             draft[key] = time_str + 'Z'
                     
-                    # Ensure the fixed draft is put back into the result
                     result_json['eventDraft'] = draft
-                # --- END CORRECTED PATCH LOGIC ---
                 
-                # --- This key is now 'eventDraft' from the schema ---
                 if "eventDraft" in result_json and result_json["eventDraft"]:
                     result_json["eventDraft"] = result_json["eventDraft"] 
 
                 return jsonify(result_json)
             else:
                 raise Exception("AI did not use the correct tool.")
-            # --- END OF UPDATE ---
 
         elif ACTIVE_AI_SERVICE == "gemini":
             # Gemini JSON Schema Config
@@ -368,14 +333,13 @@ def handle_chat():
             )
             result_json = json.loads(response.text)
 
-            # --- START PATCH FOR GEMINI ---
+            # --- PATCH to enforce UTC format in eventDraft ---
             draft = result_json.get('eventDraft')
 
             if draft:
                 # PATCH to enforce UTC format (YYYY-MM-DDTHH:MM:SSZ)
                 for key in ['start_time', 'end_time']:
                     time_str = draft.get(key)
-                    # Check for the 19-character non-Z format
                     if (time_str and 
                         len(time_str) == 19 and 
                         time_str.count(':') == 2 and 
@@ -385,9 +349,7 @@ def handle_chat():
                         
                         draft[key] = time_str + 'Z'
                 
-                # Ensure the fixed draft is put back into the result
                 result_json['eventDraft'] = draft
-            # --- END PATCH FOR GEMINI ---
 
             if "eventDraft" in result_json and result_json["eventDraft"]:
                  result_json["eventDraft"] = result_json["eventDraft"]
@@ -399,10 +361,13 @@ def handle_chat():
 
 
 @ai_blueprint.route('/wizard-helper', methods=['POST'])
-def handle_wizard_helper():
+def handle_wizard_helper() -> Tuple[Response, int]:
     """
     Handles specific field-level assistance (Wizard & Main Form).
-    Returns JSON with 'response' and optional 'actions'.
+    
+    Returns:
+        200: JSON with 'response' and 'actions'.
+        500: AI/Server error.
     """
     if ACTIVE_AI_SERVICE is None:
         return jsonify({"error": "AI service is not configured."}), 500
@@ -410,13 +375,11 @@ def handle_wizard_helper():
     data = request.json or {}
     user_prompt = data.get("prompt")
     context = data.get("context", "general")
-    history = data.get("history", [])  # <--- NEW: Get history
+    history = data.get("history", [])
     
-    # Optional: Allow passing current field values to help the AI rewrite them
     current_values = data.get("current_values", {})
-    user_time = data.get("user_time")  # ISO string from browser
+    user_time = data.get("user_time") 
     
-    # Context block for the current turn
     current_context_block = (
         f"Context: {context}\n"
         f"User Time: {user_time}\n"
@@ -427,12 +390,10 @@ def handle_wizard_helper():
         if ACTIVE_AI_SERVICE == "openai":
             messages = [{"role": "system", "content": WIZARD_SYSTEM_PROMPT}]
             
-            # --- NEW: Append History ---
             for item in history:
                 role = "assistant" if item["role"] == "ai" else item["role"]
                 messages.append({"role": role, "content": item["content"]})
             
-            # Append current request with context
             messages.append({"role": "user", "content": f"{current_context_block}\nUser Request: {user_prompt}"})
 
             response = openai_client.chat.completions.create(
@@ -448,8 +409,6 @@ def handle_wizard_helper():
             return jsonify(result)
 
         elif ACTIVE_AI_SERVICE == "gemini":
-            # Gemini Schema for Actions
-            # --- UPDATED: Using the global WIZARD_ACTION_SCHEMA ---
             gemini_wizard_schema = types.Schema(
                 type=types.Type.OBJECT,
                 properties={
@@ -469,14 +428,12 @@ def handle_wizard_helper():
                 required=["response", "actions"]
             )
 
-            # --- NEW: Build Content with History ---
             contents = [types.Part(text=WIZARD_SYSTEM_PROMPT, role="user")]
             
             for item in history:
                 role = "model" if item["role"] == "ai" else "user"
                 contents.append(types.Part(text=item["content"], role=role))
             
-            # Append current request
             contents.append(types.Part(text=f"{current_context_block}\nUser Request: {user_prompt}", role="user"))
 
             response = gemini_model.generate_content(

@@ -19,9 +19,19 @@ if not DATABASE_URL:
 def get_db():
     """
     Returns a new psycopg2 connection with dictionary-based row access.
+
+    This utility ensures consistent connection parameters across services.
     
-    The caller is responsible for closing the connection.
-    Using 'with get_db() as conn:' is recommended.
+    Usage:
+        with get_db() as conn:
+            with conn.cursor() as cur:
+                cur.execute(...)
+    
+    Returns:
+        psycopg2.extensions.connection: A connection object with DictCursor factory.
+    
+    Raises:
+        psycopg2.Error: If connection fails.
     """
     try:
         # Connect to the PostgreSQL database

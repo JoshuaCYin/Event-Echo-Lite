@@ -8,29 +8,30 @@ Provides routes for:
 - Profile retrieval (/me)
 - Profile update (/me PUT)
 - Admin role assignment
-- Admin user listing (New)
+- Admin user listing
 
 All JWT logic is delegated to `auth_service.utils`.
 """
 
-from flask import Blueprint, request, jsonify
+import logging
+from typing import Tuple, Dict, Any, Union
+
+import psycopg2.errors
 from argon2 import PasswordHasher
+from flask import Blueprint, request, jsonify, Response
 from backend.database.db_connection import get_db
 from backend.auth_service.utils import create_token, verify_token_from_request
-import psycopg2.errors
-import logging
 
 auth_bp = Blueprint("auth", __name__)
 ph = PasswordHasher()
 
 
-# ----------------------------------------------------
-# REQUEST LOGGING
-# ----------------------------------------------------
+# --- REQUEST LOGGING ---
 @auth_bp.before_request
-def before_request():
+def before_request() -> None:
     """
-    Log every incoming request to the authentication service.
+    Log every incoming request header and method to the authentication service.
+    Useful for debugging and audit trails.
     """
     logging.info(
         f"[Auth] Incoming {request.method} {request.path} "
@@ -39,41 +40,42 @@ def before_request():
 
 
 @auth_bp.after_request
-def after_request(response):
+def after_request(response: Response) -> Response:
     """
     Log the response status code for every request.
+
+    Args:
+        response (Response): The Flask response object.
+
+    Returns:
+        Response: The passed-through response object.
     """
     logging.info(f"[Auth] Response {response.status}")
     return response
 
 
-# ----------------------------------------------------
-# REGISTER
-# ----------------------------------------------------
+# --- REGISTER ---
 @auth_bp.route("/register", methods=["POST"])
-def register():
+def register() -> Tuple[Response, int]:
     """
-    Register a new user.
+    Register a new user in the system.
 
-    Expected JSON body:
-        {
-            "email": "example@example.com",
-            "password": "password123",
-            "first_name": "John",
-            "last_name": "Doe"
-        }
+    Expects a JSON body with:
+    - email (str): Unique email address.
+    - password (str): Minimum 8 characters.
+    - first_name (str)
+    - last_name (str)
 
     Returns:
-        201: { "user_id": int, "role": str, "token": str }
-        400: missing fields or invalid input
-        400: email already exists
-        500: hashing or database failure
+        201: JSON with user_id, role, and a new JWT token.
+        400: Missing fields, invalid input, or email already exists.
+        500: Server-side error (hashing or database).
     """
-    data = request.get_json() or {}
-    email = (data.get("email") or "").strip().lower()
-    password = data.get("password", "")
-    first_name = data.get("first_name")
-    last_name = data.get("last_name")
+    data: Dict[str, Any] = request.get_json() or {}
+    email: str = (data.get("email") or "").strip().lower()
+    password: str = data.get("password", "")
+    first_name: str = data.get("first_name")
+    last_name: str = data.get("last_name")
 
     # Validate input
     if not email or not password:
@@ -83,7 +85,7 @@ def register():
     if len(password) < 8:
         return jsonify({"error": "Password must be at least 8 characters"}), 400
 
-    # Hash password
+    # Hash password using Argon2
     try:
         pw_hash = ph.hash(password)
     except Exception:
@@ -109,34 +111,31 @@ def register():
     user_id = user["user_id"]
     role = user["role"]
 
+    # Generate initial token for immediate login
     token = create_token(user_id, role)
 
     return jsonify({"user_id": user_id, "role": role, "token": token}), 201
 
 
-# ----------------------------------------------------
-# LOGIN
-# ----------------------------------------------------
+# --- LOGIN ---
 @auth_bp.route("/login", methods=["POST"])
-def login():
+def login() -> Tuple[Response, int]:
     """
     Authenticate a user and return a JWT.
 
-    Expected JSON body:
-        {
-            "email": "example@example.com",
-            "password": "password123"
-        }
+    Expects a JSON body with:
+    - email (str)
+    - password (str)
 
     Returns:
-        200: { "user_id": int, "role": str, "token": str }
-        400: missing credentials
-        401: invalid credentials
-        500: database error
+        200: JSON with user_id, role, and JWT token.
+        400: Missing credentials.
+        401: Invalid credentials (wrong password or email).
+        500: Database error.
     """
-    data = request.get_json() or {}
-    email = (data.get("email") or "").strip().lower()
-    password = data.get("password", "")
+    data: Dict[str, Any] = request.get_json() or {}
+    email: str = (data.get("email") or "").strip().lower()
+    password: str = data.get("password", "")
 
     if not email or not password:
         return jsonify({"error": "Email and password required"}), 400
@@ -154,7 +153,7 @@ def login():
     if not user:
         return jsonify({"error": "Invalid credentials"}), 401
 
-    # Verify password
+    # Verify password against hash
     try:
         ph.verify(user["password_hash"], password)
     except Exception:
@@ -169,22 +168,18 @@ def login():
     }), 200
 
 
-# ----------------------------------------------------
-# DELETE ACCOUNT
-# ----------------------------------------------------
+# --- DELETE ACCOUNT ---
 @auth_bp.route("/delete", methods=["POST"])
-def delete_account():
+def delete_account() -> Union[Tuple[Response, int], Tuple[Dict[str, str], int]]:
     """
-    Delete the authenticated user's account.
-
-    Authorization:
-        Requires header:
-            Authorization: Bearer <token>
+    Delete the authenticated user's account permanently.
+    
+    Requires Authorization header: Bearer <token>
 
     Returns:
-        200: { "status": "deleted" }
-        401/403: auth failure
-        500: database error
+        200: JSON status "deleted".
+        401/403: Authentication failure.
+        500: Database error.
     """
     user_id, _, err, code = verify_token_from_request()
     if err:
@@ -203,23 +198,19 @@ def delete_account():
     return jsonify({"status": "deleted"}), 200
 
 
-# ----------------------------------------------------
-# GET CURRENT USER
-# ----------------------------------------------------
+# --- GET CURRENT USER ---
 @auth_bp.route("/me", methods=["GET"])
-def get_current_user():
+def get_current_user() -> Tuple[Response, int]:
     """
-    Retrieve the current user's full profile.
+    Retrieve the current user's full profile details.
 
-    Authorization:
-        Requires header:
-            Authorization: Bearer <token>
+    Requires Authorization header: Bearer <token>
 
     Returns:
-        200: user object
-        401/403: auth failure
-        404: not found
-        500: database error
+        200: User profile object.
+        401/403: Authentication failure.
+        404: User not found in DB (edge case).
+        500: Database error.
     """
     user_id, _, err, code = verify_token_from_request()
     if err:
@@ -247,38 +238,32 @@ def get_current_user():
     return jsonify(dict(user)), 200
 
 
-# ----------------------------------------------------
-# UPDATE CURRENT USER
-# ----------------------------------------------------
+# --- UPDATE CURRENT USER ---
 @auth_bp.route("/me", methods=["PUT"])
-def update_current_user():
+def update_current_user() -> Tuple[Response, int]:
     """
-    Update any editable fields of the current user's profile.
+    Update specific fields of the current user's profile.
 
     Allowed fields:
-        - first_name
-        - last_name
-        - major_department
-        - phone_number
-        - hobbies
-        - bio
-        - profile_picture
+    - first_name, last_name
+    - major_department
+    - phone_number
+    - hobbies, bio
+    - profile_picture
 
-    Authorization:
-        Requires header:
-            Authorization: Bearer <token>
+    Requires Authorization header: Bearer <token>
 
     Returns:
-        200: updated user object
-        400: no valid fields
-        401/403: auth failure
-        500: database error
+        200: Updated user object.
+        400: No valid fields provided.
+        401/403: Authentication failure.
+        500: Update failed.
     """
     user_id, _, err, code = verify_token_from_request()
     if err:
         return err, code
 
-    data = request.get_json() or {}
+    data: Dict[str, Any] = request.get_json() or {}
 
     allowed = [
         "first_name",
@@ -308,21 +293,22 @@ def update_current_user():
                 cur.execute(sql, values)
                 updated_user = cur.fetchone()
                 conn.commit()
-    except Exception as e:
+    except Exception:
         return jsonify({"error": "Update failed"}), 500
 
     return jsonify(dict(updated_user)), 200
 
 
-# ----------------------------------------------------
-# LIST USERS (ADMIN ONLY)
-# ----------------------------------------------------
+# --- LIST USERS (ADMIN ONLY) ---
 @auth_bp.route("/users", methods=["GET"])
-def list_users():
+def list_users() -> Tuple[Response, int]:
     """
-    Admin-only endpoint to list all users.
+    Admin-only endpoint to list all users in the system.
+
     Returns:
-        200: [ {user_id, email, first_name, last_name, role}, ... ]
+        200: List of user objects.
+        401/403: Unauthorized (not an admin).
+        500: Database error.
     """
     _, _, err, code = verify_token_from_request(required_roles=["admin"])
     if err:
@@ -339,7 +325,7 @@ def list_users():
             with conn.cursor() as cur:
                 cur.execute(sql)
                 users = [dict(row) for row in cur.fetchall()]
-                # Convert timestamps to string
+                # Convert timestamps to ISO string for JSON serialization
                 for u in users:
                     if u.get('created_at'):
                         u['created_at'] = u['created_at'].isoformat()
@@ -350,36 +336,26 @@ def list_users():
     return jsonify(users), 200
 
 
-# ----------------------------------------------------
-# SET ROLE (ADMIN ONLY)
-# ----------------------------------------------------
+# --- SET ROLE (ADMIN ONLY) ---
 @auth_bp.route("/set-role", methods=["POST"])
-def set_role():
+def set_role() -> Tuple[Response, int]:
     """
-    Admin-only endpoint to change a user's role.
+    Admin-only endpoint to promote or demote a user's role.
 
-    Expected JSON body:
-        {
-            "user_id": <int>,
-            "role": "attendee" | "organizer" | "admin"
-        }
-
-    Authorization:
-        Requires header:
-            Authorization: Bearer <admin-token>
-        AND token.role must be "admin".
+    Expects JSON:
+        { "user_id": int, "role": "attendee" | "organizer" | "admin" }
 
     Returns:
-        200: { "status": "ok" }
-        400: invalid input
-        401/403: unauthorized
-        500: database failure
+        200: Success status.
+        400: Invalid role or user_id.
+        401/403: Unauthorized.
+        500: Database error.
     """
     _, _, err, code = verify_token_from_request(required_roles=["admin"])
     if err:
         return err, code
 
-    data = request.get_json() or {}
+    data: Dict[str, Any] = request.get_json() or {}
     target_id = data.get("user_id")
     new_role = data.get("role")
 

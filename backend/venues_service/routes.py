@@ -1,18 +1,26 @@
 """
 Venues service route handlers.
-Manages on-campus locations.
+Manages on-campus locations and their details.
 """
 
-from flask import Blueprint, request, jsonify
+from typing import Tuple, Dict, Any
+
+from flask import Blueprint, request, jsonify, Response
 from backend.database.db_connection import get_db
 from backend.auth_service.utils import verify_token_from_request
 
 venues_bp = Blueprint("venues", __name__)
 
 @venues_bp.route("/", methods=["GET"])
-def list_venues():
+def list_venues() -> Tuple[Response, int]:
     """
-    Get all venues. Public access allowed (anyone can see venues).
+    Get all venues. 
+    
+    Public access allowed (anyone can see venues).
+    
+    Returns:
+        200: List of venues.
+        500: Database error.
     """
     sql = "SELECT * FROM venues ORDER BY name;"
     try:
@@ -27,15 +35,27 @@ def list_venues():
 
 
 @venues_bp.route("/", methods=["POST"])
-def create_venue():
+def create_venue() -> Tuple[Response, int]:
     """
     Admin-only: Create a new venue.
+    
+    Expects JSON:
+    - name (str)
+    - building (str)
+    - room_number (str, optional)
+    - google_maps_link (str, optional)
+    
+    Returns:
+        201: Created venue object.
+        400: Validation error.
+        403: Forbidden (not admin).
+        500: Server error.
     """
     _, _, err, code = verify_token_from_request(required_roles=["admin"])
     if err:
         return err, code
 
-    data = request.get_json() or {}
+    data: Dict[str, Any] = request.get_json() or {}
     name = data.get("name")
     building = data.get("building")
     
@@ -66,15 +86,21 @@ def create_venue():
 
 
 @venues_bp.route("/<int:venue_id>", methods=["PUT"])
-def update_venue(venue_id):
+def update_venue(venue_id: int) -> Tuple[Response, int]:
     """
     Admin-only: Update a venue.
+    
+    Returns:
+        200: Updated venue object.
+        400: No fields to update.
+        403: Forbidden.
+        404: Venue not found.
     """
     _, _, err, code = verify_token_from_request(required_roles=["admin"])
     if err:
         return err, code
 
-    data = request.get_json() or {}
+    data: Dict[str, Any] = request.get_json() or {}
     
     # Simple dynamic update query builder
     allowed_fields = ["name", "building", "room_number", "google_maps_link"]
@@ -107,9 +133,14 @@ def update_venue(venue_id):
 
 
 @venues_bp.route("/<int:venue_id>", methods=["DELETE"])
-def delete_venue(venue_id):
+def delete_venue(venue_id: int) -> Tuple[Response, int]:
     """
     Admin-only: Delete a venue.
+    
+    Returns:
+        200: Success status.
+        403: Forbidden.
+        404: Venue not found.
     """
     _, _, err, code = verify_token_from_request(required_roles=["admin"])
     if err:

@@ -1,13 +1,17 @@
 """
 Events service routes: create, read, update, delete events, and RSVP.
+Handles event lifecycle management and participation.
 """
 
-from flask import Blueprint, request, jsonify
-from backend.database.db_connection import get_db
-from backend.auth_service.utils import verify_token_from_request, verify_token
 import os
 from datetime import datetime
+from typing import Tuple, Dict, Any, Optional
+
+from flask import Blueprint, request, jsonify, Response
 from dotenv import load_dotenv
+
+from backend.database.db_connection import get_db
+from backend.auth_service.utils import verify_token_from_request, verify_token
 
 load_dotenv()
 
@@ -17,11 +21,17 @@ events_bp = Blueprint("events", __name__)
 TITLE_MAX_LENGTH = 200
 VALID_VISIBILITY = ['public', 'private']
 VALID_LOCATION_TYPES = ['venue', 'custom']
-VALID_STATUSES = ['upcoming', 'cancelled', 'completed'] # Add any other statuses you use
+VALID_STATUSES = ['upcoming', 'cancelled', 'completed'] 
 
-def parse_dt(val):
+def parse_dt(val: Optional[str]) -> Optional[datetime]:
     """
-    Safely parse an ISO-8601 or datetime-local string.
+    Safely parse an ISO-8601 or datetime-local string to a datetime object.
+    
+    Args:
+        val (str): The date string to parse.
+    
+    Returns:
+        datetime: The parsed datetime, or None if invalid.
     """
     if not val:
         return None
@@ -35,9 +45,18 @@ def parse_dt(val):
     
 
 @events_bp.route("/", methods=["GET"])
-def list_events():
+def list_events() -> Tuple[Response, int]:
     """
     Return all events based on user authentication.
+    
+    Query Logic:
+    - If logged in: Returns public events + user's private events.
+    - If anonymous: Returns only public events.
+    - Includes aggregate data: attendee_count, avg_rating, review_count.
+    
+    Returns:
+        200: List of event objects.
+        500: Database error.
     """
     auth_user_id = None
     auth = request.headers.get("Authorization", "")
@@ -45,7 +64,10 @@ def list_events():
         token = auth.split(" ", 1)[1]
         auth_user_id = verify_token(token)
 
-    # --- MODIFIED: Added avg_rating and review_count subqueries ---
+    # Complex Query Explanation:
+    # 1. Joins events with venues and users (organizers).
+    # 2. Left join on rsvps to check if the current user has RSVP'd.
+    # 3. Subqueries calculate attendee counts and review stats per event.
     base_sql = """
         SELECT 
             e.event_id, e.title, e.description, 
@@ -59,10 +81,8 @@ def list_events():
             e.venue_id,
             (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = e.event_id AND rsvps.rsvp_status = 'going') as attendee_count,
             
-            -- NEW --
             (SELECT AVG(rating) FROM event_reviews WHERE event_reviews.event_id = e.event_id) as avg_rating,
             (SELECT COUNT(*) FROM event_reviews WHERE event_reviews.event_id = e.event_id) as review_count
-            -- END NEW --
 
         FROM events e
         LEFT JOIN venues v ON e.venue_id = v.venue_id
@@ -95,7 +115,7 @@ def list_events():
                         row['start_time'] = row['start_time'].isoformat()
                     if row.get('end_time'):
                         row['end_time'] = row['end_time'].isoformat()
-                    # --- NEW: Convert decimal rating to float ---
+                    # Convert decimal rating to float
                     if row.get('avg_rating'):
                         row['avg_rating'] = float(row['avg_rating'])
 
@@ -107,9 +127,18 @@ def list_events():
 
 
 @events_bp.route("/<int:event_id>", methods=["GET"])
-def get_event(event_id):
+def get_event(event_id: int) -> Tuple[Response, int]:
     """
     Get a single event by ID.
+
+    Features:
+    - Checks visibility permissions (public vs private).
+    - Returns detailed info including venue and review stats.
+
+    Returns:
+        200: Event object.
+        403: Permission denied (private event, not owner).
+        404: Event not found.
     """
     auth_user_id = None
     auth = request.headers.get("Authorization", "")
@@ -117,7 +146,6 @@ def get_event(event_id):
         token = auth.split(" ", 1)[1]
         auth_user_id = verify_token(token)
 
-    # --- MODIFIED: Added avg_rating and review_count subqueries ---
     sql = """
         SELECT 
             e.event_id, e.title, e.description, 
@@ -128,10 +156,8 @@ def get_event(event_id):
             v.name AS venue_name,
             (SELECT COUNT(*) FROM rsvps WHERE rsvps.event_id = e.event_id AND rsvps.rsvp_status = 'going') as attendee_count,
             
-            -- NEW --
             (SELECT AVG(rating) FROM event_reviews WHERE event_reviews.event_id = e.event_id) as avg_rating,
             (SELECT COUNT(*) FROM event_reviews WHERE event_reviews.event_id = e.event_id) as review_count
-            -- END NEW --
 
         FROM events e
         LEFT JOIN venues v ON e.venue_id = v.venue_id
@@ -160,7 +186,7 @@ def get_event(event_id):
                     event_dict['start_time'] = event_dict['start_time'].isoformat()
                 if event_dict.get('end_time'):
                     event_dict['end_time'] = event_dict['end_time'].isoformat()
-                # --- NEW: Convert decimal rating to float ---
+                
                 if event_dict.get('avg_rating'):
                     event_dict['avg_rating'] = float(event_dict['avg_rating'])
 
@@ -170,15 +196,28 @@ def get_event(event_id):
         return jsonify({"error": "Failed to retrieve event"}), 500
 
 @events_bp.route("/", methods=["POST"])
-def create_event():
+def create_event() -> Tuple[Response, int]:
     """
     Create an event.
+
+    Validations:
+    - Time consistency (start < end).
+    - Location logic (venue vs custom).
+    - Venue availability (conflict check).
+    - Permissions (public events restricted to organizers/admins).
+    
+    Returns:
+        201: { "event_id": int }
+        400: Validation error.
+        403: Role permission error.
+        409: Venue conflict.
+        500: Server error.
     """
     user_id, role, err, code = verify_token_from_request()
     if err:
         return err, code
 
-    data = request.get_json() or {}
+    data: Dict[str, Any] = request.get_json() or {}
     
     title = data.get("title")
     start_str = data.get("start_time")
@@ -227,6 +266,7 @@ def create_event():
             "error": "Permission denied. Only organizers and admins can create public events."
         }), 403
 
+    # Check for scheduling conflicts at the venue
     if location_type == 'venue':
         conflict_sql = """
             SELECT event_id FROM events
@@ -280,15 +320,24 @@ def create_event():
 
 
 @events_bp.route("/<int:event_id>", methods=["PUT"])
-def update_event(event_id):
+def update_event(event_id: int) -> Tuple[Response, int]:
     """
-    Update an event if the caller is the organizer or admin.
+    Update an event.
+
+    Permission:
+    - Admin or Organizer
+    - OR the creator of the event
+
+    Returns:
+        200: Status updated.
+        400: Validation error.
+        403: Forbidden.
     """
     user_id, role, err, code = verify_token_from_request()
     if err:
         return err, code
 
-    data = request.get_json() or {}
+    data: Dict[str, Any] = request.get_json() or {}
     if not data:
         return jsonify({"error": "No update data provided"}), 400
         
@@ -311,7 +360,7 @@ def update_event(event_id):
                 conn.close()
                 return jsonify({"error": "Event not found"}), 404
 
-            # --- PERMISSION CHECKS (MOVED UP) ---
+            # --- PERMISSION CHECKS ---
             if role not in ['admin', 'organizer'] and ev["created_by"] != user_id:
                 conn.close()
                 return jsonify({"error": "Permission denied"}), 403
@@ -321,7 +370,7 @@ def update_event(event_id):
                     conn.close()
                     return jsonify({"error": "Only organizers/admins can make events public"}), 403
 
-        # --- START NEW VALIDATION BLOCK ---
+        # --- VALIDATION BLOCK ---
         
         if "title" in data:
             title = data.get("title")
@@ -330,7 +379,7 @@ def update_event(event_id):
             if len(title) > TITLE_MAX_LENGTH:
                 return jsonify({"error": f"Title must be {TITLE_MAX_LENGTH} characters or less."}), 400
 
-        # --- Datetime Validation ---
+        # --- DATETIME VALIDATION ---
         start_dt = parse_dt(data.get("start_time")) if "start_time" in data else None
         end_dt = parse_dt(data.get("end_time")) if "end_time" in data else None
 
@@ -340,14 +389,13 @@ def update_event(event_id):
             return jsonify({"error": "Invalid end_time format. Use ISO-8601."}), 400
 
         # Check final start/end times
-        # Use new time if provided, otherwise fall back to existing time from DB
         final_start = start_dt or ev['start_time']
         final_end = end_dt or ev['end_time']
 
         if final_start >= final_end:
             return jsonify({"error": "start_time must be before end_time"}), 400
         
-        # --- Enum Validations ---
+        # --- ENUM VALIDATIONS ---
         if "visibility" in data and data.get("visibility") not in VALID_VISIBILITY:
              return jsonify({"error": f"visibility must be one of: {', '.join(VALID_VISIBILITY)}"}), 400
 
@@ -357,17 +405,15 @@ def update_event(event_id):
         if "location_type" in data and data.get("location_type") not in VALID_LOCATION_TYPES:
              return jsonify({"error": f"location_type must be one of: {', '.join(VALID_LOCATION_TYPES)}"}), 400
              
-        # --- Location Logic Validation ---
-        # Determine the *final* state of the event after the update is applied
+        # --- LOCATION LOGIC VALIDATION ---
+        # Determine the *final* state of the event
         final_loc_type = data.get("location_type", ev['location_type'])
         final_venue_id = data.get("venue_id", ev['venue_id'])
         final_custom_loc = data.get("custom_location_address", ev['custom_location_address'])
 
-        # Handle edge case: if user sets venue_id, auto-set type to 'venue'
+        # Auto-set logic
         if "venue_id" in data and "location_type" not in data:
             final_loc_type = 'venue'
-
-        # Handle edge case: if user sets custom_addr, auto-set type to 'custom'
         if "custom_location_address" in data and "location_type" not in data:
             final_loc_type = 'custom'
 
@@ -376,8 +422,6 @@ def update_event(event_id):
         
         if final_loc_type == 'custom' and not final_custom_loc:
             return jsonify({"error": "custom_location_address is required for location_type 'custom'"}), 400
-
-        # --- END NEW VALIDATION BLOCK ---
 
         fields = []
         values = []
@@ -396,7 +440,7 @@ def update_event(event_id):
                 else:
                     values.append(data[key])
         
-        # Auto-update location_type if venue_id or custom_location_address was changed
+        # Auto-update location_type if needed
         if "venue_id" in data and "location_type" not in data:
              fields.append("location_type = 'venue'")
         elif "custom_location_address" in data and "location_type" not in data:
@@ -418,7 +462,7 @@ def update_event(event_id):
     except Exception as e:
         conn.rollback()
         print(f"Database error updating event {event_id}: {e}")
-        # Check for the specific error you mentioned
+        # Specific PG error catching could go here
         if "value too long for type character varying" in str(e):
              return jsonify({"error": "A value provided was too long for the database."}), 400
         return jsonify({"error": "Failed to update event"}), 500
@@ -430,7 +474,7 @@ def update_event(event_id):
 
 
 @events_bp.route("/<int:event_id>", methods=["DELETE"])
-def delete_event(event_id):
+def delete_event(event_id: int) -> Tuple[Response, int]:
     """
     Delete an event if the caller is the organizer, admin, or creator.
     """
@@ -463,15 +507,18 @@ def delete_event(event_id):
 
 
 @events_bp.route("/<int:event_id>/rsvp", methods=["POST"])
-def rsvp(event_id):
+def rsvp(event_id: int) -> Tuple[Response, int]:
     """
     RSVP to an event.
+    
+    Status can be 'going', 'maybe', or 'canceled' (upsert logic).
+    If status is missing, it removes the RSVP.
     """
     user_id, _, err, code = verify_token_from_request()
     if err:
         return err, code
 
-    data = request.get_json() or {}
+    data: Dict[str, Any] = request.get_json() or {}
     status = data.get("status")
     
     sql = ""
@@ -481,6 +528,7 @@ def rsvp(event_id):
         if status not in ["going", "maybe", "canceled"]:
             return jsonify({"error": "Invalid status"}), 400
         
+        # Upsert: Insert or Update
         sql = """
             INSERT INTO rsvps (user_id, event_id, rsvp_status) 
             VALUES (%s, %s, %s)
@@ -489,6 +537,7 @@ def rsvp(event_id):
         """
         params = (user_id, event_id, status)
     else:
+        # If no status, treat as removal
         sql = "DELETE FROM rsvps WHERE user_id = %s AND event_id = %s;"
         params = (user_id, event_id)
 
@@ -505,9 +554,10 @@ def rsvp(event_id):
 
 
 @events_bp.route("/<int:event_id>/rsvps", methods=["GET"])
-def get_rsvps(event_id):
+def get_rsvps(event_id: int) -> Tuple[Response, int]:
     """
     Get the list of attendees for an event.
+    Restricted to Organizers and Admins (or the event creator).
     """
     user_id, role, err, code = verify_token_from_request()
     if err:
@@ -544,7 +594,7 @@ def get_rsvps(event_id):
 
 
 @events_bp.route("/users/<int:user_id>/profile", methods=["GET"])
-def get_user_profile(user_id):
+def get_user_profile(user_id: int) -> Tuple[Response, int]:
     """
     Get public-facing profile info for a user.
     """
@@ -571,17 +621,13 @@ def get_user_profile(user_id):
         print(f"Database error getting profile: {e}")
         return jsonify({"error": "Failed to retrieve profile"}), 500
     
-# ------------------------------------------------------
-# --- NEW: REVIEWS ENDPOINTS ---
-# ------------------------------------------------------
+# --- REVIEWS ENDPOINTS ---
 
 @events_bp.route("/<int:event_id>/reviews", methods=["GET"])
-def get_event_reviews(event_id):
+def get_event_reviews(event_id: int) -> Tuple[Response, int]:
     """
     Get all reviews for a specific event.
     """
-    # Anyone can read reviews, so auth is not strictly required
-    # but you could add it if you want.
     
     sql = """
         SELECT 
@@ -611,23 +657,21 @@ def get_event_reviews(event_id):
 
 
 @events_bp.route("/<int:event_id>/review", methods=["POST"])
-def post_event_review(event_id):
+def post_event_review(event_id: int) -> Tuple[Response, int]:
     """
     Create or update a review for an event.
+    Upserts (ON CONFLICT DO UPDATE).
     """
     user_id, _, err, code = verify_token_from_request()
     if err:
         return err, code
 
-    data = request.get_json() or {}
+    data: Dict[str, Any] = request.get_json() or {}
     rating = data.get("rating")
     review_text = data.get("review_text")
 
     if not rating or not isinstance(rating, int) or not (1 <= rating <= 5):
         return jsonify({"error": "A rating between 1 and 5 is required"}), 400
-
-    # Optional: Check if the event is in the past before allowing a review
-    # (Skipped for simplicity, but you could add this)
 
     sql = """
         INSERT INTO event_reviews (event_id, user_id, rating, review_text)

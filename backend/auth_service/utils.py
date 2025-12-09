@@ -6,7 +6,8 @@ Provides token creation, verification, and role enforcement.
 import os
 import jwt
 from datetime import datetime, timedelta, timezone
-from flask import jsonify, request
+from typing import Tuple, Optional, Any
+from flask import jsonify, request, Response
 from dotenv import load_dotenv
 
 # Load .env only once here
@@ -19,12 +20,17 @@ if not JWT_SECRET:
 
 TOKEN_EXPIRATION_MINUTES = int(os.getenv("TOKEN_EXPIRATION_MINUTES", 1440))  # Default 24 hours
 
-# ----------------------------------------------------
-# JWT CREATION
-# ----------------------------------------------------
-def create_token(user_id: int, role: str):
+# --- JWT CREATION ---
+def create_token(user_id: int, role: str) -> str:
     """
     Generates a new JWT for a given user.
+
+    Args:
+        user_id (int): The unique ID of the user.
+        role (str): The role of the user (admin, organizer, attendee).
+
+    Returns:
+        str: Encoded JWT string.
     """
     now = datetime.now(timezone.utc)
 
@@ -37,14 +43,18 @@ def create_token(user_id: int, role: str):
 
     return jwt.encode(payload, JWT_SECRET, algorithm="HS256")
 
-# ----------------------------------------------------
-# JWT VALIDATION
-# ----------------------------------------------------
-def verify_token_from_request(required_roles=None):
+# --- JWT VALIDATION ---
+def verify_token_from_request(required_roles: Optional[list] = None) -> Tuple[Optional[int], Optional[str], Optional[Response], Optional[int]]:
     """
     Verify the JWT in the Authorization header.
-    Returns (user_id, role, None, None) if valid.
-    Returns (None, None, flask_response, status_code) on error.
+
+    Args:
+        required_roles (list, optional): List of allowed roles.
+
+    Returns:
+        tuple: (user_id, role, error_response, status_code)
+               If successful, error_response and status_code are None.
+               If failed, user_id and role are None.
     """
 
     auth = request.headers.get("Authorization", "")
@@ -70,9 +80,15 @@ def verify_token_from_request(required_roles=None):
     return user_id, role, None, None
 
 
-def verify_token(token: str):
+def verify_token(token: str) -> Optional[int]:
     """
-    Validate a JWT manually (optional).
+    Validate a JWT manually (optional usage).
+
+    Args:
+        token (str): JWT string.
+
+    Returns:
+        int: user_id if valid, None otherwise.
     """
     try:
         payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])

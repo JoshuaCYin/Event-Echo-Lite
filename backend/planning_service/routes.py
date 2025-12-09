@@ -1,26 +1,43 @@
 """
 Planning service routes: Manage tasks, Kanban board, and planning calendar.
+Supports organizers in managing event logistics.
 """
 
-from flask import Blueprint, request, jsonify
+import datetime
+from typing import Tuple, Dict, Any, Optional
+
+from flask import Blueprint, request, jsonify, Response
 from backend.database.db_connection import get_db
 from backend.auth_service.utils import verify_token_from_request
-import datetime
-import time
 
 planning_bp = Blueprint("planning", __name__)
 
-def parse_dt(val):
+def parse_dt(val: Optional[str]) -> Optional[datetime.datetime]:
+    """
+    Helper to parse ISO datetime strings.
+    """
     if not val: return None
     try:
         if val.endswith('Z'): val = val[:-1] + '+00:00'
         return datetime.datetime.fromisoformat(val)
-    except: return None
+    except Exception: return None
 
 @planning_bp.route("/tasks", methods=["GET"])
-def list_tasks():
+def list_tasks() -> Tuple[Response, int]:
     """
     Get all tasks ordered by position.
+    
+    Filters:
+    - ?event_id=<id> : Filter by specific event.
+    - ?event_id=global : Filter for tasks not linked to any event.
+    
+    Permissions:
+    - Admin or Organizer only.
+    
+    Returns:
+        200: List of task objects with assignee and event details.
+        403: Forbidden.
+        500: Database error.
     """
     user_id, role, err, code = verify_token_from_request()
     if err: return err, code
@@ -73,14 +90,24 @@ def list_tasks():
         return jsonify({"error": "Failed to fetch tasks"}), 500
 
 @planning_bp.route("/tasks", methods=["POST"])
-def create_task():
+def create_task() -> Tuple[Response, int]:
+    """
+    Create a new planning task.
+    
+    Auto-assigns a position at the bottom of the list (max(pos) + 1000).
+    
+    Returns:
+        201: { "task_id": int, "status": "created" }
+        400: Validation error.
+        403: Forbidden.
+    """
     user_id, role, err, code = verify_token_from_request()
     if err: return err, code
 
     if role not in ['admin', 'organizer']:
         return jsonify({"error": "Permission denied"}), 403
 
-    data = request.get_json()
+    data: Dict[str, Any] = request.get_json() or {}
     
     if not data.get('title'):
         return jsonify({"error": "Title is required"}), 400
@@ -90,7 +117,8 @@ def create_task():
             with conn.cursor() as cur:
                 # Get current max position to append to bottom
                 cur.execute("SELECT COALESCE(MAX(position), 0) FROM planning_tasks")
-                max_pos = cur.fetchone()[0]
+                result = cur.fetchone()
+                max_pos = result[0] if result else 0
                 new_pos = max_pos + 1000.0
 
                 sql = """
@@ -119,14 +147,26 @@ def create_task():
         return jsonify({"error": "Failed to create task"}), 500
 
 @planning_bp.route("/tasks/<int:task_id>", methods=["PUT"])
-def update_task(task_id):
+def update_task(task_id: int) -> Tuple[Response, int]:
+    """
+    Update an existing task.
+    
+    Allowed fields:
+        title, description, status, priority, due_date, 
+        assigned_to, event_id, position
+    
+    Returns:
+        200: Success status.
+        400: No valid fields.
+        403: Forbidden.
+    """
     user_id, role, err, code = verify_token_from_request()
     if err: return err, code
 
     if role not in ['admin', 'organizer']:
         return jsonify({"error": "Permission denied"}), 403
 
-    data = request.get_json()
+    data: Dict[str, Any] = request.get_json() or {}
     
     fields = []
     values = []
@@ -157,7 +197,14 @@ def update_task(task_id):
         return jsonify({"error": "Failed to update task"}), 500
 
 @planning_bp.route("/tasks/<int:task_id>", methods=["DELETE"])
-def delete_task(task_id):
+def delete_task(task_id: int) -> Tuple[Response, int]:
+    """
+    Delete a task.
+    
+    Returns:
+        200: Success status.
+        403: Forbidden.
+    """
     user_id, role, err, code = verify_token_from_request()
     if err: return err, code
 

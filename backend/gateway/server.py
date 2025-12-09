@@ -17,9 +17,12 @@ print("DEBUG_DATABASE_URL:", os.getenv("DATABASE_URL")) # For database URL debug
 # Basic console logging during API requests
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(asctime)s - %(message)s")
 
-def create_app():
+def create_app() -> Flask:
     """
     Application factory for creating the Flask app.
+    
+    Returns:
+        Flask: The configured Flask application.
     """
     app = Flask(__name__)
     # Configure CORS for S3 bucket
@@ -44,7 +47,7 @@ def create_app():
     # This allows imports like 'from backend.auth_service.routes import auth_bp'
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
     
-    # --- Register Blueprints ---
+    # --- REGISTER BLUEPRINTS ---
     try:
         from backend.auth_service.routes import auth_bp
         from backend.events_service.routes import events_bp
@@ -64,7 +67,7 @@ def create_app():
         logging.error(f"Failed to import blueprints. Module not found: {e}")
         sys.exit(1)
 
-    # --- Basic Health Checkpoints ---
+    # --- BASIC HEALTH CHECKPOINTS ---
     @app.route("/")
     def ping():
         """
