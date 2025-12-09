@@ -1,0 +1,68 @@
+@startuml
+!theme plain
+title Event Echo - General Use Case Diagram
+
+left to right direction
+
+actor "Guest" as guest
+actor "User/Attendee" as user
+actor "Organizer" as organizer
+actor "Admin" as admin
+
+guest <|-- user
+user <|-- organizer
+user <|-- admin
+
+rectangle "Event Echo System" {
+
+  ' Account System
+  usecase "Register" as UC_Register
+  usecase "Login" as UC_Login
+  usecase "View/Update Profile" as UC_Profile
+  usecase "Manage Users" as UC_ManageUsers
+
+  ' Event Discovery & Attendance
+  usecase "Browse/Search Events" as UC_Browse
+  usecase "View Event Details" as UC_View
+  usecase "RSVP to Event" as UC_RSVP
+  usecase "Write Review" as UC_Review
+
+  ' Event Management
+  usecase "Create Event" as UC_Create
+  usecase "Update Event" as UC_Update
+  usecase "Cancel/Delete Event" as UC_Cancel
+  usecase "Manage RSVPs" as UC_ManageRSVPs
+
+  ' AI Concierge
+  usecase "Plan Event with AI Assistance" as UC_AIPlan
+  usecase "Chat with AI Assistant" as UC_AIChat
+}
+
+' Guest interactions (Unauthenticated)
+guest --> UC_Register
+guest --> UC_Login
+guest --> UC_Browse
+guest --> UC_View
+
+' User interactions (Authenticated - Attendee role)
+user --> UC_Profile
+user --> UC_RSVP
+user --> UC_Review
+user --> UC_AIChat
+
+' Organizer interactions
+organizer --> UC_Create
+organizer --> UC_Update
+organizer --> UC_Cancel
+organizer --> UC_ManageRSVPs
+organizer --> UC_AIPlan
+
+' Link AI planning to creation
+UC_AIPlan ..> UC_Create : <<include>>
+
+' Admin interactions
+admin --> UC_ManageUsers
+admin --> UC_Cancel
+admin --> UC_ManageRSVPs
+
+@enduml

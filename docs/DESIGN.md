@@ -13,6 +13,7 @@
 - **[RSVP Flow](diagrams/sequence_rsvp.puml)**: User RSVP interaction.
 
 ## Use Case Diagrams
+- **[General Overview](diagrams/usecase_general.puml)**: High-level use case diagram encompassing all key features.
 - **[Account Management](diagrams/usecase_accounts.puml)**: User registration, login, and profile management.
 - **[Event Management](diagrams/usecase_events.puml)**: Browsing, creating, and managing events.
 - **[Plan Event with AI](diagrams/usecase_plan_event_ai.puml)**: Deep dive into AI-assisted event planning.
