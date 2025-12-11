@@ -1,0 +1,84 @@
+@startuml
+!theme plain
+title Event Echo - Distributed Service Architecture
+
+package "Frontend Layer" {
+  [Web Client] as Client
+  note right of Client
+    React / SPA
+    Hosted on CDN/Static Server
+  end note
+}
+
+package "API Gateway Layer" {
+  node "Gateway Server" {
+    [API Gateway] as Gateway
+    note right of Gateway
+      Routing, Rate Limiting,
+      SSL Termination
+    end note
+  }
+}
+
+package "Microservices Layer" {
+  node "Auth Server" {
+    [Auth Service] as Auth
+  }
+
+  node "Events Server" {
+    [Events Service] as Events
+  }
+
+  node "Venues Server" {
+    [Venues Service] as Venues
+  }
+
+  node "Planning Server" {
+    [Planning Service] as Planning
+  }
+
+  node "AI Server" {
+    [AI Service] as AI
+  }
+  
+  node "Notification Server" {
+    [Notification Service] as Notifications
+  }
+}
+
+database "Data Layer" {
+  database "PostgreSQL Cluster" as DB {
+    folder "Users Schema"
+    folder "Events Schema"
+    folder "Venues Schema"
+  }
+}
+
+cloud "External Services" {
+  [GenAI Provider] as AIProvider
+}
+
+' Connections
+Client --> Gateway : HTTPS (JSON)
+
+Gateway --> Auth : HTTP/REST
+Gateway --> Events : HTTP/REST
+Gateway --> Venues : HTTP/REST
+Gateway --> Planning : HTTP/REST
+Gateway --> AI : HTTP/REST
+Gateway --> Notifications : HTTP/REST
+
+' Service to DB
+Auth --> DB : (Users)
+Events --> DB : (Events, RSVPs)
+Venues --> DB : (Venues)
+Planning --> DB : (Tasks)
+Notifications --> DB : (Logs)
+
+' Inter-service communication (Conceptual)
+Events ..> Notifications : Async Event\n(e.g. New RSVP)
+
+' External
+AI --> AIProvider : API Calls
+
+@enduml
