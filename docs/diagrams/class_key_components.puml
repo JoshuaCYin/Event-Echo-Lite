@@ -48,6 +48,7 @@ class "Organizer" as Organizer {
 User <|-- Admin
 User <|-- Student
 User <|-- Organizer
+Organizer <|-- Admin
 
 ' Event Class
 class "Event" {
@@ -74,6 +75,7 @@ class "Event" {
 Organizer "1" --> "*" Event : creates >
 Student "*" --> "*" Event : rsvps >
 Admin --> "*" User : manages >
+
 
 ' RSVP Entity (Association Class or Link)
 class "RSVP" {
@@ -132,5 +134,7 @@ class "AIChatbot" {
 }
 
 User ..> AIChatbot : interacts with >
+AIChatbot ..> Event : assists with >
+User ..> Notification : receives >
 
 @enduml
